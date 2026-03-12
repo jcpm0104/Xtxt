@@ -270,124 +270,82 @@ document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',
   btn.classList.add('active'); document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
 }));
 
-
 function calcRisk(){
-const capital=parseFloat(document.getElementById('riskCapital').value)||0;
-const riskPct=(parseFloat(document.getElementById('riskPercent').value)||0)/100;
-const entry=parseFloat(document.getElementById('entryPrice').value)||0;
-const stop=parseFloat(document.getElementById('stopPrice').value)||0;
-const target=parseFloat(document.getElementById('targetPrice').value)||0;
-const fees=parseFloat(document.getElementById('fees').value)||0;
-
-const riskDollar=capital*riskPct;
-const stopDistance=Math.abs(entry-stop);
-const targetDistance=Math.abs(target-entry);
-
-let size=0;
-if(stopDistance>0){
-size=Math.floor((riskDollar-fees)/stopDistance);
-if(size<0) size=0;
+  const capital = parseFloat(document.getElementById('riskCapital').value)||0;
+  const riskPct = (parseFloat(document.getElementById('riskPercent').value)||0)/100;
+  const entry = parseFloat(document.getElementById('entryPrice').value)||0;
+  const stop = parseFloat(document.getElementById('stopPrice').value)||0;
+  const target = parseFloat(document.getElementById('targetPrice').value)||0;
+  const fees = parseFloat(document.getElementById('fees').value)||0;
+  const riskDollar = capital*riskPct;
+  const stopDistance = Math.abs(entry-stop);
+  const targetDistance = Math.abs(target-entry);
+  const size = stopDistance>0 ? Math.floor(riskDollar/stopDistance) : 0;
+  const rr = stopDistance>0 ? targetDistance/stopDistance : 0;
+  const potentialProfit = Math.max(0,(size*targetDistance)-fees);
+  setText('riskDollar', money(riskDollar));
+  setText('positionSize', size.toLocaleString(currentLang()==='es'?'es-ES':'en-US'));
+  setText('rrRatio', rr.toFixed(2)+'R');
+  setText('potentialProfit', money(potentialProfit));
+  setText('stopDistanceOut', stopDistance.toFixed(2));
+  setText('targetDistanceOut', targetDistance.toFixed(2));
+  setText('quickRisk', money(riskDollar));
+  const t = translations[currentLang()];
+  setText('riskInsight', (rr>=1.5 && size>0) ? t.riskGood : t.riskBad);
 }
-
-const totalRisk=size*stopDistance+fees;
-const netProfit=(size*targetDistance)-fees;
-let rr=0;
-if(totalRisk>0) rr=netProfit/totalRisk;
-
-setText('riskDollar',money(totalRisk));
-setText('positionSize',size.toLocaleString());
-setText('rrRatio',rr.toFixed(2)+'R');
-setText('potentialProfit',money(netProfit));
-setText('stopDistanceOut',stopDistance.toFixed(2));
-setText('targetDistanceOut',targetDistance.toFixed(2));
-
-const insight=rr>=1.5
-?"Good risk‑reward. Many professional traders aim for at least 1.5R."
-:"Low reward relative to risk. Consider improving the target or tightening the stop.";
-setText('riskInsight',insight);
-}
-
-
 
 function calcPlan(){
-const capital=parseFloat(document.getElementById('planCapital').value)||0;
-const riskPct=(parseFloat(document.getElementById('planRiskPct').value)||0)/100;
-const winRate=(parseFloat(document.getElementById('planWinRate').value)||0)/100;
-const rr=parseFloat(document.getElementById('planRR').value)||0;
-const tradesDay=parseFloat(document.getElementById('planTradesDay').value)||0;
-const daysWeek=parseFloat(document.getElementById('planDaysWeek').value)||0;
-const maxLosses=parseFloat(document.getElementById('planMaxLosses').value)||0;
-
-const risk=capital*riskPct;
-const avgWin=risk*rr;
-const avgLoss=risk;
-
-const expectancy=(winRate*avgWin)-((1-winRate)*avgLoss);
-const breakeven=avgLoss/(avgLoss+avgWin);
-
-const daily=expectancy*tradesDay;
-const weekly=daily*daysWeek;
-const monthly=weekly*4.33;
-const drawdown=avgLoss*maxLosses;
-
-setText('planExpectancy',money(expectancy));
-setText('planBreakeven',(breakeven*100).toFixed(2)+'%');
-setText('planDaily',money(daily));
-setText('planMonthly',money(monthly));
-setText('planDrawdown',money(drawdown));
-
-let insight="Neutral strategy.";
-if(expectancy>0) insight="Positive expectancy strategy.";
-if(expectancy<0) insight="Negative expectancy strategy.";
-setText('planInsight',insight);
-
-const tbody=document.getElementById('projectionBody');
-tbody.innerHTML='';
-for(let i=1;i<=12;i++){
-const profit=weekly*i;
-const balance=capital+profit;
-const tr=document.createElement('tr');
-tr.innerHTML=`<td>Week ${i}</td><td>${money(profit)}</td><td>${money(balance)}</td>`;
-tbody.appendChild(tr);
-}
-}
- ${i}</td><td>${money(profit)}</td><td>${money(balance)}</td>`;
+  const capital = parseFloat(document.getElementById('planCapital').value)||0;
+  const riskPct = (parseFloat(document.getElementById('planRiskPct').value)||0)/100;
+  const winRate = (parseFloat(document.getElementById('planWinRate').value)||0)/100;
+  const rr = parseFloat(document.getElementById('planRR').value)||0;
+  const tradesDay = parseFloat(document.getElementById('planTradesDay').value)||0;
+  const daysWeek = parseFloat(document.getElementById('planDaysWeek').value)||0;
+  const maxLosses = parseFloat(document.getElementById('planMaxLosses').value)||0;
+  const riskAmount = capital*riskPct;
+  const winAmount = riskAmount*rr;
+  const expectancy = (winRate*winAmount)-((1-winRate)*riskAmount);
+  const breakeven = (riskAmount+winAmount)>0 ? (riskAmount/(riskAmount+winAmount))*100 : 0;
+  const daily = expectancy*tradesDay;
+  const weekly = daily*daysWeek;
+  const monthly = weekly*4.33;
+  const drawdown = riskAmount*maxLosses;
+  setText('planExpectancy', money(expectancy));
+  setText('planBreakeven', breakeven.toFixed(2)+'%');
+  setText('planDaily', money(daily));
+  setText('planMonthly', money(monthly));
+  setText('planDrawdown', money(drawdown));
+  setText('quickExpectancy', money(expectancy));
+  const t = translations[currentLang()];
+  let klass = t.balanced;
+  if (riskPct <= 0.005) klass = t.conservative; else if (riskPct <= 0.015) klass = t.balanced; else if (riskPct <= 0.025) klass = t.aggressive; else klass = t.highRisk;
+  setText('planClass', klass);
+  if (expectancy > 0) setText('planInsight', t.planGood); else if (expectancy < 0) setText('planInsight', t.planBad); else setText('planInsight', t.planFlat);
+  const tbody = document.getElementById('projectionBody'); tbody.innerHTML='';
+  for(let i=1;i<=12;i++){
+    const profit = weekly*i, balance = capital+profit, label = currentLang()==='es' ? translations.es.week : translations.en.week;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${label} ${i}</td><td>${money(profit)}</td><td>${money(balance)}</td>`;
     tbody.appendChild(tr);
   }
 }
 
-
 function calcDay(){
-const capital=parseFloat(document.getElementById('dayCapital').value)||0;
-const maxLossPct=(parseFloat(document.getElementById('dayMaxLossPct').value)||0)/100;
-const targetR=parseFloat(document.getElementById('dayTargetR').value)||0;
-const pnl=parseFloat(document.getElementById('currentPnL').value)||0;
-const riskTrade=parseFloat(document.getElementById('dayRiskDollar').value)||0;
-
-const maxLoss=capital*maxLossPct;
-const target=targetR*riskTrade;
-const remaining=maxLoss+pnl;
-
-setText('dayMaxLossDollar',money(maxLoss));
-setText('dayTargetDollar',money(target));
-setText('remainingRoom',money(Math.max(0,remaining)));
-
-let status="Continue Trading";
-let insight="You are within daily risk limits.";
-
-if(pnl<=-maxLoss){
-status="STOP TRADING";
-insight="Daily max loss reached. Stop trading.";
-}
-if(pnl>=target){
-status="TARGET HIT";
-insight="Daily profit target reached.";
-}
-
-setText('dayStatus',status);
-setText('dayInsight',insight);
-}
-
+  const capital = parseFloat(document.getElementById('dayCapital').value)||0;
+  const maxLossPct = (parseFloat(document.getElementById('dayMaxLossPct').value)||0)/100;
+  const targetR = parseFloat(document.getElementById('dayTargetR').value)||0;
+  const currentPnL = parseFloat(document.getElementById('currentPnL').value)||0;
+  const riskToday = parseFloat(document.getElementById('dayRiskDollar').value)||0;
+  const maxLossDollar = capital*maxLossPct;
+  const targetDollar = targetR*riskToday;
+  const remaining = Math.max(0,maxLossDollar+currentPnL);
+  setText('dayMaxLossDollar', money(maxLossDollar));
+  setText('dayTargetDollar', money(targetDollar));
+  setText('remainingRoom', money(remaining));
+  setText('quickDailyLoss', money(maxLossDollar));
+  const t = translations[currentLang()];
+  let status=t.canContinue, insight=t.dayOk;
+  if (currentPnL <= -maxLossDollar){ status=t.stopTrading; insight=t.dayStop; }
   else if (targetDollar>0 && currentPnL >= targetDollar){ status=t.targetHit; insight=t.dayTarget; }
   setText('dayStatus', status); setText('quickStatus', status); setText('dayInsight', insight);
 }
