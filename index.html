@@ -276,22 +276,44 @@ function calcRisk(){
   const entry = parseFloat(document.getElementById('entryPrice').value)||0;
   const stop = parseFloat(document.getElementById('stopPrice').value)||0;
   const target = parseFloat(document.getElementById('targetPrice').value)||0;
-  const fees = parseFloat(document.getElementById('fees').value)||0;
-  const riskDollar = capital*riskPct;
-  const stopDistance = Math.abs(entry-stop);
-  const targetDistance = Math.abs(target-entry);
-  const size = stopDistance>0 ? Math.floor(riskDollar/stopDistance) : 0;
-  const rr = stopDistance>0 ? targetDistance/stopDistance : 0;
-  const potentialProfit = Math.max(0,(size*targetDistance)-fees);
-  setText('riskDollar', money(riskDollar));
+  const fees = Math.max(0, parseFloat(document.getElementById('fees').value)||0);
+
+  const maxAllowedRisk = Math.max(0, capital * riskPct);
+  const stopDistance = Math.abs(entry - stop);
+  const targetDistance = Math.abs(target - entry);
+
+  let size = 0;
+  if (entry > 0 && stop > 0 && target > 0 && stopDistance > 0 && maxAllowedRisk > fees) {
+    size = Math.floor((maxAllowedRisk - fees) / stopDistance);
+  }
+  if (size < 0) size = 0;
+
+  const totalRisk = (size * stopDistance) + fees;
+  const potentialProfit = (size * targetDistance) - fees;
+  const rr = totalRisk > 0 ? potentialProfit / totalRisk : 0;
+
+  setText('riskDollar', money(totalRisk));
   setText('positionSize', size.toLocaleString(currentLang()==='es'?'es-ES':'en-US'));
   setText('rrRatio', rr.toFixed(2)+'R');
   setText('potentialProfit', money(potentialProfit));
   setText('stopDistanceOut', stopDistance.toFixed(2));
   setText('targetDistanceOut', targetDistance.toFixed(2));
-  setText('quickRisk', money(riskDollar));
+  setText('quickRisk', money(totalRisk));
+
   const t = translations[currentLang()];
-  setText('riskInsight', (rr>=1.5 && size>0) ? t.riskGood : t.riskBad);
+  let insight = t.riskBad;
+  if (!(entry > 0 && stop > 0 && target > 0 && stopDistance > 0)) {
+    insight = currentLang()==='es'
+      ? 'Introduce valores válidos para entrada, stop y target. La distancia al stop no puede ser cero.'
+      : 'Enter valid entry, stop, and target values. Stop distance cannot be zero.';
+  } else if (size <= 0) {
+    insight = currentLang()==='es'
+      ? 'El riesgo permitido es demasiado pequeño para este setup después de incluir comisiones o slippage.'
+      : 'The allowed risk is too small for this setup after including fees or slippage.';
+  } else if (rr >= 1.5) {
+    insight = t.riskGood;
+  }
+  setText('riskInsight', insight);
 }
 
 function calcPlan(){
