@@ -358,18 +358,36 @@ function calcDay(){
   const targetR = parseFloat(document.getElementById('dayTargetR').value)||0;
   const currentPnL = parseFloat(document.getElementById('currentPnL').value)||0;
   const riskToday = parseFloat(document.getElementById('dayRiskDollar').value)||0;
-  const maxLossDollar = capital*maxLossPct;
-  const targetDollar = targetR*riskToday;
-  const remaining = Math.max(0,maxLossDollar+currentPnL);
+
+  const maxLossDollar = capital * maxLossPct;
+  const targetDollar = targetR * riskToday;
+
+  let remaining = maxLossDollar;
+  if (currentPnL < 0) {
+    remaining = Math.max(0, maxLossDollar - Math.abs(currentPnL));
+  }
+
   setText('dayMaxLossDollar', money(maxLossDollar));
   setText('dayTargetDollar', money(targetDollar));
   setText('remainingRoom', money(remaining));
   setText('quickDailyLoss', money(maxLossDollar));
+
   const t = translations[currentLang()];
-  let status=t.canContinue, insight=t.dayOk;
-  if (currentPnL <= -maxLossDollar){ status=t.stopTrading; insight=t.dayStop; }
-  else if (targetDollar>0 && currentPnL >= targetDollar){ status=t.targetHit; insight=t.dayTarget; }
-  setText('dayStatus', status); setText('quickStatus', status); setText('dayInsight', insight);
+  let status = t.canContinue;
+  let insight = t.dayOk;
+
+  if (currentPnL <= -maxLossDollar && maxLossDollar > 0) {
+    status = t.stopTrading;
+    insight = t.dayStop;
+    setText('remainingRoom', money(0));
+  } else if (targetDollar > 0 && currentPnL >= targetDollar) {
+    status = t.targetHit;
+    insight = t.dayTarget;
+  }
+
+  setText('dayStatus', status);
+  setText('quickStatus', status);
+  setText('dayInsight', insight);
 }
 
 function calcTargets(){
