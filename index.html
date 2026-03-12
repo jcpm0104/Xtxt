@@ -415,8 +415,75 @@ Future Capital does not provide investment, legal, or tax advice.
 All trading involves risk, and past simulations do not guarantee future results.
 </div>
 
-</div>
 
+<div class="simulator-screen" id="simulatorScreen">
+  <button class="back-link" onclick="showLanding()">← Back</button>
+
+  <div class="sim-card">
+    <div class="sim-title" id="simTitle">Strategy Inputs</div>
+    <div class="sim-desc" id="simDesc">Enter your short-term trading assumptions. Risk stays fixed based on your starting capital.</div>
+
+    <div class="input-grid">
+      <div class="field">
+        <label id="labelCapital" for="capital">Starting Capital ($)</label>
+        <input id="capital" type="number" value="10000" min="0" step="0.01">
+      </div>
+
+      <div class="field">
+        <label id="labelRisk" for="riskPct">Risk Per Trade (%)</label>
+        <input id="riskPct" type="number" value="1" min="0" step="0.01">
+      </div>
+
+      <div class="field">
+        <label id="labelWinRate" for="winRate">Win Rate (%)</label>
+        <input id="winRate" type="number" value="50" min="0" max="100" step="0.01">
+      </div>
+
+      <div class="field">
+        <label id="labelRR" for="rr">Risk / Reward Ratio</label>
+        <input id="rr" type="number" value="2" min="0" step="0.01">
+      </div>
+
+      <div class="field">
+        <label id="labelTrades" for="tradesDay">Trades Per Day</label>
+        <input id="tradesDay" type="number" value="3" min="0" step="1">
+      </div>
+
+      <div class="field">
+        <label id="labelDays" for="daysWeek">Trading Days Per Week</label>
+        <input id="daysWeek" type="number" value="5" min="0" max="7" step="1">
+      </div>
+
+      <div class="field full">
+        <label id="labelLosses" for="maxLosses">Max Consecutive Losses</label>
+        <input id="maxLosses" type="number" value="5" min="0" step="1">
+      </div>
+    </div>
+
+    <button class="cta" id="calcBtn" onclick="calculateStrategy()" style="margin-top:18px;margin-bottom:0;">Analyze Strategy</button>
+  </div>
+
+  <div class="sim-card">
+    <div class="sim-title" id="resultsTitle">Results</div>
+
+    <div class="results-grid">
+      <div class="result"><div class="k" id="rk1">Risk Per Trade</div><div class="v" id="outRisk">$0.00</div></div>
+      <div class="result"><div class="k" id="rk2">Profit Per Win</div><div class="v" id="outWin">$0.00</div></div>
+      <div class="result"><div class="k" id="rk3">Loss Per Trade</div><div class="v" id="outLoss">$0.00</div></div>
+      <div class="result" id="expCard"><div class="k" id="rk4">Expectancy Per Trade</div><div class="v" id="outExpectancy">$0.00</div></div>
+      <div class="result"><div class="k" id="rk5">Break-Even Win Rate</div><div class="v" id="outBreakeven">0.00%</div></div>
+      <div class="result"><div class="k" id="rk6">Expected Daily Profit</div><div class="v" id="outDaily">$0.00</div></div>
+      <div class="result"><div class="k" id="rk7">Expected Weekly Profit</div><div class="v" id="outWeekly">$0.00</div></div>
+      <div class="result"><div class="k" id="rk8">Expected Monthly Profit</div><div class="v" id="outMonthly">$0.00</div></div>
+      <div class="result"><div class="k" id="rk9">Estimated Drawdown</div><div class="v" id="outDrawdown">$0.00</div></div>
+      <div class="result"><div class="k" id="rk10">Plan Classification</div><div class="v" id="outClass">Balanced</div></div>
+    </div>
+
+    <div class="footer" id="strategyInsight" style="margin-top:16px;">
+      Enter your assumptions and tap Analyze Strategy.
+    </div>
+  </div>
+</div>
 
 
 <script>
