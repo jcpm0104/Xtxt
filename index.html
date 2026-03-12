@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Future Capital – Trading Strategy Simulator</title>
+<style>
+
+body{
+font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+background:#0f1115;
+color:white;
+margin:0;
+padding:0;
+display:flex;
+justify-content:center;
+}
+
+.container{
+max-width:900px;
+width:100%;
+padding:30px;
+}
+
+h1{
+text-align:center;
+margin-bottom:30px;
+}
+
+.card{
+background:#1a1d24;
+padding:20px;
+border-radius:14px;
+margin-bottom:20px;
+}
+
+input{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:none;
+margin-top:5px;
+margin-bottom:15px;
+background:#2a2e38;
+color:white;
+}
+
+button{
+width:100%;
+padding:14px;
+border-radius:10px;
+border:none;
+background:#4c7cff;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.result{
+margin-top:20px;
+font-size:18px;
+}
+
+canvas{
+margin-top:30px;
+background:#111;
+border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Future Capital</h1>
+
+<div class="card">
+
+<label>Starting Capital</label>
+<input id="capital" type="number" value="10000">
+
+<label>Risk % per Trade</label>
+<input id="risk" type="number" value="1">
+
+<label>Win Rate %</label>
+<input id="winrate" type="number" value="55">
+
+<label>Risk Reward</label>
+<input id="rr" type="number" value="2">
+
+<label>Number of Trades</label>
+<input id="trades" type="number" value="100">
+
+<button onclick="simulate()">Run Simulation</button>
+
+<div class="result" id="result"></div>
+
+</div>
+
+<canvas id="chart" width="800" height="300"></canvas>
+
+</div>
+
+<script>
+
+function simulate(){
+
+let capital=parseFloat(document.getElementById("capital").value);
+let risk=parseFloat(document.getElementById("risk").value)/100;
+let winrate=parseFloat(document.getElementById("winrate").value)/100;
+let rr=parseFloat(document.getElementById("rr").value);
+let trades=parseInt(document.getElementById("trades").value);
+
+let balance=capital;
+
+let data=[balance];
+
+let peak=balance;
+let maxDD=0;
+
+for(let i=0;i<trades;i++){
+
+let riskAmount=balance*risk;
+
+if(Math.random()<winrate){
+
+balance+=riskAmount*rr;
+
+}else{
+
+balance-=riskAmount;
+
+}
+
+if(balance>peak){
+peak=balance;
+}
+
+let dd=(peak-balance)/peak;
+
+if(dd>maxDD){
+maxDD=dd;
+}
+
+data.push(balance);
+
+}
+
+document.getElementById("result").innerHTML=
+"Final Balance: $" + balance.toFixed(2) +
+"<br>Max Drawdown: " + (maxDD*100).toFixed(2) + "%";
+
+drawChart(data);
+
+}
+
+function drawChart(data){
+
+let canvas=document.getElementById("chart");
+let ctx=canvas.getContext("2d");
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+let max=Math.max(...data);
+let min=Math.min(...data);
+
+let step=canvas.width/(data.length-1);
+
+ctx.beginPath();
+ctx.strokeStyle="#4c7cff";
+ctx.lineWidth=2;
+
+for(let i=0;i<data.length;i++){
+
+let x=i*step;
+let y=canvas.height-((data[i]-min)/(max-min))*canvas.height;
+
+if(i===0){
+ctx.moveTo(x,y);
+}else{
+ctx.lineTo(x,y);
+}
+
+}
+
+ctx.stroke();
+
+}
+
+</script>
+
+</body>
+</html>
