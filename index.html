@@ -352,7 +352,7 @@ cursor:pointer;
 
 <body>
 
-<div class="container" id="landingScreenContainer">
+<div class="container" id="landingScreen">
 
 <div class="lang-fab">
   <button class="lang-fab-btn" id="langFabBtn" onclick="toggleLanguageMenu(event)" aria-label="Language selector">🌐</button>
@@ -688,7 +688,13 @@ function calculateStrategy(){
 
 window.addEventListener('DOMContentLoaded', () => {
   applyTranslations(currentLang());
-  showLanding();
+  const landing = document.getElementById('landingScreen');
+  const sim = document.getElementById('simulatorScreen');
+  if (landing) landing.style.display = 'block';
+  if (sim) {
+    sim.style.display = 'none';
+    sim.classList.remove('active');
+  }
 });
 </script>
 
