@@ -236,12 +236,123 @@ backdrop-filter:blur(10px);
 }
 }
 
+
+.simulator-screen{
+display:none;
+max-width:420px;
+padding:40px 22px;
+text-align:left;
+}
+.simulator-screen.active{
+display:block;
+}
+.input-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:14px;
+margin-top:22px;
+}
+.field{
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+.field.full{
+grid-column:1 / -1;
+}
+.field label{
+font-size:13px;
+font-weight:700;
+opacity:.82;
+}
+.field input{
+width:100%;
+min-height:52px;
+border-radius:16px;
+border:1px solid rgba(255,255,255,.12);
+background:rgba(255,255,255,.06);
+color:#fff;
+padding:0 16px;
+font-size:16px;
+outline:none;
+}
+.field input:focus{
+border-color:rgba(106,166,255,.8);
+box-shadow:0 0 0 4px rgba(75,140,255,.16);
+}
+.sim-card{
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.15);
+padding:20px;
+border-radius:20px;
+margin-top:18px;
+}
+.sim-title{
+font-size:28px;
+font-weight:800;
+margin:6px 0 8px;
+}
+.sim-desc{
+font-size:15px;
+opacity:.82;
+line-height:1.6;
+}
+.results-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+margin-top:18px;
+}
+.result{
+background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.1);
+border-radius:18px;
+padding:16px;
+}
+.result .k{
+font-size:11px;
+opacity:.65;
+letter-spacing:.08em;
+text-transform:uppercase;
+margin-bottom:6px;
+}
+.result .v{
+font-size:22px;
+font-weight:800;
+line-height:1.1;
+}
+.result.good .v{color:#7ef0a5;}
+.result.bad .v{color:#ff9a9a;}
+.back-link{
+display:inline-flex;
+align-items:center;
+gap:8px;
+margin-top:4px;
+margin-bottom:14px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.14);
+color:#eef4ff;
+border-radius:999px;
+padding:10px 14px;
+font-size:14px;
+font-weight:800;
+cursor:pointer;
+}
+@media (max-width:640px){
+  .simulator-screen{
+    padding:26px 22px 36px;
+  }
+  .input-grid,.results-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="container" id="landingScreenContainer">
 
 <div class="lang-fab">
   <button class="lang-fab-btn" id="langFabBtn" onclick="toggleLanguageMenu(event)" aria-label="Language selector">🌐</button>
@@ -270,7 +381,7 @@ Analyze short‑term trading strategies before risking real capital.
 Test risk‑to‑reward, expectancy, and projected performance using structured trading plans.
 </div>
 
-<button class="cta" id="ctaText">
+<button class="cta" id="ctaText" onclick="showSimulator()">
 Start Strategy Simulation
 </button>
 
@@ -283,12 +394,12 @@ Start Strategy Simulation
 
 <div class="card">
 <div class="card-title" id="cardTitle2">STRATEGY TEST</div>
-<div class="card-text">Evaluate expectancy, win rate and risk‑reward balance.</div>
+<div class="card-text" id="cardText2">Evaluate expectancy, win rate and risk‑reward balance.</div>
 </div>
 
 <div class="card">
 <div class="card-title" id="cardTitle3">PLAN COMPARISON</div>
-<div class="card-text">Compare multiple trading plans side‑by‑side.</div>
+<div class="card-text" id="cardText3">Compare multiple trading plans side‑by‑side.</div>
 </div>
 
 <div class="card">
@@ -307,6 +418,7 @@ All trading involves risk, and past simulations do not guarantee future results.
 </div>
 
 
+
 <script>
 const translations = {
   en: {
@@ -321,7 +433,35 @@ const translations = {
     cardText3: "Compare multiple trading plans side-by-side.",
     cardTitle4: "OUTPUT",
     cardText4: "Performance projection and strategy metrics.",
-    footer: "This simulator is provided strictly for educational and financial simulation purposes. Future Capital does not provide investment advice. Trading involves risk and simulated results do not guarantee future performance."
+    footer: "This simulator is provided strictly for educational and financial simulation purposes. Future Capital does not provide investment advice. Trading involves risk and simulated results do not guarantee future performance.",
+    simTitle: "Strategy Inputs",
+    simDesc: "Enter your short-term trading assumptions. Risk stays fixed based on your starting capital.",
+    labelCapital: "Starting Capital ($)",
+    labelRisk: "Risk Per Trade (%)",
+    labelWinRate: "Win Rate (%)",
+    labelRR: "Risk / Reward Ratio",
+    labelTrades: "Trades Per Day",
+    labelDays: "Trading Days Per Week",
+    labelLosses: "Max Consecutive Losses",
+    calcBtn: "Analyze Strategy",
+    resultsTitle: "Results",
+    rk1: "Risk Per Trade",
+    rk2: "Profit Per Win",
+    rk3: "Loss Per Trade",
+    rk4: "Expectancy Per Trade",
+    rk5: "Break-Even Win Rate",
+    rk6: "Expected Daily Profit",
+    rk7: "Expected Weekly Profit",
+    rk8: "Expected Monthly Profit",
+    rk9: "Estimated Drawdown",
+    rk10: "Plan Classification",
+    insightPos: "Your plan shows positive expectancy under the current assumptions. The key is consistent execution and respecting your risk rules.",
+    insightNeg: "Your plan shows negative expectancy under the current assumptions. Adjust win rate, reward ratio, or risk structure.",
+    insightFlat: "Your plan is currently at break-even expectancy. Small changes in execution could move it positive or negative.",
+    clsConservative: "Conservative",
+    clsBalanced: "Balanced",
+    clsAggressive: "Aggressive",
+    clsHighRisk: "High Risk"
   },
   es: {
     header: "Future Capital • Simulador de Estrategias de Trading",
@@ -335,49 +475,117 @@ const translations = {
     cardText3: "Compara múltiples planes de trading lado a lado.",
     cardTitle4: "RESULTADO",
     cardText4: "Proyección de rendimiento y métricas de estrategia.",
-    footer: "Este simulador se proporciona estrictamente con fines educativos y de simulación financiera. Future Capital no ofrece asesoría de inversión. El trading implica riesgo y los resultados simulados no garantizan rendimiento futuro."
+    footer: "Este simulador se proporciona estrictamente con fines educativos y de simulación financiera. Future Capital no ofrece asesoría de inversión. El trading implica riesgo y los resultados simulados no garantizan rendimiento futuro.",
+    simTitle: "Datos de la Estrategia",
+    simDesc: "Introduce tus supuestos de trading a corto plazo. El riesgo se mantiene fijo según tu capital inicial.",
+    labelCapital: "Capital Inicial ($)",
+    labelRisk: "Riesgo por Operación (%)",
+    labelWinRate: "Porcentaje de Acierto (%)",
+    labelRR: "Relación Riesgo / Beneficio",
+    labelTrades: "Operaciones por Día",
+    labelDays: "Días de Trading por Semana",
+    labelLosses: "Máximas Pérdidas Consecutivas",
+    calcBtn: "Analizar Estrategia",
+    resultsTitle: "Resultados",
+    rk1: "Riesgo por Operación",
+    rk2: "Ganancia por Trade Ganador",
+    rk3: "Pérdida por Operación",
+    rk4: "Expectativa por Operación",
+    rk5: "Win Rate de Equilibrio",
+    rk6: "Ganancia Esperada Diaria",
+    rk7: "Ganancia Esperada Semanal",
+    rk8: "Ganancia Esperada Mensual",
+    rk9: "Drawdown Estimado",
+    rk10: "Clasificación del Plan",
+    insightPos: "Tu plan muestra expectativa positiva con los supuestos actuales. La clave es ejecutarlo con consistencia y respetar tus reglas de riesgo.",
+    insightNeg: "Tu plan muestra expectativa negativa con los supuestos actuales. Ajusta el win rate, la relación beneficio/riesgo o la estructura del plan.",
+    insightFlat: "Tu plan está actualmente en break-even de expectativa. Pequeños cambios en la ejecución podrían volverlo positivo o negativo.",
+    clsConservative: "Conservador",
+    clsBalanced: "Balanceado",
+    clsAggressive: "Agresivo",
+    clsHighRisk: "Alto Riesgo"
   }
 };
 
+function currentLang(){
+  return localStorage.getItem('fc_lang') || ((navigator.language || 'en').toLowerCase().startsWith('es') ? 'es' : 'en');
+}
+
+function setText(id, value){
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
 function applyTranslations(lang){
   const t = translations[lang];
-  document.getElementById('headerText').textContent = t.header;
-  document.getElementById('descText').textContent = t.desc;
-  document.getElementById('ctaText').textContent = t.cta;
-  document.getElementById('cardTitle1').textContent = t.cardTitle1;
-  document.getElementById('cardText1').textContent = t.cardText1;
-  document.getElementById('cardTitle2').textContent = t.cardTitle2;
-  document.getElementById('cardText2').textContent = t.cardText2;
-  document.getElementById('cardTitle3').textContent = t.cardTitle3;
-  document.getElementById('cardText3').textContent = t.cardText3;
-  document.getElementById('cardTitle4').textContent = t.cardTitle4;
-  document.getElementById('cardText4').textContent = t.cardText4;
-  document.getElementById('footerText').textContent = t.footer;
-  document.documentElement.lang = lang === 'es' ? 'es' : 'en';
+  setText('headerText', t.header);
+  setText('descText', t.desc);
+  setText('ctaText', t.cta);
+  setText('cardTitle1', t.cardTitle1);
+  setText('cardText1', t.cardText1);
+  setText('cardTitle2', t.cardTitle2);
+  setText('cardText2', t.cardText2);
+  setText('cardTitle3', t.cardTitle3);
+  setText('cardText3', t.cardText3);
+  setText('cardTitle4', t.cardTitle4);
+  setText('cardText4', t.cardText4);
+  setText('footerText', t.footer);
+
+  setText('simTitle', t.simTitle);
+  setText('simDesc', t.simDesc);
+  setText('labelCapital', t.labelCapital);
+  setText('labelRisk', t.labelRisk);
+  setText('labelWinRate', t.labelWinRate);
+  setText('labelRR', t.labelRR);
+  setText('labelTrades', t.labelTrades);
+  setText('labelDays', t.labelDays);
+  setText('labelLosses', t.labelLosses);
+  setText('calcBtn', t.calcBtn);
+  setText('resultsTitle', t.resultsTitle);
+  setText('rk1', t.rk1);
+  setText('rk2', t.rk2);
+  setText('rk3', t.rk3);
+  setText('rk4', t.rk4);
+  setText('rk5', t.rk5);
+  setText('rk6', t.rk6);
+  setText('rk7', t.rk7);
+  setText('rk8', t.rk8);
+  setText('rk9', t.rk9);
+  setText('rk10', t.rk10);
+
+  document.documentElement.lang = lang;
   localStorage.setItem('fc_lang', lang);
-  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
-  document.getElementById('langFabPanel').classList.remove('open');
+
+  const btnEn = document.getElementById('btn-en');
+  const btnEs = document.getElementById('btn-es');
+  if (btnEn) btnEn.classList.toggle('active', lang === 'en');
+  if (btnEs) btnEs.classList.toggle('active', lang === 'es');
+
+  const panel = document.getElementById('langFabPanel');
+  if (panel) panel.classList.remove('open');
+
+  if (document.getElementById('simulatorScreen') && document.getElementById('simulatorScreen').classList.contains('active')) {
+    calculateStrategy();
+  }
 }
 
 function setLanguage(lang){
   applyTranslations(lang);
 }
 
-
 function toggleLanguageMenu(event){
   event.stopPropagation();
-  document.getElementById('langFabPanel').classList.toggle('open');
+  const panel = document.getElementById('langFabPanel');
+  if (panel) panel.classList.toggle('open');
 }
 
 document.addEventListener('click', function(e){
   const panel = document.getElementById('langFabPanel');
   const btn = document.getElementById('langFabBtn');
-  if (!panel.contains(e.target) && !btn.contains(e.target)){
+  if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)){
     panel.classList.remove('open');
   }
 });
-
 
 let lastScrollY = window.scrollY;
 let scrollTimer = null;
@@ -385,35 +593,105 @@ let scrollTimer = null;
 function handleFabOnScroll(){
   const fab = document.querySelector('.lang-fab');
   if (!fab) return;
-
   const currentY = window.scrollY;
 
   if (currentY > lastScrollY + 6){
     fab.classList.add('hide');
-    document.getElementById('langFabPanel').classList.remove('open');
+    const panel = document.getElementById('langFabPanel');
+    if (panel) panel.classList.remove('open');
   } else if (currentY < lastScrollY - 6){
     fab.classList.remove('hide');
   }
 
   lastScrollY = currentY;
-
   clearTimeout(scrollTimer);
-  scrollTimer = setTimeout(() => {
-    fab.classList.remove('hide');
-  }, 140);
+  scrollTimer = setTimeout(() => fab.classList.remove('hide'), 140);
 }
-
 window.addEventListener('scroll', handleFabOnScroll, { passive: true });
 
+function money(n){
+  return new Intl.NumberFormat(currentLang() === 'es' ? 'es-US' : 'en-US', {style:'currency', currency:'USD'}).format(Number(n || 0));
+}
 
+function showSimulator(){
+  const landing = document.getElementById('landingScreen');
+  const sim = document.getElementById('simulatorScreen');
+  if (landing) landing.style.display = 'none';
+  if (sim) {
+    sim.style.display = 'block';
+    sim.classList.add('active');
+  }
+  calculateStrategy();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
 
-(function initLanguage(){
-  const saved = localStorage.getItem('fc_lang');
-  const browserLang = (navigator.language || 'en').toLowerCase();
-  const lang = saved || (browserLang.startsWith('es') ? 'es' : 'en');
-  window.addEventListener('DOMContentLoaded', () => applyTranslations(lang));
-})();
+function showLanding(){
+  const landing = document.getElementById('landingScreen');
+  const sim = document.getElementById('simulatorScreen');
+  if (sim) {
+    sim.style.display = 'none';
+    sim.classList.remove('active');
+  }
+  if (landing) landing.style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function calculateStrategy(){
+  const capital = parseFloat(document.getElementById('capital')?.value) || 0;
+  const riskPct = (parseFloat(document.getElementById('riskPct')?.value) || 0) / 100;
+  const winRate = (parseFloat(document.getElementById('winRate')?.value) || 0) / 100;
+  const rr = parseFloat(document.getElementById('rr')?.value) || 0;
+  const tradesDay = parseFloat(document.getElementById('tradesDay')?.value) || 0;
+  const daysWeek = parseFloat(document.getElementById('daysWeek')?.value) || 0;
+  const maxLosses = parseFloat(document.getElementById('maxLosses')?.value) || 0;
+
+  const riskAmount = capital * riskPct;
+  const winAmount = riskAmount * rr;
+  const lossAmount = riskAmount;
+  const expectancy = (winRate * winAmount) - ((1 - winRate) * lossAmount);
+  const breakeven = (lossAmount + winAmount) > 0 ? (lossAmount / (lossAmount + winAmount)) * 100 : 0;
+  const daily = expectancy * tradesDay;
+  const weekly = daily * daysWeek;
+  const monthly = weekly * 4.33;
+  const drawdown = lossAmount * maxLosses;
+
+  setText('outRisk', money(riskAmount));
+  setText('outWin', money(winAmount));
+  setText('outLoss', money(lossAmount));
+  setText('outExpectancy', money(expectancy));
+  setText('outBreakeven', breakeven.toFixed(2) + '%');
+  setText('outDaily', money(daily));
+  setText('outWeekly', money(weekly));
+  setText('outMonthly', money(monthly));
+  setText('outDrawdown', money(drawdown));
+
+  const t = translations[currentLang()];
+  let cls = t.clsBalanced;
+  if (riskPct <= 0.005) cls = t.clsConservative;
+  else if (riskPct <= 0.015) cls = t.clsBalanced;
+  else if (riskPct <= 0.025) cls = t.clsAggressive;
+  else cls = t.clsHighRisk;
+  setText('outClass', cls);
+
+  const expCard = document.getElementById('expCard');
+  if (expCard){
+    expCard.classList.remove('good','bad');
+    if (expectancy > 0) expCard.classList.add('good');
+    if (expectancy < 0) expCard.classList.add('bad');
+  }
+
+  let insight = t.insightFlat;
+  if (expectancy > 0) insight = t.insightPos;
+  if (expectancy < 0) insight = t.insightNeg;
+  setText('strategyInsight', insight);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  applyTranslations(currentLang());
+  showLanding();
+});
 </script>
+
 
 </body>
 </html>
