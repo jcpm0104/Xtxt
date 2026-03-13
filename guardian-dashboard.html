@@ -1,342 +1,1151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trade Guardian Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Guardian Dashboard</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
+  <style>
+    :root{
+      --bg:#08111f;
+      --panel:#0f1b30;
+      --panel-2:#12213b;
+      --line:rgba(255,255,255,.08);
+      --line-strong:rgba(255,255,255,.14);
+      --text:#eaf1ff;
+      --muted:#93a4c2;
+      --blue:#2f6bff;
+      --blue-soft:#78a3ff;
+      --green:#2ed47a;
+      --yellow:#f5b94f;
+      --red:#ef5c5c;
+      --shadow:0 24px 60px rgba(0,0,0,.34);
+      --radius:24px;
+    }
 
-:root{
---bg:#08111f;
---panel:#0f1b30;
---line:rgba(255,255,255,.08);
---text:#eaf1ff;
---muted:#93a4c2;
---blue:#2f6bff;
---green:#2ed47a;
---yellow:#f5b94f;
---red:#ef5c5c;
-}
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
 
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-}
+    html, body{
+      min-height:100%;
+    }
 
-body{
-font-family:'Inter',sans-serif;
-background:radial-gradient(circle at top,rgba(47,107,255,.12),transparent 40%),var(--bg);
-color:var(--text);
-padding:30px;
-}
+    body{
+      font-family:'Inter',sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top, rgba(47,107,255,.14), transparent 35%),
+        radial-gradient(circle at right top, rgba(120,163,255,.06), transparent 25%),
+        var(--bg);
+      padding:24px;
+    }
 
-.container{
-max-width:1400px;
-margin:auto;
-}
+    .container{
+      max-width:1480px;
+      margin:auto;
+    }
 
-/* header */
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      flex-wrap:wrap;
+      margin-bottom:24px;
+    }
 
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:30px;
-}
+    .brand-wrap{
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+    }
 
-.title{
-font-size:28px;
-font-weight:700;
-}
+    .brand-icon{
+      width:60px;
+      height:60px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(47,107,255,.18), rgba(47,107,255,.06));
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      flex:0 0 60px;
+    }
 
-.connect-btn{
-background:linear-gradient(180deg,#4d82ff,var(--blue));
-border:none;
-padding:12px 18px;
-border-radius:10px;
-color:white;
-font-weight:600;
-cursor:pointer;
-}
+    .brand-copy h1{
+      font-size:34px;
+      line-height:1;
+      letter-spacing:-.05em;
+      margin-bottom:8px;
+    }
 
-/* cards */
+    .brand-copy p{
+      color:var(--muted);
+      font-size:15px;
+      max-width:720px;
+      line-height:1.7;
+    }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:20px;
-margin-bottom:30px;
-}
+    .top-actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
 
-.card{
-background:var(--panel);
-border:1px solid var(--line);
-border-radius:16px;
-padding:20px;
-}
+    .btn{
+      min-height:48px;
+      border:none;
+      border-radius:14px;
+      padding:0 18px;
+      font-weight:700;
+      font-size:14px;
+      cursor:pointer;
+      transition:.2s ease;
+    }
 
-.card-title{
-font-size:14px;
-color:var(--muted);
-margin-bottom:10px;
-}
+    .btn-primary{
+      background:linear-gradient(180deg,#4d82ff,var(--blue));
+      color:white;
+      box-shadow:0 14px 30px rgba(47,107,255,.25);
+    }
 
-.card-value{
-font-size:22px;
-font-weight:700;
-}
+    .btn-primary:hover{
+      filter:brightness(1.05);
+      transform:translateY(-1px);
+    }
 
-/* guardian status */
+    .btn-secondary{
+      background:rgba(255,255,255,.04);
+      color:white;
+      border:1px solid var(--line);
+    }
 
-.status-safe{
-color:var(--green);
-}
+    .btn-secondary:hover{
+      background:rgba(255,255,255,.06);
+    }
 
-.status-warning{
-color:var(--yellow);
-}
+    .hero{
+      display:grid;
+      grid-template-columns:1.3fr .9fr;
+      gap:20px;
+      margin-bottom:24px;
+    }
 
-.status-danger{
-color:var(--red);
-}
+    .hero-main,
+    .hero-side{
+      background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
 
-/* panels */
+    .hero-main{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
 
-.panel{
-background:var(--panel);
-border:1px solid var(--line);
-border-radius:16px;
-padding:20px;
-margin-bottom:20px;
-}
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      width:max-content;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      color:#dce8ff;
+      font-size:12px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
 
-.panel-title{
-font-size:18px;
-margin-bottom:15px;
-}
+    .hero-title{
+      font-size:clamp(34px,5vw,54px);
+      line-height:1.02;
+      letter-spacing:-.06em;
+      max-width:780px;
+    }
 
-/* alerts */
+    .hero-sub{
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.75;
+      max-width:820px;
+    }
 
-.alert{
-padding:10px;
-border-bottom:1px solid var(--line);
-font-size:14px;
-}
+    .hero-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-top:4px;
+    }
 
-.alert:last-child{
-border-bottom:none;
-}
+    .mini-stat{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+    }
 
-/* trade table */
+    .mini-stat .label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:600;
+      margin-bottom:8px;
+    }
 
-table{
-width:100%;
-border-collapse:collapse;
-}
+    .mini-stat .value{
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
 
-th,td{
-padding:10px;
-text-align:left;
-border-bottom:1px solid var(--line);
-font-size:14px;
-}
+    .hero-side{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
 
-th{
-color:var(--muted);
-}
+    .copilot-title{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
 
-</style>
+    .copilot-box{
+      background:#0c1728;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+      min-height:180px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .copilot-status{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:13px;
+      color:#dbe7ff;
+      font-weight:700;
+    }
+
+    .status-dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:var(--green);
+      box-shadow:0 0 12px rgba(46,212,122,.45);
+    }
+
+    .copilot-message{
+      font-size:20px;
+      line-height:1.55;
+      font-weight:700;
+      letter-spacing:-.02em;
+    }
+
+    .copilot-sub{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+    }
+
+    .main-grid{
+      display:grid;
+      grid-template-columns:1.1fr 1.1fr .95fr;
+      gap:20px;
+    }
+
+    .left-col,
+    .mid-col,
+    .right-col{
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:20px;
+      box-shadow:var(--shadow);
+    }
+
+    .panel-title{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:-.02em;
+      margin-bottom:16px;
+    }
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:14px;
+    }
+
+    .stat-card{
+      background:#0c1728;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      min-height:110px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .stat-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:600;
+    }
+
+    .stat-pill{
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.03em;
+      text-transform:uppercase;
+      border:1px solid transparent;
+      white-space:nowrap;
+    }
+
+    .pill-safe{
+      background:rgba(46,212,122,.12);
+      color:#8df5bc;
+      border-color:rgba(46,212,122,.2);
+    }
+
+    .pill-caution{
+      background:rgba(245,185,79,.12);
+      color:#ffd98f;
+      border-color:rgba(245,185,79,.2);
+    }
+
+    .pill-danger{
+      background:rgba(239,92,92,.12);
+      color:#ffb4b4;
+      border-color:rgba(239,92,92,.2);
+    }
+
+    .stat-value{
+      font-size:28px;
+      font-weight:800;
+      letter-spacing:-.04em;
+      margin-top:10px;
+    }
+
+    .stat-sub{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
+      line-height:1.5;
+    }
+
+    .progress-box{
+      margin-top:12px;
+    }
+
+    .progress-line{
+      height:10px;
+      border-radius:999px;
+      background:#17253e;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.04);
+    }
+
+    .progress-fill{
+      height:100%;
+      border-radius:999px;
+      transition:width .35s ease;
+    }
+
+    .fill-blue{ background:linear-gradient(90deg,var(--blue),var(--blue-soft)); }
+    .fill-green{ background:linear-gradient(90deg,#1fa85f,#47e694); }
+    .fill-yellow{ background:linear-gradient(90deg,#d89f37,#ffd16b); }
+    .fill-red{ background:linear-gradient(90deg,#c84a4a,#ff7e7e); }
+
+    .trade-box{
+      background:#0c1728;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+    }
+
+    .trade-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .symbol{
+      font-size:24px;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+
+    .position-tag{
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      border:1px solid rgba(46,212,122,.2);
+      background:rgba(46,212,122,.12);
+      color:#8df5bc;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+    }
+
+    .trade-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .trade-metric{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .trade-metric .label{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:8px;
+      font-weight:600;
+    }
+
+    .trade-metric .value{
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+
+    .trade-footer{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .trade-note{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .feed{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .feed-item{
+      background:#0c1728;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .feed-time{
+      min-width:62px;
+      color:var(--blue-soft);
+      font-size:12px;
+      font-weight:700;
+      padding-top:2px;
+    }
+
+    .feed-text{
+      color:#eaf1ff;
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .alert-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .alert-item{
+      background:#0c1728;
+      border:1px solid var(--line);
+      border-left:4px solid transparent;
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .alert-item.warning{
+      border-left-color:var(--yellow);
+    }
+
+    .alert-item.danger{
+      border-left-color:var(--red);
+    }
+
+    .alert-item.safe{
+      border-left-color:var(--green);
+    }
+
+    .alert-title{
+      font-size:14px;
+      font-weight:800;
+      margin-bottom:6px;
+    }
+
+    .alert-copy{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.65;
+    }
+
+    .action-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+
+    .action-btn{
+      min-height:52px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#0c1728;
+      color:#fff;
+      font-weight:700;
+      font-size:14px;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .action-btn:hover{
+      border-color:var(--line-strong);
+      background:#10203a;
+      transform:translateY(-1px);
+    }
+
+    .action-btn.primary{
+      background:linear-gradient(180deg,#4d82ff,var(--blue));
+      border:none;
+      box-shadow:0 14px 30px rgba(47,107,255,.22);
+    }
+
+    .action-btn.lock{
+      background:linear-gradient(180deg,#ff7a7a,#ef5c5c);
+      border:none;
+      box-shadow:0 14px 30px rgba(239,92,92,.2);
+    }
+
+    .bottom-note{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+      margin-top:4px;
+    }
+
+    @media (max-width: 1200px){
+      .main-grid{
+        grid-template-columns:1fr;
+      }
+
+      .hero{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 900px){
+      .hero-grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .stats-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 640px){
+      body{
+        padding:16px;
+      }
+
+      .brand-copy h1{
+        font-size:28px;
+      }
+
+      .hero-grid,
+      .trade-grid,
+      .action-grid{
+        grid-template-columns:1fr;
+      }
+
+      .top-actions{
+        width:100%;
+      }
+
+      .top-actions .btn{
+        width:100%;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
 <div class="container">
 
-<!-- header -->
+  <div class="topbar">
+    <div class="brand-wrap">
+      <div class="brand-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" fill="#2F6BFF"/>
+          <path d="M8 13L10.2 10.5L12.4 12.1L16 8.2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
 
-<div class="header">
+      <div class="brand-copy">
+        <h1>Trade Guardian Dashboard</h1>
+        <p>
+          Your live trading copilot. Monitor risk, validate execution, detect rule violations,
+          and stay aligned with your plan in real time.
+        </p>
+      </div>
+    </div>
 
-<div class="title">Trade Guardian Dashboard</div>
+    <div class="top-actions">
+      <button class="btn btn-secondary">Review Plan</button>
+      <button class="btn btn-primary" id="connectBtn">Connect Trading Account</button>
+    </div>
+  </div>
 
-<button class="connect-btn" onclick="connectAccount()">
-Connect Trading Account
-</button>
+  <div class="hero">
+    <div class="hero-main">
+      <div class="eyebrow">Live Guardian Overview</div>
+      <div class="hero-title">Know instantly if your account is safe, at risk, or violating the plan.</div>
+      <div class="hero-sub">
+        This dashboard is designed to stay open beside your trading platform and act like a real-time
+        control center. Once your account is connected, the system can read activity, compare it against
+        your rules, and guide you through the session.
+      </div>
+
+      <div class="hero-grid">
+        <div class="mini-stat">
+          <div class="label">Active Plan</div>
+          <div class="value" id="heroPlan">Guardian Plan</div>
+        </div>
+        <div class="mini-stat">
+          <div class="label">Account Type</div>
+          <div class="value" id="heroAccountType">Funded</div>
+        </div>
+        <div class="mini-stat">
+          <div class="label">Session Status</div>
+          <div class="value" id="heroSession">Monitoring</div>
+        </div>
+        <div class="mini-stat">
+          <div class="label">Connection</div>
+          <div class="value" id="heroConnection">Not Connected</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-side">
+      <div class="copilot-title">Guardian Copilot</div>
+
+      <div class="copilot-box">
+        <div class="copilot-status">
+          <span class="status-dot" id="copilotDot"></span>
+          <span id="copilotStatus">SYSTEM READY</span>
+        </div>
+
+        <div class="copilot-message" id="copilotMessage">
+          Connect your trading account to begin live account monitoring and real-time protection.
+        </div>
+
+        <div class="copilot-sub" id="copilotSub">
+          The dashboard will automatically track positions, risk, rule violations, and session behavior once connected.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <div class="left-col">
+      <div class="panel">
+        <div class="panel-title">Core Risk Metrics</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Guardian Status</div>
+              <div class="stat-pill pill-safe" id="guardianPill">SAFE</div>
+            </div>
+            <div class="stat-value" id="guardianValue">Safe</div>
+            <div class="stat-sub">Current system protection state.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Risk per Trade</div>
+              <div class="stat-pill pill-safe">PLAN</div>
+            </div>
+            <div class="stat-value" id="riskPerTrade">$56</div>
+            <div class="stat-sub">Maximum planned risk allowed per position.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Daily Loss Used</div>
+              <div class="stat-pill pill-caution" id="dailyLossPill">38%</div>
+            </div>
+            <div class="stat-value" id="dailyLossUsed">$190</div>
+            <div class="stat-sub">Used from your daily loss limit.</div>
+            <div class="progress-box">
+              <div class="progress-line">
+                <div class="progress-fill fill-yellow" id="dailyLossBar" style="width:38%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Drawdown Used</div>
+              <div class="stat-pill pill-safe" id="drawdownPill">21%</div>
+            </div>
+            <div class="stat-value" id="drawdownUsed">$420</div>
+            <div class="stat-sub">Used from your maximum drawdown.</div>
+            <div class="progress-box">
+              <div class="progress-line">
+                <div class="progress-fill fill-blue" id="drawdownBar" style="width:21%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Trades Today</div>
+              <div class="stat-pill pill-safe" id="tradesPill">3 / 5</div>
+            </div>
+            <div class="stat-value" id="tradesToday">3</div>
+            <div class="stat-sub">Number of completed trades in this session.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Consecutive Losses</div>
+              <div class="stat-pill pill-safe" id="lossPill">1 / 3</div>
+            </div>
+            <div class="stat-value" id="consecutiveLosses">1</div>
+            <div class="stat-sub">Live losing streak monitoring.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Current Position</div>
+
+        <div class="trade-box">
+          <div class="trade-head">
+            <div>
+              <div class="symbol" id="positionSymbol">MNQ</div>
+              <div class="trade-note">Current open market position detected by Trade Guardian.</div>
+            </div>
+            <div class="position-tag" id="positionSide">LONG</div>
+          </div>
+
+          <div class="trade-grid">
+            <div class="trade-metric">
+              <div class="label">Entry Price</div>
+              <div class="value" id="entryPrice">18,442.25</div>
+            </div>
+            <div class="trade-metric">
+              <div class="label">Stop Loss</div>
+              <div class="value" id="stopLoss">18,428.75</div>
+            </div>
+            <div class="trade-metric">
+              <div class="label">Take Profit</div>
+              <div class="value" id="takeProfit">18,468.25</div>
+            </div>
+            <div class="trade-metric">
+              <div class="label">Position Size</div>
+              <div class="value" id="positionSize">2 Contracts</div>
+            </div>
+          </div>
+
+          <div class="trade-footer">
+            <div class="trade-note" id="positionNote">
+              Risk validated against your active plan. Current structure is within allowed limits.
+            </div>
+            <div class="stat-pill pill-safe" id="positionRiskPill">VALID</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mid-col">
+      <div class="panel">
+        <div class="panel-title">Live Session Monitoring</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Session Status</div>
+              <div class="stat-pill pill-safe" id="sessionPill">OPEN</div>
+            </div>
+            <div class="stat-value" id="sessionValue">Inside Window</div>
+            <div class="stat-sub">Trading activity is currently inside your allowed schedule.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Cooldown Status</div>
+              <div class="stat-pill pill-safe" id="cooldownPill">READY</div>
+            </div>
+            <div class="stat-value" id="cooldownValue">No Delay</div>
+            <div class="stat-sub">A new trade can be opened right now based on cooldown logic.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Open Risk</div>
+              <div class="stat-pill pill-safe" id="openRiskPill">31%</div>
+            </div>
+            <div class="stat-value" id="openRiskValue">$124</div>
+            <div class="stat-sub">Current total risk across all open positions.</div>
+            <div class="progress-box">
+              <div class="progress-line">
+                <div class="progress-fill fill-green" id="openRiskBar" style="width:31%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Open Positions</div>
+              <div class="stat-pill pill-safe" id="openPositionsPill">1 / 2</div>
+            </div>
+            <div class="stat-value" id="openPositionsValue">1</div>
+            <div class="stat-sub">Number of live positions currently open.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Recent Activity Feed</div>
+
+        <div class="feed" id="activityFeed">
+          <div class="feed-item">
+            <div class="feed-time">09:31</div>
+            <div class="feed-text">Trading account connected and Guardian monitoring activated.</div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-time">09:36</div>
+            <div class="feed-text">Position opened on MNQ. Risk structure detected and validated.</div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-time">09:37</div>
+            <div class="feed-text">Stop loss and take profit were both detected successfully.</div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-time">09:41</div>
+            <div class="feed-text">Trade remains inside your allowed window and within active plan parameters.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="panel">
+        <div class="panel-title">Guardian Alerts</div>
+
+        <div class="alert-list" id="alertList">
+          <div class="alert-item safe">
+            <div class="alert-title">System Ready</div>
+            <div class="alert-copy">Trade Guardian is waiting for your account connection to start live monitoring.</div>
+          </div>
+
+          <div class="alert-item warning">
+            <div class="alert-title">Live Monitoring Preview</div>
+            <div class="alert-copy">This dashboard is currently showing simulated values until a real account is connected.</div>
+          </div>
+
+          <div class="alert-item safe">
+            <div class="alert-title">Plan Loaded</div>
+            <div class="alert-copy">Your selected plan is active and ready to guide session discipline.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Action Zone</div>
+
+        <div class="action-grid">
+          <button class="action-btn primary" id="startSessionBtn">Start Session</button>
+          <button class="action-btn" id="endSessionBtn">End Session</button>
+          <button class="action-btn lock" id="lockTradingBtn">Lock Trading</button>
+          <button class="action-btn" id="reviewPlanBtn">Review Plan</button>
+        </div>
+
+        <div class="bottom-note">
+          The dashboard is built to become fully automatic once the trading account connection is enabled.
+          After connection, every relevant movement should update here in real time.
+        </div>
+      </div>
+    </div>
+
+  </div>
 
 </div>
-
-
-<!-- status cards -->
-
-<div class="grid">
-
-<div class="card">
-<div class="card-title">Guardian Status</div>
-<div class="card-value status-safe" id="guardianStatus">
-SAFE
-</div>
-</div>
-
-<div class="card">
-<div class="card-title">Account Connection</div>
-<div class="card-value" id="connectionStatus">
-Not Connected
-</div>
-</div>
-
-<div class="card">
-<div class="card-title">Session Status</div>
-<div class="card-value" id="sessionStatus">
-Inactive
-</div>
-</div>
-
-<div class="card">
-<div class="card-title">Active Plan</div>
-<div class="card-value" id="activePlan">
-No Plan Active
-</div>
-</div>
-
-</div>
-
-
-<!-- risk metrics -->
-
-<div class="grid">
-
-<div class="card">
-<div class="card-title">Daily PnL</div>
-<div class="card-value" id="dailyPnL">
-$0
-</div>
-</div>
-
-<div class="card">
-<div class="card-title">Daily Loss Used</div>
-<div class="card-value" id="dailyLoss">
-$0
-</div>
-</div>
-
-<div class="card">
-<div class="card-title">Drawdown Used</div>
-<div class="card-value" id="drawdown">
-$0
-</div>
-</div>
-
-<div class="card">
-<div class="card-title">Trades Today</div>
-<div class="card-value" id="tradesToday">
-0
-</div>
-</div>
-
-</div>
-
-
-<!-- open position -->
-
-<div class="panel">
-
-<div class="panel-title">
-Current Position
-</div>
-
-<table>
-
-<thead>
-<tr>
-<th>Symbol</th>
-<th>Entry</th>
-<th>Stop Loss</th>
-<th>Take Profit</th>
-<th>Size</th>
-<th>PnL</th>
-</tr>
-</thead>
-
-<tbody id="positionTable">
-
-<tr>
-<td colspan="6">No open position</td>
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-
-<!-- alerts -->
-
-<div class="panel">
-
-<div class="panel-title">
-Guardian Alerts
-</div>
-
-<div id="alerts">
-
-<div class="alert">System ready.</div>
-
-</div>
-
-</div>
-
-
-</div>
-
 
 <script>
+  const guardianState = {
+    connected: false,
+    guardianStatus: "SAFE",
+    sessionStatus: "Inactive",
+    activePlan: "Guardian Plan",
+    accountType: "Funded",
+    dailyLossLimit: 500,
+    maxDrawdown: 2000,
+    dailyLossUsed: 190,
+    drawdownUsed: 420,
+    riskPerTrade: 56,
+    maxTradesPerDay: 5,
+    tradesToday: 3,
+    consecutiveLosses: 1,
+    openRisk: 124,
+    maxOpenRisk: 400,
+    openPositions: 1,
+    maxOpenPositions: 2,
+    cooldownReady: true
+  };
 
-/* connection simulation */
+  function setText(id, value){
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
 
-function connectAccount(){
+  function setBar(id, percent){
+    const el = document.getElementById(id);
+    if (el) el.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+  }
 
-document.getElementById("connectionStatus").innerText="Connected";
+  function addFeed(text){
+    const feed = document.getElementById("activityFeed");
+    const item = document.createElement("div");
+    item.className = "feed-item";
 
-document.getElementById("sessionStatus").innerText="Monitoring";
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = String(now.getMinutes()).padStart(2, "0");
 
-document.getElementById("activePlan").innerText="Guardian Plan";
+    item.innerHTML = `
+      <div class="feed-time">${hh}:${mm}</div>
+      <div class="feed-text">${text}</div>
+    `;
+    feed.prepend(item);
 
-addAlert("Trading account connected");
+    while (feed.children.length > 6) {
+      feed.removeChild(feed.lastElementChild);
+    }
+  }
 
-}
+  function addAlert(title, copy, type = "safe"){
+    const list = document.getElementById("alertList");
+    const item = document.createElement("div");
+    item.className = `alert-item ${type}`;
+    item.innerHTML = `
+      <div class="alert-title">${title}</div>
+      <div class="alert-copy">${copy}</div>
+    `;
+    list.prepend(item);
 
-/* alert system */
+    while (list.children.length > 5) {
+      list.removeChild(list.lastElementChild);
+    }
+  }
 
-function addAlert(text){
+  function updateGuardianStatus(status){
+    guardianState.guardianStatus = status;
 
-const alerts=document.getElementById("alerts");
+    const pill = document.getElementById("guardianPill");
+    pill.className = "stat-pill";
 
-const newAlert=document.createElement("div");
+    if (status === "SAFE") {
+      pill.classList.add("pill-safe");
+      pill.textContent = "SAFE";
+      setText("guardianValue", "Safe");
+      setText("copilotStatus", "SYSTEM PROTECTING");
+      setText("copilotMessage", "Your current activity is inside plan parameters and your account remains protected.");
+      document.getElementById("copilotDot").style.background = "var(--green)";
+      document.getElementById("copilotDot").style.boxShadow = "0 0 12px rgba(46,212,122,.45)";
+    } else if (status === "CAUTION") {
+      pill.classList.add("pill-caution");
+      pill.textContent = "CAUTION";
+      setText("guardianValue", "Caution");
+      setText("copilotStatus", "SYSTEM WARNING");
+      setText("copilotMessage", "Your account is still inside limits, but current behavior is approaching a risk threshold.");
+      document.getElementById("copilotDot").style.background = "var(--yellow)";
+      document.getElementById("copilotDot").style.boxShadow = "0 0 12px rgba(245,185,79,.45)";
+    } else {
+      pill.classList.add("pill-danger");
+      pill.textContent = "WARNING";
+      setText("guardianValue", "Warning");
+      setText("copilotStatus", "SYSTEM ALERT");
+      setText("copilotMessage", "A plan rule or risk threshold is close to being violated. Immediate discipline is required.");
+      document.getElementById("copilotDot").style.background = "var(--red)";
+      document.getElementById("copilotDot").style.boxShadow = "0 0 12px rgba(239,92,92,.45)";
+    }
+  }
 
-newAlert.className="alert";
+  function renderDashboard(){
+    setText("heroPlan", guardianState.activePlan);
+    setText("heroAccountType", guardianState.accountType);
+    setText("heroSession", guardianState.sessionStatus);
+    setText("heroConnection", guardianState.connected ? "Connected" : "Not Connected");
 
-newAlert.innerText=new Date().toLocaleTimeString()+" — "+text;
+    setText("riskPerTrade", `$${guardianState.riskPerTrade}`);
+    setText("dailyLossUsed", `$${guardianState.dailyLossUsed}`);
+    setText("drawdownUsed", `$${guardianState.drawdownUsed}`);
+    setText("tradesToday", guardianState.tradesToday);
+    setText("consecutiveLosses", guardianState.consecutiveLosses);
 
-alerts.prepend(newAlert);
+    const dailyPercent = (guardianState.dailyLossUsed / guardianState.dailyLossLimit) * 100;
+    const drawdownPercent = (guardianState.drawdownUsed / guardianState.maxDrawdown) * 100;
+    const openRiskPercent = (guardianState.openRisk / guardianState.maxOpenRisk) * 100;
 
-}
+    setText("dailyLossPill", `${Math.round(dailyPercent)}%`);
+    setText("drawdownPill", `${Math.round(drawdownPercent)}%`);
+    setText("openRiskPill", `${Math.round(openRiskPercent)}%`);
+    setText("tradesPill", `${guardianState.tradesToday} / ${guardianState.maxTradesPerDay}`);
+    setText("lossPill", `${guardianState.consecutiveLosses} / 3`);
 
-/* demo live updates */
+    setBar("dailyLossBar", dailyPercent);
+    setBar("drawdownBar", drawdownPercent);
+    setBar("openRiskBar", openRiskPercent);
 
-setInterval(()=>{
+    setText("openRiskValue", `$${guardianState.openRisk}`);
+    setText("openPositionsValue", guardianState.openPositions);
+    setText("openPositionsPill", `${guardianState.openPositions} / ${guardianState.maxOpenPositions}`);
 
-let pnl=(Math.random()*200-100).toFixed(2);
+    if (guardianState.cooldownReady) {
+      setText("cooldownValue", "No Delay");
+      setText("cooldownPill", "READY");
+      document.getElementById("cooldownPill").className = "stat-pill pill-safe";
+    } else {
+      setText("cooldownValue", "Cooldown Active");
+      setText("cooldownPill", "WAIT");
+      document.getElementById("cooldownPill").className = "stat-pill pill-caution";
+    }
 
-document.getElementById("dailyPnL").innerText="$"+pnl;
+    if (guardianState.sessionStatus === "Monitoring") {
+      setText("sessionValue", "Inside Window");
+      setText("sessionPill", "OPEN");
+      document.getElementById("sessionPill").className = "stat-pill pill-safe";
+    } else {
+      setText("sessionValue", "Inactive");
+      setText("sessionPill", "OFF");
+      document.getElementById("sessionPill").className = "stat-pill pill-caution";
+    }
 
-document.getElementById("tradesToday").innerText=Math.floor(Math.random()*6);
+    updateGuardianStatus(guardianState.guardianStatus);
+  }
 
-},4000);
+  function connectAccount(){
+    guardianState.connected = true;
+    guardianState.sessionStatus = "Monitoring";
 
+    setText("heroConnection", "Connected");
+    addFeed("Trading account connected. Live monitoring channel initialized.");
+    addAlert("Account Connected", "Trade Guardian is now ready to receive live account activity.", "safe");
+
+    setText("copilotSub", "Live risk, position structure, and session discipline will update automatically once broker data is connected.");
+    renderDashboard();
+  }
+
+  document.getElementById("connectBtn").addEventListener("click", connectAccount);
+
+  document.getElementById("startSessionBtn").addEventListener("click", () => {
+    guardianState.sessionStatus = "Monitoring";
+    addFeed("Trading session manually activated.");
+    addAlert("Session Started", "Guardian monitoring is active for the current session.", "safe");
+    renderDashboard();
+  });
+
+  document.getElementById("endSessionBtn").addEventListener("click", () => {
+    guardianState.sessionStatus = "Ended";
+    addFeed("Trading session ended.");
+    addAlert("Session Ended", "Monitoring remains available, but no active session is running.", "warning");
+    renderDashboard();
+  });
+
+  document.getElementById("lockTradingBtn").addEventListener("click", () => {
+    guardianState.guardianStatus = "WARNING";
+    addFeed("Emergency trading lock activated.");
+    addAlert("Trading Locked", "Trade Guardian has moved into a locked protective state.", "danger");
+    renderDashboard();
+  });
+
+  document.getElementById("reviewPlanBtn").addEventListener("click", () => {
+    addFeed("Plan review opened from the dashboard.");
+    addAlert("Plan Review", "You can review your active plan and account rules.", "safe");
+  });
+
+  setInterval(() => {
+    if (!guardianState.connected) return;
+
+    const pnlSwing = Math.floor(Math.random() * 60) - 20;
+    guardianState.dailyLossUsed = Math.max(0, Math.min(guardianState.dailyLossLimit, guardianState.dailyLossUsed + pnlSwing));
+    guardianState.drawdownUsed = Math.max(0, Math.min(guardianState.maxDrawdown, guardianState.drawdownUsed + Math.floor(Math.random() * 40) - 8));
+    guardianState.openRisk = Math.max(20, Math.min(guardianState.maxOpenRisk, guardianState.openRisk + (Math.floor(Math.random() * 50) - 20)));
+    guardianState.tradesToday = Math.max(0, Math.min(guardianState.maxTradesPerDay, guardianState.tradesToday + (Math.random() > 0.78 ? 1 : 0)));
+    guardianState.consecutiveLosses = Math.max(0, Math.min(3, guardianState.consecutiveLosses + (Math.random() > 0.88 ? 1 : (Math.random() > 0.70 ? -1 : 0))));
+    guardianState.cooldownReady = Math.random() > 0.25;
+
+    const dailyPercent = (guardianState.dailyLossUsed / guardianState.dailyLossLimit) * 100;
+
+    if (dailyPercent > 75) {
+      guardianState.guardianStatus = "WARNING";
+      addAlert("Daily Loss Pressure", "You are approaching your daily loss threshold.", "danger");
+    } else if (dailyPercent > 50) {
+      guardianState.guardianStatus = "CAUTION";
+    } else {
+      guardianState.guardianStatus = "SAFE";
+    }
+
+    renderDashboard();
+  }, 5000);
+
+  renderDashboard();
 </script>
 
 </body>
