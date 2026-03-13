@@ -650,13 +650,13 @@ nextBtn.addEventListener("click", () => {
   saveAnswer();
 
   if (stepIndex < visibleSteps.length - 1) {
-    stepIndex++;
-    renderStep();
-  } else {
-    console.log("ACCOUNT RULES COMPLETE", accountRules);
-    localStorage.setItem("tradeGuardianAccountRules", JSON.stringify(accountRules));
-    alert("Account Rules Setup completed. Next step: Strategy Profile Setup.");
-  }
+  stepIndex++;
+  renderStep();
+} else {
+  console.log("ACCOUNT RULES COMPLETE", accountRules);
+  localStorage.setItem("tradeGuardianAccountRules", JSON.stringify(accountRules));
+  window.location.href = "recommended-plans.html";
+}
 });
 
 backBtn.addEventListener("click", () => {
