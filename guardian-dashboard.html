@@ -643,7 +643,7 @@
     </div>
 
     <div class="top-actions">
-      <button class="btn btn-secondary">Review Plan</button>
+      <button class="btn btn-secondary" id="reviewPlanBtn">Review Plan</button>
       <button class="btn btn-primary" id="connectBtn">Connect Trading Account</button>
     </div>
   </div>
@@ -653,23 +653,22 @@
       <div class="eyebrow">Live Guardian Overview</div>
       <div class="hero-title">Know instantly if your account is safe, at risk, or violating the plan.</div>
       <div class="hero-sub">
-        This dashboard is designed to stay open beside your trading platform and act like a real-time
-        control center. Once your account is connected, the system can read activity, compare it against
-        your rules, and guide you through the session.
+        This dashboard is ready to become your real-time control center.
+        For now, it loads the plan, profile, and account rules you already configured.
       </div>
 
       <div class="hero-grid">
         <div class="mini-stat">
           <div class="label">Active Plan</div>
-          <div class="value" id="heroPlan">Guardian Plan</div>
+          <div class="value" id="heroPlan">—</div>
         </div>
         <div class="mini-stat">
           <div class="label">Account Type</div>
-          <div class="value" id="heroAccountType">Funded</div>
+          <div class="value" id="heroAccountType">—</div>
         </div>
         <div class="mini-stat">
           <div class="label">Session Status</div>
-          <div class="value" id="heroSession">Monitoring</div>
+          <div class="value" id="heroSession">Inactive</div>
         </div>
         <div class="mini-stat">
           <div class="label">Connection</div>
@@ -688,11 +687,11 @@
         </div>
 
         <div class="copilot-message" id="copilotMessage">
-          Connect your trading account to begin live account monitoring and real-time protection.
+          Your plan has been loaded successfully. Connect your trading account when you are ready for live monitoring.
         </div>
 
         <div class="copilot-sub" id="copilotSub">
-          The dashboard will automatically track positions, risk, rule violations, and session behavior once connected.
+          Trade Guardian is now using the account structure and plan rules you configured during setup.
         </div>
       </div>
     </div>
@@ -719,34 +718,34 @@
               <div class="stat-label">Risk per Trade</div>
               <div class="stat-pill pill-safe">PLAN</div>
             </div>
-            <div class="stat-value" id="riskPerTrade">$56</div>
-            <div class="stat-sub">Maximum planned risk allowed per position.</div>
+            <div class="stat-value" id="riskPerTrade">—</div>
+            <div class="stat-sub">Loaded from your selected or custom plan.</div>
           </div>
 
           <div class="stat-card">
             <div class="stat-top">
-              <div class="stat-label">Daily Loss Used</div>
-              <div class="stat-pill pill-caution" id="dailyLossPill">38%</div>
+              <div class="stat-label">Daily Loss Limit</div>
+              <div class="stat-pill pill-caution" id="dailyLossPill">0%</div>
             </div>
-            <div class="stat-value" id="dailyLossUsed">$190</div>
-            <div class="stat-sub">Used from your daily loss limit.</div>
+            <div class="stat-value" id="dailyLossUsed">$0</div>
+            <div class="stat-sub">Currently no live loss activity is connected.</div>
             <div class="progress-box">
               <div class="progress-line">
-                <div class="progress-fill fill-yellow" id="dailyLossBar" style="width:38%"></div>
+                <div class="progress-fill fill-yellow" id="dailyLossBar" style="width:0%"></div>
               </div>
             </div>
           </div>
 
           <div class="stat-card">
             <div class="stat-top">
-              <div class="stat-label">Drawdown Used</div>
-              <div class="stat-pill pill-safe" id="drawdownPill">21%</div>
+              <div class="stat-label">Max Drawdown</div>
+              <div class="stat-pill pill-safe" id="drawdownPill">0%</div>
             </div>
-            <div class="stat-value" id="drawdownUsed">$420</div>
-            <div class="stat-sub">Used from your maximum drawdown.</div>
+            <div class="stat-value" id="drawdownUsed">$0</div>
+            <div class="stat-sub">Live drawdown will appear here after connection.</div>
             <div class="progress-box">
               <div class="progress-line">
-                <div class="progress-fill fill-blue" id="drawdownBar" style="width:21%"></div>
+                <div class="progress-fill fill-blue" id="drawdownBar" style="width:0%"></div>
               </div>
             </div>
           </div>
@@ -754,19 +753,19 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Trades Today</div>
-              <div class="stat-pill pill-safe" id="tradesPill">3 / 5</div>
+              <div class="stat-pill pill-safe" id="tradesPill">0 / 0</div>
             </div>
-            <div class="stat-value" id="tradesToday">3</div>
-            <div class="stat-sub">Number of completed trades in this session.</div>
+            <div class="stat-value" id="tradesToday">0</div>
+            <div class="stat-sub">Will update automatically once the account is connected.</div>
           </div>
 
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Consecutive Losses</div>
-              <div class="stat-pill pill-safe" id="lossPill">1 / 3</div>
+              <div class="stat-pill pill-safe" id="lossPill">0</div>
             </div>
-            <div class="stat-value" id="consecutiveLosses">1</div>
-            <div class="stat-sub">Live losing streak monitoring.</div>
+            <div class="stat-value" id="consecutiveLosses">0</div>
+            <div class="stat-sub">Waiting for live trade results.</div>
           </div>
         </div>
       </div>
@@ -777,36 +776,36 @@
         <div class="trade-box">
           <div class="trade-head">
             <div>
-              <div class="symbol" id="positionSymbol">MNQ</div>
-              <div class="trade-note">Current open market position detected by Trade Guardian.</div>
+              <div class="symbol" id="positionSymbol">No Position</div>
+              <div class="trade-note">Once your trading account is connected, current position data will appear here automatically.</div>
             </div>
-            <div class="position-tag" id="positionSide">LONG</div>
+            <div class="position-tag" id="positionSide">WAITING</div>
           </div>
 
           <div class="trade-grid">
             <div class="trade-metric">
               <div class="label">Entry Price</div>
-              <div class="value" id="entryPrice">18,442.25</div>
+              <div class="value" id="entryPrice">—</div>
             </div>
             <div class="trade-metric">
               <div class="label">Stop Loss</div>
-              <div class="value" id="stopLoss">18,428.75</div>
+              <div class="value" id="stopLoss">—</div>
             </div>
             <div class="trade-metric">
               <div class="label">Take Profit</div>
-              <div class="value" id="takeProfit">18,468.25</div>
+              <div class="value" id="takeProfit">—</div>
             </div>
             <div class="trade-metric">
               <div class="label">Position Size</div>
-              <div class="value" id="positionSize">2 Contracts</div>
+              <div class="value" id="positionSize">—</div>
             </div>
           </div>
 
           <div class="trade-footer">
             <div class="trade-note" id="positionNote">
-              Risk validated against your active plan. Current structure is within allowed limits.
+              Waiting for live broker/platform position data.
             </div>
-            <div class="stat-pill pill-safe" id="positionRiskPill">VALID</div>
+            <div class="stat-pill pill-caution" id="positionRiskPill">NO DATA</div>
           </div>
         </div>
       </div>
@@ -820,10 +819,10 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Session Status</div>
-              <div class="stat-pill pill-safe" id="sessionPill">OPEN</div>
+              <div class="stat-pill pill-caution" id="sessionPill">OFF</div>
             </div>
-            <div class="stat-value" id="sessionValue">Inside Window</div>
-            <div class="stat-sub">Trading activity is currently inside your allowed schedule.</div>
+            <div class="stat-value" id="sessionValue">Inactive</div>
+            <div class="stat-sub" id="sessionValueSub">Session logic is loaded from your plan.</div>
           </div>
 
           <div class="stat-card">
@@ -831,20 +830,20 @@
               <div class="stat-label">Cooldown Status</div>
               <div class="stat-pill pill-safe" id="cooldownPill">READY</div>
             </div>
-            <div class="stat-value" id="cooldownValue">No Delay</div>
-            <div class="stat-sub">A new trade can be opened right now based on cooldown logic.</div>
+            <div class="stat-value" id="cooldownValue">Not Active</div>
+            <div class="stat-sub">Cooldown rules will apply automatically after live trade activity starts.</div>
           </div>
 
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Open Risk</div>
-              <div class="stat-pill pill-safe" id="openRiskPill">31%</div>
+              <div class="stat-pill pill-safe" id="openRiskPill">0%</div>
             </div>
-            <div class="stat-value" id="openRiskValue">$124</div>
-            <div class="stat-sub">Current total risk across all open positions.</div>
+            <div class="stat-value" id="openRiskValue">$0</div>
+            <div class="stat-sub">No open exposure detected yet.</div>
             <div class="progress-box">
               <div class="progress-line">
-                <div class="progress-fill fill-green" id="openRiskBar" style="width:31%"></div>
+                <div class="progress-fill fill-green" id="openRiskBar" style="width:0%"></div>
               </div>
             </div>
           </div>
@@ -852,33 +851,29 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Open Positions</div>
-              <div class="stat-pill pill-safe" id="openPositionsPill">1 / 2</div>
+              <div class="stat-pill pill-safe" id="openPositionsPill">0</div>
             </div>
-            <div class="stat-value" id="openPositionsValue">1</div>
-            <div class="stat-sub">Number of live positions currently open.</div>
+            <div class="stat-value" id="openPositionsValue">0</div>
+            <div class="stat-sub">Maximum open positions is already loaded from your plan.</div>
           </div>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Recent Activity Feed</div>
+        <div class="panel-title">System Context Feed</div>
 
         <div class="feed" id="activityFeed">
           <div class="feed-item">
-            <div class="feed-time">09:31</div>
-            <div class="feed-text">Trading account connected and Guardian monitoring activated.</div>
+            <div class="feed-time">INFO</div>
+            <div class="feed-text" id="feedPlanLine">Active plan successfully loaded.</div>
           </div>
           <div class="feed-item">
-            <div class="feed-time">09:36</div>
-            <div class="feed-text">Position opened on MNQ. Risk structure detected and validated.</div>
+            <div class="feed-time">INFO</div>
+            <div class="feed-text" id="feedAccountLine">Account rules have been loaded into the dashboard context.</div>
           </div>
           <div class="feed-item">
-            <div class="feed-time">09:37</div>
-            <div class="feed-text">Stop loss and take profit were both detected successfully.</div>
-          </div>
-          <div class="feed-item">
-            <div class="feed-time">09:41</div>
-            <div class="feed-text">Trade remains inside your allowed window and within active plan parameters.</div>
+            <div class="feed-time">INFO</div>
+            <div class="feed-text" id="feedSessionLine">Trading session rules are ready and waiting for live market activity.</div>
           </div>
         </div>
       </div>
@@ -890,18 +885,18 @@
 
         <div class="alert-list" id="alertList">
           <div class="alert-item safe">
-            <div class="alert-title">System Ready</div>
-            <div class="alert-copy">Trade Guardian is waiting for your account connection to start live monitoring.</div>
+            <div class="alert-title">Plan Loaded</div>
+            <div class="alert-copy">Trade Guardian successfully loaded your active plan and account rules.</div>
           </div>
 
           <div class="alert-item warning">
-            <div class="alert-title">Live Monitoring Preview</div>
-            <div class="alert-copy">This dashboard is currently showing simulated values until a real account is connected.</div>
+            <div class="alert-title">Waiting for Connection</div>
+            <div class="alert-copy">Live account metrics will begin updating after you connect a trading platform.</div>
           </div>
 
           <div class="alert-item safe">
-            <div class="alert-title">Plan Loaded</div>
-            <div class="alert-copy">Your selected plan is active and ready to guide session discipline.</div>
+            <div class="alert-title">System Ready</div>
+            <div class="alert-copy">The dashboard is configured and ready for real-time monitoring.</div>
           </div>
         </div>
       </div>
@@ -913,12 +908,12 @@
           <button class="action-btn primary" id="startSessionBtn">Start Session</button>
           <button class="action-btn" id="endSessionBtn">End Session</button>
           <button class="action-btn lock" id="lockTradingBtn">Lock Trading</button>
-          <button class="action-btn" id="reviewPlanBtn">Review Plan</button>
+          <button class="action-btn" id="reviewPlanActionBtn">Review Plan</button>
         </div>
 
         <div class="bottom-note">
-          The dashboard is built to become fully automatic once the trading account connection is enabled.
-          After connection, every relevant movement should update here in real time.
+          This dashboard is now reading the information you already entered during setup.
+          Once a trading account is connected, all live metrics should begin updating automatically.
         </div>
       </div>
     </div>
@@ -928,26 +923,11 @@
 </div>
 
 <script>
-  const guardianState = {
-    connected: false,
-    guardianStatus: "SAFE",
-    sessionStatus: "Inactive",
-    activePlan: "Guardian Plan",
-    accountType: "Funded",
-    dailyLossLimit: 500,
-    maxDrawdown: 2000,
-    dailyLossUsed: 190,
-    drawdownUsed: 420,
-    riskPerTrade: 56,
-    maxTradesPerDay: 5,
-    tradesToday: 3,
-    consecutiveLosses: 1,
-    openRisk: 124,
-    maxOpenRisk: 400,
-    openPositions: 1,
-    maxOpenPositions: 2,
-    cooldownReady: true
-  };
+  const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
+  const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules")) || {};
+  const selectedPlan = JSON.parse(localStorage.getItem("tradeGuardianSelectedPlan")) || {};
+  const customPlan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan")) || {};
+  const activePlan = JSON.parse(localStorage.getItem("tradeGuardianActivePlan")) || {};
 
   function setText(id, value){
     const el = document.getElementById(id);
@@ -959,191 +939,157 @@
     if (el) el.style.width = `${Math.max(0, Math.min(100, percent))}%`;
   }
 
-  function addFeed(text){
-    const feed = document.getElementById("activityFeed");
-    const item = document.createElement("div");
-    item.className = "feed-item";
-
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, "0");
-    const mm = String(now.getMinutes()).padStart(2, "0");
-
-    item.innerHTML = `
-      <div class="feed-time">${hh}:${mm}</div>
-      <div class="feed-text">${text}</div>
-    `;
-    feed.prepend(item);
-
-    while (feed.children.length > 6) {
-      feed.removeChild(feed.lastElementChild);
-    }
+  function formatMoney(value){
+    const n = Number(value || 0);
+    if (!Number.isFinite(n)) return "$0";
+    return `$${n.toLocaleString()}`;
   }
 
-  function addAlert(title, copy, type = "safe"){
-    const list = document.getElementById("alertList");
-    const item = document.createElement("div");
-    item.className = `alert-item ${type}`;
-    item.innerHTML = `
-      <div class="alert-title">${title}</div>
-      <div class="alert-copy">${copy}</div>
-    `;
-    list.prepend(item);
-
-    while (list.children.length > 5) {
-      list.removeChild(list.lastElementChild);
-    }
+  function getLoadedPlan(){
+    if (activePlan && Object.keys(activePlan).length) return activePlan;
+    if (selectedPlan && Object.keys(selectedPlan).length) return selectedPlan;
+    if (customPlan && Object.keys(customPlan).length) return customPlan;
+    return {};
   }
 
-  function updateGuardianStatus(status){
-    guardianState.guardianStatus = status;
+  function getPlanName(plan){
+    if (plan.selectedName) return plan.selectedName;
+    if (plan.planType === "custom") return "Custom Trading Plan";
+    if (plan.source === "custom-plan") return "Custom Trading Plan";
+    return "Guardian Plan";
+  }
 
-    const pill = document.getElementById("guardianPill");
-    pill.className = "stat-pill";
-
-    if (status === "SAFE") {
-      pill.classList.add("pill-safe");
-      pill.textContent = "SAFE";
-      setText("guardianValue", "Safe");
-      setText("copilotStatus", "SYSTEM PROTECTING");
-      setText("copilotMessage", "Your current activity is inside plan parameters and your account remains protected.");
-      document.getElementById("copilotDot").style.background = "var(--green)";
-      document.getElementById("copilotDot").style.boxShadow = "0 0 12px rgba(46,212,122,.45)";
-    } else if (status === "CAUTION") {
-      pill.classList.add("pill-caution");
-      pill.textContent = "CAUTION";
-      setText("guardianValue", "Caution");
-      setText("copilotStatus", "SYSTEM WARNING");
-      setText("copilotMessage", "Your account is still inside limits, but current behavior is approaching a risk threshold.");
-      document.getElementById("copilotDot").style.background = "var(--yellow)";
-      document.getElementById("copilotDot").style.boxShadow = "0 0 12px rgba(245,185,79,.45)";
-    } else {
-      pill.classList.add("pill-danger");
-      pill.textContent = "WARNING";
-      setText("guardianValue", "Warning");
-      setText("copilotStatus", "SYSTEM ALERT");
-      setText("copilotMessage", "A plan rule or risk threshold is close to being violated. Immediate discipline is required.");
-      document.getElementById("copilotDot").style.background = "var(--red)";
-      document.getElementById("copilotDot").style.boxShadow = "0 0 12px rgba(239,92,92,.45)";
+  function getPlanRisk(plan){
+    if (plan.riskPerTrade !== undefined && plan.riskPerTrade !== null) {
+      const mode = plan.riskPerTradeMode || "$";
+      return mode === "Percentage of account" ? `${plan.riskPerTrade}%` : formatMoney(plan.riskPerTrade);
     }
+
+    if (plan.riskPerTradeValue && typeof plan.riskPerTradeValue === "object") {
+      return `${plan.riskPerTradeValue.value || 0}${plan.riskPerTradeValue.unit || ""}`;
+    }
+
+    return "—";
+  }
+
+  function getMaxTrades(plan){
+    return plan.maxTradesPerDay || accountRules.maxTradesPerDay || "—";
+  }
+
+  function getSessionLabel(){
+    return customPlan.tradingSession || traderProfile.session || "Not Defined";
+  }
+
+  function getCopilotMessage(plan){
+    const accountType = accountRules.accountType || "your account";
+    const session = getSessionLabel();
+    const maxTrades = getMaxTrades(plan);
+    return `Your ${accountType.toLowerCase()} is configured. Trade Guardian is ready to monitor your ${session.toLowerCase()} session using a maximum of ${maxTrades} trades per day.`;
   }
 
   function renderDashboard(){
-    setText("heroPlan", guardianState.activePlan);
-    setText("heroAccountType", guardianState.accountType);
-    setText("heroSession", guardianState.sessionStatus);
-    setText("heroConnection", guardianState.connected ? "Connected" : "Not Connected");
+    const plan = getLoadedPlan();
+    const planName = getPlanName(plan);
+    const riskPerTrade = getPlanRisk(plan);
+    const maxTrades = getMaxTrades(plan);
+    const dailyLossLimit = Number(accountRules.dailyLossLimit || 0);
+    const maxDrawdown = Number(accountRules.maxDrawdown || 0);
+    const maxOpenRisk = Number(
+      (customPlan.maxTotalRiskAcrossOpenTrades && customPlan.maxTotalRiskAcrossOpenTrades.value) ||
+      accountRules.maxTotalRiskAcrossOpenTrades ||
+      0
+    );
+    const maxOpenPositions =
+      customPlan.maxOpenPositions ||
+      accountRules.maxOpenTradesAtSameTime ||
+      0;
 
-    setText("riskPerTrade", `$${guardianState.riskPerTrade}`);
-    setText("dailyLossUsed", `$${guardianState.dailyLossUsed}`);
-    setText("drawdownUsed", `$${guardianState.drawdownUsed}`);
-    setText("tradesToday", guardianState.tradesToday);
-    setText("consecutiveLosses", guardianState.consecutiveLosses);
+    setText("heroPlan", planName);
+    setText("heroAccountType", accountRules.accountType || "—");
+    setText("heroSession", "Inactive");
+    setText("heroConnection", "Not Connected");
 
-    const dailyPercent = (guardianState.dailyLossUsed / guardianState.dailyLossLimit) * 100;
-    const drawdownPercent = (guardianState.drawdownUsed / guardianState.maxDrawdown) * 100;
-    const openRiskPercent = (guardianState.openRisk / guardianState.maxOpenRisk) * 100;
+    setText("copilotMessage", getCopilotMessage(plan));
 
-    setText("dailyLossPill", `${Math.round(dailyPercent)}%`);
-    setText("drawdownPill", `${Math.round(drawdownPercent)}%`);
-    setText("openRiskPill", `${Math.round(openRiskPercent)}%`);
-    setText("tradesPill", `${guardianState.tradesToday} / ${guardianState.maxTradesPerDay}`);
-    setText("lossPill", `${guardianState.consecutiveLosses} / 3`);
+    setText("riskPerTrade", riskPerTrade);
+    setText("dailyLossUsed", formatMoney(dailyLossLimit));
+    setText("drawdownUsed", formatMoney(maxDrawdown));
+    setText("tradesToday", "0");
+    setText("consecutiveLosses", "0");
+    setText("dailyLossPill", "0%");
+    setText("drawdownPill", "0%");
+    setText("tradesPill", `0 / ${maxTrades}`);
+    setText("lossPill", "0");
+    setBar("dailyLossBar", 0);
+    setBar("drawdownBar", 0);
 
-    setBar("dailyLossBar", dailyPercent);
-    setBar("drawdownBar", drawdownPercent);
-    setBar("openRiskBar", openRiskPercent);
+    setText("sessionValue", "Inactive");
+    setText("sessionValueSub", `Configured session: ${getSessionLabel()}`);
+    setText("cooldownValue", "Not Active");
+    setText("openRiskValue", maxOpenRisk ? formatMoney(maxOpenRisk) : "$0");
+    setText("openRiskPill", "0%");
+    setBar("openRiskBar", 0);
+    setText("openPositionsValue", "0");
+    setText("openPositionsPill", `0 / ${maxOpenPositions || 0}`);
 
-    setText("openRiskValue", `$${guardianState.openRisk}`);
-    setText("openPositionsValue", guardianState.openPositions);
-    setText("openPositionsPill", `${guardianState.openPositions} / ${guardianState.maxOpenPositions}`);
+    setText("positionSymbol", "No Position");
+    setText("positionSide", "WAITING");
+    setText("entryPrice", "—");
+    setText("stopLoss", "—");
+    setText("takeProfit", "—");
+    setText("positionSize", "—");
 
-    if (guardianState.cooldownReady) {
-      setText("cooldownValue", "No Delay");
-      setText("cooldownPill", "READY");
-      document.getElementById("cooldownPill").className = "stat-pill pill-safe";
-    } else {
-      setText("cooldownValue", "Cooldown Active");
-      setText("cooldownPill", "WAIT");
-      document.getElementById("cooldownPill").className = "stat-pill pill-caution";
-    }
+    setText("positionNote",
+      `Current live trade data will appear here after account connection. Maximum open positions loaded: ${maxOpenPositions || 0}.`
+    );
 
-    if (guardianState.sessionStatus === "Monitoring") {
-      setText("sessionValue", "Inside Window");
-      setText("sessionPill", "OPEN");
-      document.getElementById("sessionPill").className = "stat-pill pill-safe";
-    } else {
-      setText("sessionValue", "Inactive");
-      setText("sessionPill", "OFF");
-      document.getElementById("sessionPill").className = "stat-pill pill-caution";
-    }
-
-    updateGuardianStatus(guardianState.guardianStatus);
+    setText("feedPlanLine", `${planName} is currently loaded as the active plan.`);
+    setText("feedAccountLine",
+      `Account type: ${accountRules.accountType || "—"} • Account size: ${accountRules.accountSize || "—"}`
+    );
+    setText("feedSessionLine",
+      `Trading session configured: ${getSessionLabel()}${customPlan.tradingWindow ? ` • Window: ${customPlan.tradingWindow.start} - ${customPlan.tradingWindow.end}` : ""}`
+    );
   }
 
-  function connectAccount(){
-    guardianState.connected = true;
-    guardianState.sessionStatus = "Monitoring";
-
-    setText("heroConnection", "Connected");
-    addFeed("Trading account connected. Live monitoring channel initialized.");
-    addAlert("Account Connected", "Trade Guardian is now ready to receive live account activity.", "safe");
-
-    setText("copilotSub", "Live risk, position structure, and session discipline will update automatically once broker data is connected.");
-    renderDashboard();
-  }
-
-  document.getElementById("connectBtn").addEventListener("click", connectAccount);
+  document.getElementById("connectBtn").addEventListener("click", () => {
+    setText("heroConnection", "Connecting...");
+    setText("copilotStatus", "CONNECTION STARTED");
+    setText("copilotMessage", "Account connection flow started. Once a broker/platform is linked, live activity will appear here automatically.");
+    setText("copilotSub", "This button will later open the platform selector and authentication flow.");
+  });
 
   document.getElementById("startSessionBtn").addEventListener("click", () => {
-    guardianState.sessionStatus = "Monitoring";
-    addFeed("Trading session manually activated.");
-    addAlert("Session Started", "Guardian monitoring is active for the current session.", "safe");
-    renderDashboard();
+    setText("heroSession", "Monitoring");
+    setText("sessionValue", "Session Started");
+    setText("sessionPill", "OPEN");
+    document.getElementById("sessionPill").className = "stat-pill pill-safe";
   });
 
   document.getElementById("endSessionBtn").addEventListener("click", () => {
-    guardianState.sessionStatus = "Ended";
-    addFeed("Trading session ended.");
-    addAlert("Session Ended", "Monitoring remains available, but no active session is running.", "warning");
-    renderDashboard();
+    setText("heroSession", "Ended");
+    setText("sessionValue", "Session Ended");
+    setText("sessionPill", "OFF");
+    document.getElementById("sessionPill").className = "stat-pill pill-caution";
   });
 
   document.getElementById("lockTradingBtn").addEventListener("click", () => {
-    guardianState.guardianStatus = "WARNING";
-    addFeed("Emergency trading lock activated.");
-    addAlert("Trading Locked", "Trade Guardian has moved into a locked protective state.", "danger");
-    renderDashboard();
+    setText("guardianValue", "Locked");
+    setText("guardianPill", "LOCKED");
+    document.getElementById("guardianPill").className = "stat-pill pill-danger";
+    setText("copilotStatus", "TRADING LOCKED");
+    setText("copilotMessage", "Manual lock activated. Trade Guardian is now in protective lock mode.");
+    document.getElementById("copilotDot").style.background = "var(--red)";
+    document.getElementById("copilotDot").style.boxShadow = "0 0 12px rgba(239,92,92,.45)";
   });
 
   document.getElementById("reviewPlanBtn").addEventListener("click", () => {
-    addFeed("Plan review opened from the dashboard.");
-    addAlert("Plan Review", "You can review your active plan and account rules.", "safe");
+    window.location.href = "recommended-plans.html";
   });
 
-  setInterval(() => {
-    if (!guardianState.connected) return;
-
-    const pnlSwing = Math.floor(Math.random() * 60) - 20;
-    guardianState.dailyLossUsed = Math.max(0, Math.min(guardianState.dailyLossLimit, guardianState.dailyLossUsed + pnlSwing));
-    guardianState.drawdownUsed = Math.max(0, Math.min(guardianState.maxDrawdown, guardianState.drawdownUsed + Math.floor(Math.random() * 40) - 8));
-    guardianState.openRisk = Math.max(20, Math.min(guardianState.maxOpenRisk, guardianState.openRisk + (Math.floor(Math.random() * 50) - 20)));
-    guardianState.tradesToday = Math.max(0, Math.min(guardianState.maxTradesPerDay, guardianState.tradesToday + (Math.random() > 0.78 ? 1 : 0)));
-    guardianState.consecutiveLosses = Math.max(0, Math.min(3, guardianState.consecutiveLosses + (Math.random() > 0.88 ? 1 : (Math.random() > 0.70 ? -1 : 0))));
-    guardianState.cooldownReady = Math.random() > 0.25;
-
-    const dailyPercent = (guardianState.dailyLossUsed / guardianState.dailyLossLimit) * 100;
-
-    if (dailyPercent > 75) {
-      guardianState.guardianStatus = "WARNING";
-      addAlert("Daily Loss Pressure", "You are approaching your daily loss threshold.", "danger");
-    } else if (dailyPercent > 50) {
-      guardianState.guardianStatus = "CAUTION";
-    } else {
-      guardianState.guardianStatus = "SAFE";
-    }
-
-    renderDashboard();
-  }, 5000);
+  document.getElementById("reviewPlanActionBtn").addEventListener("click", () => {
+    window.location.href = "recommended-plans.html";
+  });
 
   renderDashboard();
 </script>
