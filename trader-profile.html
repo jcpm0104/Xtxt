@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trader Profile Setup — Trade Guardian</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--bg:#08111f;
+--panel:rgba(255,255,255,.04);
+--line:rgba(255,255,255,.08);
+--text:#eaf1ff;
+--muted:#97a7c0;
+--blue:#2f6bff;
+--radius:24px;
+--max:860px;
+--shadow:0 24px 60px rgba(0,0,0,.34);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+font-family:'Inter',system-ui,sans-serif;
+background:
+radial-gradient(circle at top, rgba(47,107,255,.15), transparent 35%),
+#08111f;
+color:var(--text);
+display:flex;
+align-items:center;
+justify-content:center;
+min-height:100vh;
+padding:20px;
+}
+
+.container{
+width:min(var(--max),100%);
+background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+border:1px solid var(--line);
+border-radius:var(--radius);
+padding:36px 28px;
+box-shadow:var(--shadow);
+display:flex;
+flex-direction:column;
+min-height:560px;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.progress{
+width:100%;
+height:10px;
+background:#162337;
+border-radius:999px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.progress-fill{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,var(--blue),#79a3ff);
+transition:width .35s ease;
+}
+
+.question{
+flex:1;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+
+h1{
+font-size:32px;
+margin-bottom:16px;
+}
+
+.input-group{
+margin-top:18px;
+width:100%;
+max-width:400px;
+}
+
+input,select{
+width:100%;
+height:48px;
+border-radius:10px;
+border:1px solid var(--line);
+background:#0c1728;
+color:white;
+padding:0 14px;
+font-size:15px;
+}
+
+.options{
+display:flex;
+flex-direction:column;
+gap:10px;
+margin-top:10px;
+}
+
+label{
+background:#0c1728;
+border:1px solid var(--line);
+padding:10px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.bottom{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-top:24px;
+flex-wrap:wrap;
+gap:12px;
+}
+
+button{
+height:46px;
+border:none;
+border-radius:10px;
+padding:0 18px;
+font-weight:700;
+cursor:pointer;
+}
+
+.primary{
+background:linear-gradient(180deg,#4d82ff,var(--blue));
+color:white;
+}
+
+.secondary{
+background:rgba(255,255,255,.05);
+color:white;
+border:1px solid var(--line);
+}
+
+.hidden{display:none;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="topbar">
+<div id="stepLabel">Step 1 / 22</div>
+</div>
+
+<div class="progress">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+
+<div class="question">
+<h1 id="questionTitle"></h1>
+
+<div class="input-group" id="inputContainer"></div>
+
+</div>
+
+<div class="bottom">
+<button class="secondary" id="backBtn">Back</button>
+<button class="primary" id="nextBtn">Next</button>
+</div>
+
+</div>
+
+<script>
+
+const traderProfile = {};
+
+const steps = [
+
+{key:"firstName", title:"What is your first name?", type:"text"},
+{key:"lastName", title:"What is your last name?", type:"text"},
+{key:"timezone", title:"Select your time zone", type:"text"},
+{key:"experience", title:"Select your experience level", type:"radio", options:["Beginner","Intermediate","Advanced"]},
+{key:"markets", title:"Which markets do you trade?", type:"checkbox", options:["Futures","Forex","Stocks","Crypto","Options"]},
+{key:"instrument", title:"What is your primary instrument?", type:"text"},
+{key:"style", title:"Select your trading style", type:"radio", options:["Scalping","Intraday","Swing Trading"]},
+{key:"overnight", title:"Do you hold positions overnight?", type:"radio", options:["Yes","No"]},
+{key:"session", title:"Primary trading session", type:"radio", options:["London","New York","Asia","Custom"]},
+{key:"platforms", title:"Trading platforms used", type:"checkbox", options:["NinjaTrader","Tradovate","Rithmic","CQG","TradingView","MetaTrader 4","MetaTrader 5","Interactive Brokers","Binance","Coinbase"]},
+{key:"broker", title:"Broker / Account provider", type:"text"},
+{key:"propfirm", title:"Are you trading with a prop firm?", type:"radio", options:["Yes","No"]},
+{key:"multiAccounts", title:"Do you trade multiple accounts?", type:"radio", options:["Yes","No"]},
+{key:"objectives", title:"Trading objectives", type:"checkbox", options:["Pass evaluation","Protect funded account","Improve discipline","Reduce emotional trading","Increase consistency","Grow personal account"]},
+{key:"days", title:"Trading days", type:"checkbox", options:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]},
+{key:"execution", title:"Trading execution type", type:"radio", options:["Manual Trading Only","Automated Trading","Both Manual and Automated"]},
+{key:"replication", title:"Do you replicate trades across accounts?", type:"radio", options:["Yes","No"]},
+{key:"journaling", title:"Do you use external journaling tools?", type:"radio", options:["Yes","No"]},
+{key:"alerts", title:"Receive real-time alerts?", type:"radio", options:["Yes","No"]},
+{key:"alertMethod", title:"Alert delivery method", type:"radio", options:["In-App Notifications","Email Alerts","Mobile Push Notifications","All of the above"]},
+{key:"protective", title:"Allow Trade Guardian to pause trading if rules break?", type:"radio", options:["Yes","No"]},
+{key:"autoJournal", title:"Automatically record all trades?", type:"radio", options:["Yes","No"]}
+
+];
+
+let stepIndex = 0;
+
+const title = document.getElementById("questionTitle");
+const inputContainer = document.getElementById("inputContainer");
+const progressFill = document.getElementById("progressFill");
+const stepLabel = document.getElementById("stepLabel");
+
+function renderStep(){
+
+const step = steps[stepIndex];
+title.textContent = step.title;
+inputContainer.innerHTML="";
+
+if(step.type==="text"){
+inputContainer.innerHTML=`<input id="inputField" type="text">`;
+}
+
+if(step.type==="radio"){
+step.options.forEach(o=>{
+inputContainer.innerHTML+=`<label><input type="radio" name="option" value="${o}"> ${o}</label>`;
+});
+}
+
+if(step.type==="checkbox"){
+step.options.forEach(o=>{
+inputContainer.innerHTML+=`<label><input type="checkbox" value="${o}"> ${o}</label>`;
+});
+}
+
+stepLabel.textContent=`Step ${stepIndex+1} / ${steps.length}`;
+progressFill.style.width=`${((stepIndex+1)/steps.length)*100}%`;
+
+}
+
+function saveAnswer(){
+
+const step=steps[stepIndex];
+
+if(step.type==="text"){
+traderProfile[step.key]=document.getElementById("inputField").value;
+}
+
+if(step.type==="radio"){
+const selected=document.querySelector("input[name='option']:checked");
+if(selected) traderProfile[step.key]=selected.value;
+}
+
+if(step.type==="checkbox"){
+const selected=[...document.querySelectorAll("input[type='checkbox']:checked")].map(el=>el.value);
+traderProfile[step.key]=selected;
+}
+
+}
+
+document.getElementById("nextBtn").onclick=()=>{
+
+saveAnswer();
+
+if(stepIndex<steps.length-1){
+stepIndex++;
+renderStep();
+}else{
+console.log("PROFILE COMPLETE",traderProfile);
+alert("Trader profile completed. Next step: Account Setup.");
+}
+
+}
+
+document.getElementById("backBtn").onclick=()=>{
+if(stepIndex>0){
+stepIndex--;
+renderStep();
+}
+}
+
+renderStep();
+
+</script>
+
+</body>
+</html>
