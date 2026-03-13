@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Rules Setup — Trade Guardian</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#08111f;
+  --panel:rgba(255,255,255,.04);
+  --line:rgba(255,255,255,.08);
+  --line-strong:rgba(255,255,255,.14);
+  --text:#eaf1ff;
+  --muted:#97a7c0;
+  --blue:#2f6bff;
+  --blue-soft:#79a3ff;
+  --radius:24px;
+  --max:860px;
+  --shadow:0 24px 60px rgba(0,0,0,.34);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(47,107,255,.15), transparent 35%),
+    #08111f;
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:20px;
+}
+
+.container{
+  width:min(var(--max),100%);
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--line);
+  border-radius:28px;
+  padding:32px 28px 24px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  min-height:640px;
+  overflow:hidden;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.step-text{
+  font-size:14px;
+  color:#dbe7ff;
+  font-weight:700;
+}
+
+.progress{
+  width:100%;
+  height:10px;
+  background:#162337;
+  border-radius:999px;
+  overflow:hidden;
+  margin-bottom:30px;
+}
+
+.progress-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--blue),var(--blue-soft));
+  transition:width .35s ease;
+}
+
+.question{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+
+h1{
+  font-size:clamp(32px, 6vw, 58px);
+  line-height:1.05;
+  letter-spacing:-.04em;
+  margin-bottom:14px;
+  max-width:760px;
+}
+
+.helper{
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.6;
+  max-width:650px;
+  margin-bottom:22px;
+}
+
+.input-group{
+  margin-top:8px;
+  width:100%;
+  max-width:560px;
+}
+
+.text-input,
+.select-input{
+  width:100%;
+  height:54px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#0c1728;
+  color:white;
+  padding:0 16px;
+  font-size:16px;
+  outline:none;
+}
+
+.text-input:focus,
+.select-input:focus{
+  border-color:rgba(47,107,255,.65);
+  box-shadow:0 0 0 3px rgba(47,107,255,.14);
+}
+
+.inline-prefix{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:10px;
+}
+
+.prefix-box{
+  min-width:56px;
+  height:54px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#0c1728;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#dbe7ff;
+  font-weight:700;
+  font-size:18px;
+}
+
+.options{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-top:8px;
+  width:100%;
+}
+
+.option-card{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:14px;
+  width:100%;
+  min-height:58px;
+  padding:14px 16px;
+  border-radius:16px;
+  background:#0c1728;
+  border:1px solid var(--line);
+  color:var(--text);
+  cursor:pointer;
+  text-align:left;
+  transition:.2s ease;
+  user-select:none;
+}
+
+.option-card:hover{
+  border-color:var(--line-strong);
+  background:#0e1b30;
+}
+
+.option-card.selected{
+  border-color:rgba(47,107,255,.7);
+  background:linear-gradient(180deg, rgba(47,107,255,.16), rgba(47,107,255,.08));
+  box-shadow:0 0 0 1px rgba(47,107,255,.18) inset;
+}
+
+.option-indicator{
+  width:24px;
+  height:24px;
+  flex:0 0 24px;
+  border-radius:999px;
+  border:2px solid rgba(255,255,255,.22);
+  display:grid;
+  place-items:center;
+  transition:.2s ease;
+}
+
+.option-card.checkbox .option-indicator{
+  border-radius:8px;
+}
+
+.option-card.selected .option-indicator{
+  border-color:var(--blue-soft);
+  background:rgba(47,107,255,.22);
+}
+
+.option-card.selected .option-indicator::after{
+  content:"";
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:#fff;
+}
+
+.option-card.checkbox.selected .option-indicator::after{
+  width:11px;
+  height:11px;
+  border-radius:3px;
+}
+
+.option-label{
+  font-size:17px;
+  font-weight:600;
+  line-height:1.35;
+  word-break:break-word;
+}
+
+.bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:26px;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+button{
+  min-height:50px;
+  border:none;
+  border-radius:14px;
+  padding:0 20px;
+  font-weight:700;
+  font-size:15px;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.primary{
+  background:linear-gradient(180deg,#4d82ff,var(--blue));
+  color:white;
+  min-width:128px;
+}
+
+.primary:hover{
+  filter:brightness(1.05);
+}
+
+.secondary{
+  background:rgba(255,255,255,.05);
+  color:white;
+  border:1px solid var(--line);
+  min-width:110px;
+}
+
+.secondary:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.secondary:disabled,
+.primary:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.note{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+@media (max-width: 720px){
+  .container{
+    padding:24px 18px 18px;
+    min-height:620px;
+    border-radius:24px;
+  }
+
+  .helper{
+    font-size:15px;
+    margin-bottom:18px;
+  }
+
+  .input-group{
+    max-width:100%;
+  }
+
+  .option-card{
+    min-height:56px;
+    padding:12px 14px;
+    gap:12px;
+  }
+
+  .option-label{
+    font-size:16px;
+  }
+
+  .bottom{
+    flex-direction:row;
+    justify-content:space-between;
+  }
+
+  .secondary,
+  .primary{
+    min-width:104px;
+  }
+
+  .inline-prefix{
+    grid-template-columns:1fr;
+  }
+
+  .prefix-box{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="topbar">
+    <div class="step-text" id="stepLabel">Step 1 / 18</div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="question">
+    <h1 id="questionTitle"></h1>
+    <div class="helper" id="helperText"></div>
+    <div class="input-group" id="inputContainer"></div>
+    <div class="note" id="inputNote"></div>
+  </div>
+
+  <div class="bottom">
+    <button class="secondary" id="backBtn" type="button">Back</button>
+    <button class="primary" id="nextBtn" type="button">Next</button>
+  </div>
+
+</div>
+
+<script>
+const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules")) || {};
+
+const steps = [
+  {
+    key: "accountType",
+    title: "What type of account are you trading?",
+    helper: "Choose the account type the system should protect and evaluate.",
+    type: "radio",
+    options: ["Personal Account", "Evaluation Account", "Funded Account"]
+  },
+  {
+    key: "propFirmType",
+    title: "What type of prop firm account is it?",
+    helper: "This only applies to evaluation or funded accounts.",
+    type: "radio",
+    options: ["Futures Prop Firm", "Forex Prop Firm", "Stocks / Options Evaluation"],
+    showIf: data => data.accountType === "Evaluation Account" || data.accountType === "Funded Account"
+  },
+  {
+    key: "dailyLossLimit",
+    title: "What is the maximum daily loss limit for this account?",
+    helper: "Enter the maximum daily loss amount allowed by your account rules.",
+    type: "money"
+  },
+  {
+    key: "maxDrawdown",
+    title: "What is the maximum drawdown for this account?",
+    helper: "Enter the total drawdown limit for this account.",
+    type: "money"
+  },
+  {
+    key: "trailingDrawdownRule",
+    title: "Does this account have a trailing drawdown rule?",
+    helper: "This helps the system understand how your drawdown limit behaves.",
+    type: "radio",
+    options: ["Yes", "No", "I'm not sure"]
+  },
+  {
+    key: "profitTarget",
+    title: "What is the profit target for this account?",
+    helper: "Enter the target amount required by the account or challenge.",
+    type: "money"
+  },
+  {
+    key: "maxContractsOrLotSize",
+    title: "What is the maximum number of contracts or lot size allowed for this account?",
+    helper: "Enter the maximum size allowed under your account rules.",
+    type: "number"
+  },
+  {
+    key: "consistencyRule",
+    title: "Does this account have a consistency rule?",
+    helper: "Some firms restrict how much of your performance can come from a single day or trade.",
+    type: "radio",
+    options: ["Yes", "No", "I'm not sure"]
+  },
+  {
+    key: "minimumTradingDaysRequired",
+    title: "Is there a minimum number of trading days required to pass this account?",
+    helper: "Some evaluations require a minimum number of active trading days.",
+    type: "radio",
+    options: ["Yes", "No", "I'm not sure"]
+  },
+  {
+    key: "minimumTradingDaysCount",
+    title: "How many minimum trading days are required?",
+    helper: "Enter the minimum number of days required to pass.",
+    type: "number",
+    showIf: data => data.minimumTradingDaysRequired === "Yes"
+  },
+  {
+    key: "riskPerTradeMode",
+    title: "How do you define your risk per trade?",
+    helper: "Choose how you measure your per-trade risk.",
+    type: "radio",
+    options: ["Percentage of account", "Fixed dollar amount"]
+  },
+  {
+    key: "riskPerTradeValue",
+    title: "What is your risk per trade?",
+    helper: "Enter the exact value you use for each trade.",
+    type: "conditionalRiskValue"
+  },
+  {
+    key: "maxTradesPerDay",
+    title: "What is the maximum number of trades you allow yourself per day?",
+    helper: "This helps the system detect overtrading and protect discipline.",
+    type: "number"
+  },
+  {
+    key: "drawdownWarningBuffer",
+    title: "How close to your maximum drawdown should Trade Guardian warn you?",
+    helper: "Enter the amount of safety buffer you want before reaching your full drawdown limit.",
+    type: "money"
+  },
+  {
+    key: "stopAfterConsecutiveLosses",
+    title: "After how many consecutive losing trades should you stop trading for the day?",
+    helper: "This helps the system detect losing streaks and prevent revenge trading.",
+    type: "number"
+  },
+  {
+    key: "maxOpenTradesAtSameTime",
+    title: "What is the maximum number of trades you allow open at the same time?",
+    helper: "Set your maximum simultaneous open positions.",
+    type: "number"
+  },
+  {
+    key: "maxTotalRiskAcrossOpenTrades",
+    title: "What is the maximum total risk you allow across all open trades at the same time?",
+    helper: "Enter the total combined risk allowed across all live positions.",
+    type: "money"
+  },
+  {
+    key: "minimumRiskRewardRatio",
+    title: "What is the minimum risk-to-reward ratio you require before entering a trade?",
+    helper: "Example: enter 2 if your minimum acceptable ratio is 1:2.",
+    type: "number"
+  },
+  {
+    key: "maxSingleTradeProfitPercentOfDailyTarget",
+    title: "What is the maximum percentage of your daily profit target that can come from a single trade?",
+    helper: "This helps the system maintain consistency and avoid overdependence on one trade.",
+    type: "percent"
+  },
+  {
+    key: "minimumTimeBetweenTradesMinutes",
+    title: "What is the minimum time you require between closing one trade and opening the next trade?",
+    helper: "Enter the minimum cooldown time in minutes.",
+    type: "number",
+    note: "Minutes"
+  },
+  {
+    key: "maxDifferentInstrumentsPerDay",
+    title: "How many different instruments do you allow yourself to trade in a single day?",
+    helper: "This helps prevent strategy hopping and keeps execution consistent.",
+    type: "number"
+  },
+  {
+    key: "maxDailyAccountRiskPercent",
+    title: "What is the maximum percentage of your account you are willing to risk in a single day?",
+    helper: "Enter the maximum daily risk as a percentage of your account.",
+    type: "percent"
+  }
+];
+
+let visibleSteps = [];
+let stepIndex = 0;
+
+const titleEl = document.getElementById("questionTitle");
+const helperEl = document.getElementById("helperText");
+const inputContainer = document.getElementById("inputContainer");
+const progressFill = document.getElementById("progressFill");
+const stepLabel = document.getElementById("stepLabel");
+const nextBtn = document.getElementById("nextBtn");
+const backBtn = document.getElementById("backBtn");
+const inputNote = document.getElementById("inputNote");
+
+function rebuildVisibleSteps() {
+  visibleSteps = steps.filter(step => !step.showIf || step.showIf(accountRules));
+  if (stepIndex >= visibleSteps.length) stepIndex = visibleSteps.length - 1;
+  if (stepIndex < 0) stepIndex = 0;
+}
+
+function renderStep() {
+  rebuildVisibleSteps();
+  const step = visibleSteps[stepIndex];
+
+  titleEl.textContent = step.title;
+  helperEl.textContent = step.helper || "";
+  inputContainer.innerHTML = "";
+  inputNote.textContent = step.note || "";
+
+  if (step.type === "number") {
+    inputContainer.innerHTML = `
+      <input class="text-input" id="inputField" type="number" step="any" min="0" value="${accountRules[step.key] || ""}">
+    `;
+  }
+
+  if (step.type === "money") {
+    inputContainer.innerHTML = `
+      <div class="inline-prefix">
+        <div class="prefix-box">$</div>
+        <input class="text-input" id="inputField" type="number" step="any" min="0" value="${accountRules[step.key] || ""}">
+      </div>
+    `;
+  }
+
+  if (step.type === "percent") {
+    inputContainer.innerHTML = `
+      <div class="inline-prefix">
+        <div class="prefix-box">%</div>
+        <input class="text-input" id="inputField" type="number" step="any" min="0" value="${accountRules[step.key] || ""}">
+      </div>
+    `;
+  }
+
+  if (step.type === "radio") {
+    const currentValue = accountRules[step.key] || "";
+    inputContainer.innerHTML = `<div class="options">
+      ${step.options.map(option => `
+        <div class="option-card radio ${currentValue === option ? "selected" : ""}" data-type="radio" data-value="${option}">
+          <div class="option-indicator"></div>
+          <div class="option-label">${option}</div>
+        </div>
+      `).join("")}
+    </div>`;
+    attachOptionEvents();
+  }
+
+  if (step.type === "conditionalRiskValue") {
+    const mode = accountRules.riskPerTradeMode;
+    const currentValue = accountRules[step.key] || "";
+
+    if (mode === "Percentage of account") {
+      inputContainer.innerHTML = `
+        <div class="inline-prefix">
+          <div class="prefix-box">%</div>
+          <input class="text-input" id="inputField" type="number" step="any" min="0" value="${currentValue}">
+        </div>
+      `;
+      inputNote.textContent = "Example: enter 1 for 1%";
+    } else {
+      inputContainer.innerHTML = `
+        <div class="inline-prefix">
+          <div class="prefix-box">$</div>
+          <input class="text-input" id="inputField" type="number" step="any" min="0" value="${currentValue}">
+        </div>
+      `;
+      inputNote.textContent = "Fixed dollar amount per trade";
+    }
+  }
+
+  stepLabel.textContent = `Step ${stepIndex + 1} / ${visibleSteps.length}`;
+  progressFill.style.width = `${((stepIndex + 1) / visibleSteps.length) * 100}%`;
+
+  backBtn.disabled = stepIndex === 0;
+  nextBtn.textContent = stepIndex === visibleSteps.length - 1 ? "Continue" : "Next";
+}
+
+function attachOptionEvents() {
+  const cards = inputContainer.querySelectorAll(".option-card");
+
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      cards.forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+    });
+  });
+}
+
+function saveAnswer() {
+  const step = visibleSteps[stepIndex];
+
+  if (["number", "money", "percent", "conditionalRiskValue"].includes(step.type)) {
+    const value = document.getElementById("inputField").value.trim();
+    accountRules[step.key] = value;
+  }
+
+  if (step.type === "radio") {
+    const selected = inputContainer.querySelector(".option-card.selected");
+    accountRules[step.key] = selected ? selected.dataset.value : "";
+  }
+
+  localStorage.setItem("tradeGuardianAccountRules", JSON.stringify(accountRules));
+}
+
+function validateStep() {
+  const step = visibleSteps[stepIndex];
+
+  if (["number", "money", "percent", "conditionalRiskValue"].includes(step.type)) {
+    const value = document.getElementById("inputField").value.trim();
+    return value.length > 0;
+  }
+
+  if (step.type === "radio") {
+    return !!inputContainer.querySelector(".option-card.selected");
+  }
+
+  return true;
+}
+
+nextBtn.addEventListener("click", () => {
+  if (!validateStep()) {
+    alert("Please complete this step before continuing.");
+    return;
+  }
+
+  saveAnswer();
+
+  if (stepIndex < visibleSteps.length - 1) {
+    stepIndex++;
+    renderStep();
+  } else {
+    console.log("ACCOUNT RULES COMPLETE", accountRules);
+    localStorage.setItem("tradeGuardianAccountRules", JSON.stringify(accountRules));
+    alert("Account Rules Setup completed. Next step: Strategy Profile Setup.");
+  }
+});
+
+backBtn.addEventListener("click", () => {
+  if (stepIndex > 0) {
+    stepIndex--;
+    renderStep();
+  }
+});
+
+renderStep();
+</script>
+
+</body>
+</html>
