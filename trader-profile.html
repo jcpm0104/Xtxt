@@ -11,143 +11,299 @@
 
 <style>
 :root{
---bg:#08111f;
---panel:rgba(255,255,255,.04);
---line:rgba(255,255,255,.08);
---text:#eaf1ff;
---muted:#97a7c0;
---blue:#2f6bff;
---radius:24px;
---max:860px;
---shadow:0 24px 60px rgba(0,0,0,.34);
+  --bg:#08111f;
+  --panel:rgba(255,255,255,.04);
+  --line:rgba(255,255,255,.08);
+  --line-strong:rgba(255,255,255,.14);
+  --text:#eaf1ff;
+  --muted:#97a7c0;
+  --blue:#2f6bff;
+  --blue-soft:#79a3ff;
+  --radius:24px;
+  --max:860px;
+  --shadow:0 24px 60px rgba(0,0,0,.34);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
 
 body{
-font-family:'Inter',system-ui,sans-serif;
-background:
-radial-gradient(circle at top, rgba(47,107,255,.15), transparent 35%),
-#08111f;
-color:var(--text);
-display:flex;
-align-items:center;
-justify-content:center;
-min-height:100vh;
-padding:20px;
+  font-family:'Inter',system-ui,sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(47,107,255,.15), transparent 35%),
+    #08111f;
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:20px;
 }
 
 .container{
-width:min(var(--max),100%);
-background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-border:1px solid var(--line);
-border-radius:var(--radius);
-padding:36px 28px;
-box-shadow:var(--shadow);
-display:flex;
-flex-direction:column;
-min-height:560px;
+  width:min(var(--max),100%);
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  border:1px solid var(--line);
+  border-radius:28px;
+  padding:32px 28px 24px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  min-height:640px;
+  overflow:hidden;
 }
 
 .topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.step-text{
+  font-size:14px;
+  color:#dbe7ff;
+  font-weight:700;
 }
 
 .progress{
-width:100%;
-height:10px;
-background:#162337;
-border-radius:999px;
-overflow:hidden;
-margin-bottom:20px;
+  width:100%;
+  height:10px;
+  background:#162337;
+  border-radius:999px;
+  overflow:hidden;
+  margin-bottom:30px;
 }
 
 .progress-fill{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,var(--blue),#79a3ff);
-transition:width .35s ease;
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--blue),var(--blue-soft));
+  transition:width .35s ease;
 }
 
 .question{
-flex:1;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
 }
 
 h1{
-font-size:32px;
-margin-bottom:16px;
+  font-size:clamp(32px, 6vw, 58px);
+  line-height:1.05;
+  letter-spacing:-.04em;
+  margin-bottom:14px;
+  max-width:720px;
+}
+
+.helper{
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.6;
+  max-width:620px;
+  margin-bottom:22px;
 }
 
 .input-group{
-margin-top:18px;
-width:100%;
-max-width:400px;
+  margin-top:8px;
+  width:100%;
+  max-width:560px;
 }
 
-input,select{
-width:100%;
-height:48px;
-border-radius:10px;
-border:1px solid var(--line);
-background:#0c1728;
-color:white;
-padding:0 14px;
-font-size:15px;
+.text-input,
+.select-input{
+  width:100%;
+  height:54px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#0c1728;
+  color:white;
+  padding:0 16px;
+  font-size:16px;
+  outline:none;
+}
+
+.text-input:focus,
+.select-input:focus{
+  border-color:rgba(47,107,255,.65);
+  box-shadow:0 0 0 3px rgba(47,107,255,.14);
+}
+
+.dual-inputs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
 }
 
 .options{
-display:flex;
-flex-direction:column;
-gap:10px;
-margin-top:10px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-top:8px;
+  width:100%;
 }
 
-label{
-background:#0c1728;
-border:1px solid var(--line);
-padding:10px;
-border-radius:8px;
-cursor:pointer;
+.option-card{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:14px;
+  width:100%;
+  min-height:58px;
+  padding:14px 16px;
+  border-radius:16px;
+  background:#0c1728;
+  border:1px solid var(--line);
+  color:var(--text);
+  cursor:pointer;
+  text-align:left;
+  transition:.2s ease;
+  user-select:none;
+}
+
+.option-card:hover{
+  border-color:var(--line-strong);
+  background:#0e1b30;
+}
+
+.option-card.selected{
+  border-color:rgba(47,107,255,.7);
+  background:linear-gradient(180deg, rgba(47,107,255,.16), rgba(47,107,255,.08));
+  box-shadow:0 0 0 1px rgba(47,107,255,.18) inset;
+}
+
+.option-indicator{
+  width:24px;
+  height:24px;
+  flex:0 0 24px;
+  border-radius:999px;
+  border:2px solid rgba(255,255,255,.22);
+  display:grid;
+  place-items:center;
+  transition:.2s ease;
+}
+
+.option-card.checkbox .option-indicator{
+  border-radius:8px;
+}
+
+.option-card.selected .option-indicator{
+  border-color:var(--blue-soft);
+  background:rgba(47,107,255,.22);
+}
+
+.option-card.selected .option-indicator::after{
+  content:"";
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:#fff;
+}
+
+.option-card.checkbox.selected .option-indicator::after{
+  width:11px;
+  height:11px;
+  border-radius:3px;
+}
+
+.option-label{
+  font-size:17px;
+  font-weight:600;
+  line-height:1.35;
+  word-break:break-word;
 }
 
 .bottom{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-top:24px;
-flex-wrap:wrap;
-gap:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:26px;
+  gap:14px;
+  flex-wrap:wrap;
 }
 
 button{
-height:46px;
-border:none;
-border-radius:10px;
-padding:0 18px;
-font-weight:700;
-cursor:pointer;
+  min-height:50px;
+  border:none;
+  border-radius:14px;
+  padding:0 20px;
+  font-weight:700;
+  font-size:15px;
+  cursor:pointer;
+  transition:.2s ease;
 }
 
 .primary{
-background:linear-gradient(180deg,#4d82ff,var(--blue));
-color:white;
+  background:linear-gradient(180deg,#4d82ff,var(--blue));
+  color:white;
+  min-width:128px;
+}
+
+.primary:hover{
+  filter:brightness(1.05);
 }
 
 .secondary{
-background:rgba(255,255,255,.05);
-color:white;
-border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:white;
+  border:1px solid var(--line);
+  min-width:110px;
 }
 
-.hidden{display:none;}
+.secondary:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.secondary:disabled,
+.primary:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+@media (max-width: 720px){
+  .container{
+    padding:24px 18px 18px;
+    min-height:620px;
+    border-radius:24px;
+  }
+
+  .helper{
+    font-size:15px;
+    margin-bottom:18px;
+  }
+
+  .input-group{
+    max-width:100%;
+  }
+
+  .dual-inputs{
+    grid-template-columns:1fr;
+  }
+
+  .option-card{
+    min-height:56px;
+    padding:12px 14px;
+    gap:12px;
+  }
+
+  .option-label{
+    font-size:16px;
+  }
+
+  .bottom{
+    flex-direction:row;
+    justify-content:space-between;
+  }
+
+  .secondary,
+  .primary{
+    min-width:104px;
+  }
+}
 </style>
 </head>
 
@@ -155,136 +311,248 @@ border:1px solid var(--line);
 
 <div class="container">
 
-<div class="topbar">
-<div id="stepLabel">Step 1 / 22</div>
-</div>
+  <div class="topbar">
+    <div class="step-text" id="stepLabel">Step 1 / 21</div>
+  </div>
 
-<div class="progress">
-<div class="progress-fill" id="progressFill"></div>
-</div>
+  <div class="progress">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
 
-<div class="question">
-<h1 id="questionTitle"></h1>
+  <div class="question">
+    <h1 id="questionTitle"></h1>
+    <div class="helper" id="helperText"></div>
+    <div class="input-group" id="inputContainer"></div>
+  </div>
 
-<div class="input-group" id="inputContainer"></div>
-
-</div>
-
-<div class="bottom">
-<button class="secondary" id="backBtn">Back</button>
-<button class="primary" id="nextBtn">Next</button>
-</div>
+  <div class="bottom">
+    <button class="secondary" id="backBtn" type="button">Back</button>
+    <button class="primary" id="nextBtn" type="button">Next</button>
+  </div>
 
 </div>
 
 <script>
-
 const traderProfile = {};
 
 const steps = [
+  { key:"fullName", title:"What is your full name?", helper:"Enter your first and last name to create your trader profile.", type:"fullname" },
 
-{key:"firstName", title:"What is your first name?", type:"text"},
-{key:"lastName", title:"What is your last name?", type:"text"},
-{key:"timezone", title:"Select your time zone", type:"text"},
-{key:"experience", title:"Select your experience level", type:"radio", options:["Beginner","Intermediate","Advanced"]},
-{key:"markets", title:"Which markets do you trade?", type:"checkbox", options:["Futures","Forex","Stocks","Crypto","Options"]},
-{key:"instrument", title:"What is your primary instrument?", type:"text"},
-{key:"style", title:"Select your trading style", type:"radio", options:["Scalping","Intraday","Swing Trading"]},
-{key:"overnight", title:"Do you hold positions overnight?", type:"radio", options:["Yes","No"]},
-{key:"session", title:"Primary trading session", type:"radio", options:["London","New York","Asia","Custom"]},
-{key:"platforms", title:"Trading platforms used", type:"checkbox", options:["NinjaTrader","Tradovate","Rithmic","CQG","TradingView","MetaTrader 4","MetaTrader 5","Interactive Brokers","Binance","Coinbase"]},
-{key:"broker", title:"Broker / Account provider", type:"text"},
-{key:"propfirm", title:"Are you trading with a prop firm?", type:"radio", options:["Yes","No"]},
-{key:"multiAccounts", title:"Do you trade multiple accounts?", type:"radio", options:["Yes","No"]},
-{key:"objectives", title:"Trading objectives", type:"checkbox", options:["Pass evaluation","Protect funded account","Improve discipline","Reduce emotional trading","Increase consistency","Grow personal account"]},
-{key:"days", title:"Trading days", type:"checkbox", options:["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]},
-{key:"execution", title:"Trading execution type", type:"radio", options:["Manual Trading Only","Automated Trading","Both Manual and Automated"]},
-{key:"replication", title:"Do you replicate trades across accounts?", type:"radio", options:["Yes","No"]},
-{key:"journaling", title:"Do you use external journaling tools?", type:"radio", options:["Yes","No"]},
-{key:"alerts", title:"Receive real-time alerts?", type:"radio", options:["Yes","No"]},
-{key:"alertMethod", title:"Alert delivery method", type:"radio", options:["In-App Notifications","Email Alerts","Mobile Push Notifications","All of the above"]},
-{key:"protective", title:"Allow Trade Guardian to pause trading if rules break?", type:"radio", options:["Yes","No"]},
-{key:"autoJournal", title:"Automatically record all trades?", type:"radio", options:["Yes","No"]}
+  { key:"timezone", title:"Select your time zone", helper:"Choose the time zone that matches your normal trading schedule.", type:"select", options:[
+    "America/New_York (EST/EDT)",
+    "America/Chicago (CST/CDT)",
+    "America/Denver (MST/MDT)",
+    "America/Los_Angeles (PST/PDT)",
+    "Europe/London",
+    "Europe/Madrid",
+    "UTC"
+  ]},
 
+  { key:"experience", title:"Select your experience level", helper:"Choose the level that best matches your trading experience.", type:"radio", options:["Beginner","Intermediate","Advanced"] },
+  { key:"markets", title:"Which markets do you trade?", helper:"Select all the markets that apply to you.", type:"checkbox", options:["Futures","Forex","Stocks","Crypto","Options"] },
+  { key:"instrument", title:"What is your primary instrument?", helper:"Example: MNQ, NQ, ES, BTCUSD, EURUSD, Gold.", type:"text" },
+  { key:"style", title:"Select your trading style", helper:"Choose the style that best describes your trading approach.", type:"radio", options:["Scalping","Intraday","Swing Trading"] },
+  { key:"overnight", title:"Do you hold positions overnight?", helper:"This helps the system understand your exposure profile.", type:"radio", options:["Yes","No"] },
+  { key:"session", title:"Primary trading session", helper:"Choose the main session you trade most often.", type:"radio", options:["London","New York","Asia","Custom"] },
+  { key:"platforms", title:"Trading platforms used", helper:"Select all the platforms you actively use.", type:"checkbox", options:[
+    "NinjaTrader","Tradovate","Rithmic","CQG","Trading Technologies","Interactive Brokers",
+    "TradeStation","Alpaca","MetaTrader 4","MetaTrader 5","cTrader","TradingView",
+    "Sierra Chart","MultiCharts","Bookmap","Binance","Coinbase","Kraken","Gemini"
+  ]},
+  { key:"broker", title:"Broker / account provider", helper:"Type the broker, provider, or account source you trade through.", type:"text" },
+  { key:"propfirm", title:"Are you trading with a prop firm?", helper:"This helps us activate prop-firm-specific protection logic later.", type:"radio", options:["Yes","No"] },
+  { key:"multiAccounts", title:"Do you trade multiple accounts?", helper:"Select yes if you operate more than one account at the same time.", type:"radio", options:["Yes","No"] },
+  { key:"objectives", title:"Trading objectives", helper:"Select all the goals you want Trade Guardian to support.", type:"checkbox", options:[
+    "Pass evaluation","Protect funded account","Improve discipline","Reduce emotional trading",
+    "Increase consistency","Grow personal account"
+  ]},
+  { key:"days", title:"Trading days", helper:"Select the days you normally trade.", type:"checkbox", options:[
+    "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"
+  ]},
+  { key:"execution", title:"Trading execution type", helper:"Choose how your trades are primarily executed.", type:"radio", options:[
+    "Manual Trading Only","Automated Trading","Both Manual and Automated"
+  ]},
+  { key:"replication", title:"Do you replicate trades across accounts?", helper:"This helps the system understand duplicated exposure.", type:"radio", options:["Yes","No"] },
+  { key:"journaling", title:"Do you use external journaling tools?", helper:"This helps prepare future integrations and workflow imports.", type:"radio", options:["Yes","No"] },
+  { key:"alerts", title:"Receive real-time alerts?", helper:"Choose whether you want the system to warn you while trading.", type:"radio", options:["Yes","No"] },
+  { key:"alertMethod", title:"Alert delivery method", helper:"Choose your preferred alert channel.", type:"radio", options:[
+    "In-App Notifications","Email Alerts","Mobile Push Notifications","All of the above"
+  ]},
+  { key:"protective", title:"Allow Trade Guardian to pause trading if rules break?", helper:"This enables future protective controls when critical rules are violated.", type:"radio", options:["Yes","No"] },
+  { key:"autoJournal", title:"Automatically record all trades?", helper:"This enables future automated journaling and performance analysis.", type:"radio", options:["Yes","No"] }
 ];
 
 let stepIndex = 0;
 
-const title = document.getElementById("questionTitle");
+const titleEl = document.getElementById("questionTitle");
+const helperEl = document.getElementById("helperText");
 const inputContainer = document.getElementById("inputContainer");
 const progressFill = document.getElementById("progressFill");
 const stepLabel = document.getElementById("stepLabel");
+const nextBtn = document.getElementById("nextBtn");
+const backBtn = document.getElementById("backBtn");
 
 function renderStep(){
+  const step = steps[stepIndex];
+  titleEl.textContent = step.title;
+  helperEl.textContent = step.helper || "";
+  inputContainer.innerHTML = "";
 
-const step = steps[stepIndex];
-title.textContent = step.title;
-inputContainer.innerHTML="";
+  if(step.type === "fullname"){
+    const firstName = traderProfile.firstName || "";
+    const lastName = traderProfile.lastName || "";
+    inputContainer.innerHTML = `
+      <div class="dual-inputs">
+        <input class="text-input" id="firstNameField" type="text" placeholder="First name" value="${firstName}">
+        <input class="text-input" id="lastNameField" type="text" placeholder="Last name" value="${lastName}">
+      </div>
+    `;
+  }
 
-if(step.type==="text"){
-inputContainer.innerHTML=`<input id="inputField" type="text">`;
+  if(step.type === "text"){
+    inputContainer.innerHTML = `
+      <input class="text-input" id="inputField" type="text" value="${traderProfile[step.key] || ""}">
+    `;
+  }
+
+  if(step.type === "select"){
+    const currentValue = traderProfile[step.key] || "";
+    inputContainer.innerHTML = `
+      <select class="select-input" id="inputField">
+        <option value="">Select your time zone</option>
+        ${step.options.map(option => `
+          <option value="${option}" ${currentValue === option ? "selected" : ""}>${option}</option>
+        `).join("")}
+      </select>
+    `;
+  }
+
+  if(step.type === "radio"){
+    const currentValue = traderProfile[step.key] || "";
+    inputContainer.innerHTML = `<div class="options">
+      ${step.options.map(option => `
+        <div class="option-card radio ${currentValue === option ? "selected" : ""}" data-type="radio" data-value="${option}">
+          <div class="option-indicator"></div>
+          <div class="option-label">${option}</div>
+        </div>
+      `).join("")}
+    </div>`;
+    attachOptionEvents();
+  }
+
+  if(step.type === "checkbox"){
+    const currentValues = traderProfile[step.key] || [];
+    inputContainer.innerHTML = `<div class="options">
+      ${step.options.map(option => `
+        <div class="option-card checkbox ${currentValues.includes(option) ? "selected" : ""}" data-type="checkbox" data-value="${option}">
+          <div class="option-indicator"></div>
+          <div class="option-label">${option}</div>
+        </div>
+      `).join("")}
+    </div>`;
+    attachOptionEvents();
+  }
+
+  stepLabel.textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+  progressFill.style.width = `${((stepIndex + 1) / steps.length) * 100}%`;
+  backBtn.disabled = stepIndex === 0;
+  nextBtn.textContent = stepIndex === steps.length - 1 ? "Continue" : "Next";
 }
 
-if(step.type==="radio"){
-step.options.forEach(o=>{
-inputContainer.innerHTML+=`<label><input type="radio" name="option" value="${o}"> ${o}</label>`;
-});
-}
+function attachOptionEvents(){
+  const cards = inputContainer.querySelectorAll(".option-card");
 
-if(step.type==="checkbox"){
-step.options.forEach(o=>{
-inputContainer.innerHTML+=`<label><input type="checkbox" value="${o}"> ${o}</label>`;
-});
-}
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      const type = card.dataset.type;
 
-stepLabel.textContent=`Step ${stepIndex+1} / ${steps.length}`;
-progressFill.style.width=`${((stepIndex+1)/steps.length)*100}%`;
+      if(type === "radio"){
+        cards.forEach(c => c.classList.remove("selected"));
+        card.classList.add("selected");
+      }
 
+      if(type === "checkbox"){
+        card.classList.toggle("selected");
+      }
+    });
+  });
 }
 
 function saveAnswer(){
+  const step = steps[stepIndex];
 
-const step=steps[stepIndex];
+  if(step.type === "fullname"){
+    traderProfile.firstName = document.getElementById("firstNameField").value.trim();
+    traderProfile.lastName = document.getElementById("lastNameField").value.trim();
+  }
 
-if(step.type==="text"){
-traderProfile[step.key]=document.getElementById("inputField").value;
+  if(step.type === "text" || step.type === "select"){
+    const value = document.getElementById("inputField").value.trim();
+    traderProfile[step.key] = value;
+  }
+
+  if(step.type === "radio"){
+    const selected = inputContainer.querySelector(".option-card.selected");
+    traderProfile[step.key] = selected ? selected.dataset.value : "";
+  }
+
+  if(step.type === "checkbox"){
+    const selected = [...inputContainer.querySelectorAll(".option-card.selected")].map(el => el.dataset.value);
+    traderProfile[step.key] = selected;
+  }
 }
 
-if(step.type==="radio"){
-const selected=document.querySelector("input[name='option']:checked");
-if(selected) traderProfile[step.key]=selected.value;
+function validateStep(){
+  const step = steps[stepIndex];
+
+  if(step.type === "fullname"){
+    const firstName = document.getElementById("firstNameField").value.trim();
+    const lastName = document.getElementById("lastNameField").value.trim();
+    return firstName.length > 0 && lastName.length > 0;
+  }
+
+  if(step.type === "text" || step.type === "select"){
+    const value = document.getElementById("inputField").value.trim();
+    return value.length > 0;
+  }
+
+  if(step.type === "radio"){
+    return !!inputContainer.querySelector(".option-card.selected");
+  }
+
+  if(step.type === "checkbox"){
+    return inputContainer.querySelectorAll(".option-card.selected").length > 0;
+  }
+
+  return true;
 }
 
-if(step.type==="checkbox"){
-const selected=[...document.querySelectorAll("input[type='checkbox']:checked")].map(el=>el.value);
-traderProfile[step.key]=selected;
-}
+nextBtn.addEventListener("click", () => {
+  if(!validateStep()){
+    alert("Please complete this step before continuing.");
+    return;
+  }
 
-}
+  saveAnswer();
 
-document.getElementById("nextBtn").onclick=()=>{
+  if(stepIndex < steps.length - 1){
+    stepIndex++;
+    renderStep();
+  } else {
+    console.log("PROFILE COMPLETE", traderProfile);
+    localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(traderProfile));
+    alert("Trader profile completed. Next step: Account Setup.");
+  }
+});
 
-saveAnswer();
+backBtn.addEventListener("click", () => {
+  if(stepIndex > 0){
+    stepIndex--;
+    renderStep();
+  }
+});
 
-if(stepIndex<steps.length-1){
-stepIndex++;
 renderStep();
-}else{
-console.log("PROFILE COMPLETE",traderProfile);
-alert("Trader profile completed. Next step: Account Setup.");
-}
-
-}
-
-document.getElementById("backBtn").onclick=()=>{
-if(stepIndex>0){
-stepIndex--;
-renderStep();
-}
-}
-
-renderStep();
-
 </script>
 
 </body>
