@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Custom Trading Plan — Trade Guardian</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+--bg:#08111f;
+--panel:rgba(255,255,255,.04);
+--line:rgba(255,255,255,.08);
+--text:#eaf1ff;
+--muted:#97a7c0;
+--blue:#2f6bff;
+--radius:22px;
+--max:720px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:'Inter',system-ui,sans-serif;
+background:
+radial-gradient(circle at top, rgba(47,107,255,.15), transparent 35%),
+#08111f;
+color:var(--text);
+display:flex;
+align-items:center;
+justify-content:center;
+min-height:100vh;
+padding:20px;
+}
+
+.container{
+width:min(var(--max),100%);
+background:rgba(255,255,255,.03);
+border:1px solid var(--line);
+border-radius:var(--radius);
+padding:40px 32px;
+text-align:center;
+}
+
+.logo{
+width:64px;
+height:64px;
+margin:0 auto 18px;
+border-radius:16px;
+display:grid;
+place-items:center;
+background:rgba(47,107,255,.15);
+border:1px solid rgba(255,255,255,.08);
+}
+
+h1{
+font-size:34px;
+margin-bottom:10px;
+}
+
+.subtitle{
+color:#dbe7ff;
+font-weight:600;
+margin-bottom:10px;
+}
+
+.desc{
+color:var(--muted);
+font-size:15px;
+margin-bottom:28px;
+}
+
+.plan-card{
+background:#0c1728;
+border:1px solid var(--line);
+border-radius:18px;
+padding:26px;
+text-align:left;
+margin-bottom:28px;
+}
+
+.plan-card h2{
+font-size:20px;
+margin-bottom:16px;
+}
+
+.plan-list{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.plan-item{
+display:flex;
+justify-content:space-between;
+font-size:15px;
+border-bottom:1px solid rgba(255,255,255,.06);
+padding-bottom:8px;
+}
+
+.label{
+color:#cfe0ff;
+}
+
+.value{
+color:white;
+font-weight:600;
+}
+
+button{
+height:50px;
+border-radius:12px;
+border:none;
+background:linear-gradient(180deg,#4d82ff,var(--blue));
+color:white;
+font-weight:700;
+font-size:16px;
+cursor:pointer;
+width:100%;
+}
+
+button:hover{
+filter:brightness(1.05);
+}
+
+.note{
+margin-top:16px;
+font-size:13px;
+color:var(--muted);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+<path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" fill="#2F6BFF"/>
+<path d="M8 13L10.2 10.5L12.4 12.1L16 8.2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</div>
+
+<h1>Your Custom Trading Plan</h1>
+
+<div class="subtitle">
+Trade Guardian System
+</div>
+
+<div class="desc">
+Review your personalized trading plan before activating it.
+</div>
+
+<div class="plan-card">
+
+<h2>Custom Plan Summary</h2>
+
+<div class="plan-list" id="planSummary">
+
+</div>
+
+</div>
+
+<button onclick="activatePlan()">
+Activate My Plan
+</button>
+
+<div class="note">
+Once activated, Trade Guardian will enforce these rules automatically.
+</div>
+
+</div>
+
+<script>
+
+const plan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan")) || {};
+
+const summary = document.getElementById("planSummary");
+
+function addItem(label,value){
+
+const row = document.createElement("div");
+row.className = "plan-item";
+
+row.innerHTML = `
+<span class="label">${label}</span>
+<span class="value">${value}</span>
+`;
+
+summary.appendChild(row);
+
+}
+
+if(plan.riskPerTradeValue){
+addItem("Risk per trade",
+plan.riskPerTradeValue.value + plan.riskPerTradeValue.unit
+);
+}
+
+if(plan.minimumRiskReward){
+addItem("Minimum Risk Reward",plan.minimumRiskReward);
+}
+
+if(plan.tradingSession){
+addItem("Trading Session",plan.tradingSession);
+}
+
+if(plan.tradingWindow){
+addItem("Trading Window",
+plan.tradingWindow.start + " - " + plan.tradingWindow.end
+);
+}
+
+if(plan.maxTradesPerDay){
+addItem("Max Trades Per Day",plan.maxTradesPerDay);
+}
+
+if(plan.maxOpenPositions){
+addItem("Max Open Positions",plan.maxOpenPositions);
+}
+
+if(plan.cooldownAfterTrade){
+addItem("Cooldown After Trade",plan.cooldownAfterTrade);
+}
+
+if(plan.maxConsecutiveLosingTrades){
+addItem("Max Consecutive Losses",plan.maxConsecutiveLosingTrades);
+}
+
+if(plan.maxLosingTradesPerDay){
+addItem("Max Losing Trades Per Day",plan.maxLosingTradesPerDay);
+}
+
+if(plan.maxTradesPerInstrument){
+addItem("Max Trades Per Instrument",plan.maxTradesPerInstrument);
+}
+
+if(plan.personalDailyRiskLimit?.enabled === "Yes, define my own daily risk limit"){
+addItem("Personal Daily Risk Limit",
+plan.personalDailyRiskLimit.value + plan.personalDailyRiskLimit.unit
+);
+}
+
+if(plan.maxTotalRiskAcrossOpenTrades){
+addItem("Total Open Risk Limit",
+plan.maxTotalRiskAcrossOpenTrades.value +
+plan.maxTotalRiskAcrossOpenTrades.unit
+);
+}
+
+if(plan.enforcementLevel){
+addItem("Guardian Enforcement",plan.enforcementLevel);
+}
+
+function activatePlan(){
+
+localStorage.setItem("tradeGuardianActivePlan",
+JSON.stringify(plan)
+);
+
+window.location.href = "guardian-dashboard.html";
+
+}
+
+</script>
+
+</body>
+</html>
