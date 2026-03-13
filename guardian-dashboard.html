@@ -208,6 +208,7 @@
       font-size:22px;
       font-weight:800;
       letter-spacing:-.03em;
+      word-break:break-word;
     }
 
     .hero-side{
@@ -249,6 +250,7 @@
       border-radius:999px;
       background:var(--green);
       box-shadow:0 0 12px rgba(46,212,122,.45);
+      flex:0 0 10px;
     }
 
     .copilot-message{
@@ -357,6 +359,7 @@
       font-weight:800;
       letter-spacing:-.04em;
       margin-top:10px;
+      word-break:break-word;
     }
 
     .stat-sub{
@@ -447,6 +450,7 @@
       font-size:22px;
       font-weight:800;
       letter-spacing:-.03em;
+      word-break:break-word;
     }
 
     .trade-footer{
@@ -485,6 +489,7 @@
       font-size:12px;
       font-weight:700;
       padding-top:2px;
+      flex:0 0 62px;
     }
 
     .feed-text{
@@ -580,9 +585,13 @@
       background:rgba(2,7,16,.72);
       backdrop-filter:blur(8px);
       display:none;
-      align-items:center;
+      align-items:flex-start;
       justify-content:center;
-      padding:20px;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        14px
+        max(18px, env(safe-area-inset-bottom));
+      overflow:auto;
       z-index:1000;
     }
 
@@ -591,26 +600,36 @@
     }
 
     .modal{
-      width:min(680px,100%);
+      width:min(720px,100%);
+      margin:auto;
       background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
       border:1px solid var(--line);
       border-radius:28px;
       box-shadow:var(--shadow);
-      padding:24px;
+      padding:20px;
+      max-height:calc(100dvh - 24px);
+      overflow:auto;
     }
 
     .modal-head{
+      position:sticky;
+      top:0;
+      z-index:5;
+      background:linear-gradient(180deg, rgba(8,17,31,.96), rgba(8,17,31,.88));
+      backdrop-filter:blur(10px);
+      padding-bottom:14px;
+      margin-bottom:16px;
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
       gap:16px;
-      margin-bottom:18px;
     }
 
     .modal-title{
-      font-size:28px;
+      font-size:clamp(26px, 6vw, 38px);
       font-weight:800;
       letter-spacing:-.04em;
+      line-height:1.02;
       margin-bottom:8px;
     }
 
@@ -631,12 +650,13 @@
       font-size:20px;
       cursor:pointer;
       border:1px solid var(--line);
+      flex:0 0 42px;
     }
 
     .platform-grid{
       display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:14px;
+      grid-template-columns:1fr;
+      gap:12px;
       margin-bottom:18px;
     }
 
@@ -674,10 +694,21 @@
     }
 
     .modal-actions{
+      position:sticky;
+      bottom:0;
+      background:linear-gradient(180deg, rgba(8,17,31,.75), rgba(8,17,31,.96));
+      backdrop-filter:blur(10px);
+      padding-top:12px;
       display:flex;
       justify-content:flex-end;
       gap:12px;
       flex-wrap:wrap;
+    }
+
+    @media (min-width: 900px){
+      .platform-grid{
+        grid-template-columns:1fr 1fr;
+      }
     }
 
     @media (max-width: 1200px){
@@ -696,10 +727,6 @@
       }
 
       .stats-grid{
-        grid-template-columns:1fr;
-      }
-
-      .platform-grid{
         grid-template-columns:1fr;
       }
     }
@@ -1037,7 +1064,7 @@
       <div>
         <div class="modal-title">Connect Trading Account</div>
         <div class="modal-copy">
-          Choose the platform where you execute your trades. This selection will be used later
+          Choose the platform where you execute your trades. This selection will later be used
           to start the live connection and feed account activity into Trade Guardian.
         </div>
       </div>
@@ -1047,32 +1074,62 @@
     <div class="platform-grid" id="platformGrid">
       <div class="platform-card" data-platform="NinjaTrader">
         <div class="platform-name">NinjaTrader</div>
-        <div class="platform-sub">Popular for futures trading and automated execution workflows.</div>
+        <div class="platform-sub">Top priority for futures traders and real-time order / position monitoring.</div>
       </div>
 
       <div class="platform-card" data-platform="Tradovate">
         <div class="platform-name">Tradovate</div>
-        <div class="platform-sub">Cloud-based futures platform with clean execution and easy access.</div>
-      </div>
-
-      <div class="platform-card" data-platform="MetaTrader">
-        <div class="platform-name">MetaTrader</div>
-        <div class="platform-sub">Common choice for forex and CFD traders.</div>
-      </div>
-
-      <div class="platform-card" data-platform="TradingView">
-        <div class="platform-name">TradingView</div>
-        <div class="platform-sub">Used for charting, alerts, and connected broker execution.</div>
+        <div class="platform-sub">Strong priority for cloud futures trading and API-friendly workflows.</div>
       </div>
 
       <div class="platform-card" data-platform="Rithmic">
         <div class="platform-name">Rithmic</div>
-        <div class="platform-sub">Professional futures routing and data infrastructure.</div>
+        <div class="platform-sub">Professional futures infrastructure with execution and order-report support.</div>
+      </div>
+
+      <div class="platform-card" data-platform="MetaTrader 5">
+        <div class="platform-name">MetaTrader 5</div>
+        <div class="platform-sub">Important for forex expansion and programmatic positions / order access.</div>
+      </div>
+
+      <div class="platform-card" data-platform="Interactive Brokers">
+        <div class="platform-name">Interactive Brokers</div>
+        <div class="platform-sub">Multi-asset priority with official APIs for accounts, positions, and orders.</div>
+      </div>
+
+      <div class="platform-card" data-platform="cTrader">
+        <div class="platform-name">cTrader</div>
+        <div class="platform-sub">Useful for forex and CFD traders with Open API support.</div>
+      </div>
+
+      <div class="platform-card" data-platform="CQG">
+        <div class="platform-name">CQG</div>
+        <div class="platform-sub">Mid-priority futures connectivity with position and order support.</div>
+      </div>
+
+      <div class="platform-card" data-platform="DXtrade">
+        <div class="platform-name">DXtrade</div>
+        <div class="platform-sub">Enterprise-style multi-asset platform with API ecosystem.</div>
+      </div>
+
+      <div class="platform-card" data-platform="Match-Trader">
+        <div class="platform-name">Match-Trader</div>
+        <div class="platform-sub">Broker-platform API option with account, orders, and positions support.</div>
+      </div>
+
+      <div class="platform-card" data-platform="Sierra Chart / Teton">
+        <div class="platform-name">Sierra Chart / Teton</div>
+        <div class="platform-sub">Advanced futures route, useful later in the roadmap.</div>
+      </div>
+
+      <div class="platform-card" data-platform="TradingView">
+        <div class="platform-name">TradingView</div>
+        <div class="platform-sub">Lower priority as a direct connector; usually broker-dependent rather than universal.</div>
       </div>
 
       <div class="platform-card" data-platform="Other Platform">
         <div class="platform-name">Other</div>
-        <div class="platform-sub">Choose this if your platform is not listed yet.</div>
+        <div class="platform-sub">For proprietary dashboards, custom bridges, or future integrations.</div>
       </div>
     </div>
 
@@ -1089,8 +1146,9 @@
   const selectedPlan = JSON.parse(localStorage.getItem("tradeGuardianSelectedPlan")) || {};
   const customPlan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan")) || {};
   const activePlan = JSON.parse(localStorage.getItem("tradeGuardianActivePlan")) || {};
+  const savedPlatform = localStorage.getItem("tradeGuardianSelectedPlatform") || "";
 
-  let selectedPlatform = "";
+  let selectedPlatform = savedPlatform;
 
   function setText(id, value){
     const el = document.getElementById(id);
@@ -1150,6 +1208,21 @@
     return `Your ${accountType.toLowerCase()} is configured. Trade Guardian is ready to monitor your ${session.toLowerCase()} session using a maximum of ${maxTrades} trades per day.`;
   }
 
+  function addAlert(title, copy, type = "safe"){
+    const alertList = document.getElementById("alertList");
+    const item = document.createElement("div");
+    item.className = `alert-item ${type}`;
+    item.innerHTML = `
+      <div class="alert-title">${title}</div>
+      <div class="alert-copy">${copy}</div>
+    `;
+    alertList.prepend(item);
+
+    while (alertList.children.length > 5) {
+      alertList.removeChild(alertList.lastElementChild);
+    }
+  }
+
   function renderDashboard(){
     const plan = getLoadedPlan();
     const planName = getPlanName(plan);
@@ -1170,7 +1243,7 @@
     setText("heroPlan", planName);
     setText("heroAccountType", accountRules.accountType || "—");
     setText("heroSession", "Inactive");
-    setText("heroConnection", "Not Connected");
+    setText("heroConnection", selectedPlatform || "Not Connected");
 
     setText("copilotMessage", getCopilotMessage(plan));
 
@@ -1202,15 +1275,18 @@
     setText("takeProfit", "—");
     setText("positionSize", "—");
 
-    setText("positionNote",
+    setText(
+      "positionNote",
       `Waiting for live broker/platform position data. Maximum open positions loaded: ${maxOpenPositions || 0}.`
     );
 
     setText("feedPlanLine", `${planName} is currently loaded as the active plan.`);
-    setText("feedAccountLine",
+    setText(
+      "feedAccountLine",
       `Account type: ${accountRules.accountType || "—"} • Account size: ${accountRules.accountSize || "—"}`
     );
-    setText("feedSessionLine",
+    setText(
+      "feedSessionLine",
       `Trading session configured: ${getSessionLabel()}${customPlan.tradingWindow ? ` • Window: ${customPlan.tradingWindow.start} - ${customPlan.tradingWindow.end}` : ""}`
     );
   }
@@ -1226,6 +1302,12 @@
     connectModal.classList.remove("show");
   }
 
+  function syncSelectedPlatformUI(){
+    platformCards.forEach(card => {
+      card.classList.toggle("selected", card.dataset.platform === selectedPlatform);
+    });
+  }
+
   platformCards.forEach(card => {
     card.addEventListener("click", () => {
       platformCards.forEach(c => c.classList.remove("selected"));
@@ -1234,7 +1316,11 @@
     });
   });
 
-  document.getElementById("connectBtn").addEventListener("click", openConnectModal);
+  document.getElementById("connectBtn").addEventListener("click", () => {
+    syncSelectedPlatformUI();
+    openConnectModal();
+  });
+
   document.getElementById("closeModalBtn").addEventListener("click", closeConnectModal);
   document.getElementById("cancelModalBtn").addEventListener("click", closeConnectModal);
 
@@ -1246,19 +1332,19 @@
 
     localStorage.setItem("tradeGuardianSelectedPlatform", selectedPlatform);
 
-    setText("heroConnection", `${selectedPlatform}`);
+    setText("heroConnection", selectedPlatform);
     setText("copilotStatus", "CONNECTION STARTED");
     setText("copilotMessage", `${selectedPlatform} selected. Account connection flow is ready to begin.`);
-    setText("copilotSub", "In the live product, the next step would open authentication and account linking for the selected platform.");
+    setText(
+      "copilotSub",
+      "In the live product, the next step would open authentication and account linking for the selected platform."
+    );
 
-    const alertList = document.getElementById("alertList");
-    const item = document.createElement("div");
-    item.className = "alert-item safe";
-    item.innerHTML = `
-      <div class="alert-title">Platform Selected</div>
-      <div class="alert-copy">${selectedPlatform} has been selected as the trading platform for live connection.</div>
-    `;
-    alertList.prepend(item);
+    addAlert(
+      "Platform Selected",
+      `${selectedPlatform} has been selected as the trading platform for live connection.`,
+      "safe"
+    );
 
     closeConnectModal();
   });
@@ -1295,6 +1381,7 @@
     window.location.href = "recommended-plans.html";
   });
 
+  syncSelectedPlatformUI();
   renderDashboard();
 </script>
 
