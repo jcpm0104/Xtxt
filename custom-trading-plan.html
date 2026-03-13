@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom Trading Plan — Trade Guardian</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#08111f;
+      --panel:rgba(255,255,255,.04);
+      --line:rgba(255,255,255,.08);
+      --line-strong:rgba(255,255,255,.14);
+      --text:#eaf1ff;
+      --muted:#97a7c0;
+      --blue:#2f6bff;
+      --blue-soft:#79a3ff;
+      --radius:24px;
+      --max:860px;
+      --shadow:0 24px 60px rgba(0,0,0,.34);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+
+    body{
+      font-family:'Inter',system-ui,sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(47,107,255,.15), transparent 35%),
+        #08111f;
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      padding:20px;
+    }
+
+    .container{
+      width:min(var(--max),100%);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:32px 28px 24px;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      min-height:640px;
+      overflow:hidden;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .step-text{
+      font-size:14px;
+      color:#dbe7ff;
+      font-weight:700;
+    }
+
+    .progress{
+      width:100%;
+      height:10px;
+      background:#162337;
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:30px;
+    }
+
+    .progress-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--blue),var(--blue-soft));
+      transition:width .35s ease;
+    }
+
+    .question{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+    }
+
+    h1{
+      font-size:clamp(30px, 5.2vw, 54px);
+      line-height:1.05;
+      letter-spacing:-.04em;
+      margin-bottom:14px;
+      max-width:760px;
+    }
+
+    .helper{
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.6;
+      max-width:650px;
+      margin-bottom:22px;
+    }
+
+    .input-group{
+      margin-top:8px;
+      width:100%;
+      max-width:560px;
+    }
+
+    .text-input,
+    .select-input,
+    .time-input{
+      width:100%;
+      height:54px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#0c1728;
+      color:white;
+      padding:0 16px;
+      font-size:16px;
+      outline:none;
+    }
+
+    .text-input:focus,
+    .select-input:focus,
+    .time-input:focus{
+      border-color:rgba(47,107,255,.65);
+      box-shadow:0 0 0 3px rgba(47,107,255,.14);
+    }
+
+    .dual-inputs{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .inline-unit{
+      display:grid;
+      grid-template-columns:1fr 150px;
+      gap:12px;
+    }
+
+    .options{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:8px;
+      width:100%;
+    }
+
+    .option-card{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:14px;
+      width:100%;
+      min-height:58px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:#0c1728;
+      border:1px solid var(--line);
+      color:var(--text);
+      cursor:pointer;
+      text-align:left;
+      transition:.2s ease;
+      user-select:none;
+    }
+
+    .option-card:hover{
+      border-color:var(--line-strong);
+      background:#0e1b30;
+    }
+
+    .option-card.selected{
+      border-color:rgba(47,107,255,.7);
+      background:linear-gradient(180deg, rgba(47,107,255,.16), rgba(47,107,255,.08));
+      box-shadow:0 0 0 1px rgba(47,107,255,.18) inset;
+    }
+
+    .option-indicator{
+      width:24px;
+      height:24px;
+      flex:0 0 24px;
+      border-radius:999px;
+      border:2px solid rgba(255,255,255,.22);
+      display:grid;
+      place-items:center;
+      transition:.2s ease;
+    }
+
+    .option-card.selected .option-indicator{
+      border-color:var(--blue-soft);
+      background:rgba(47,107,255,.22);
+    }
+
+    .option-card.selected .option-indicator::after{
+      content:"";
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:#fff;
+    }
+
+    .option-label{
+      font-size:17px;
+      font-weight:600;
+      line-height:1.35;
+      word-break:break-word;
+    }
+
+    .bottom{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:26px;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      min-height:50px;
+      border:none;
+      border-radius:14px;
+      padding:0 20px;
+      font-weight:700;
+      font-size:15px;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .primary{
+      background:linear-gradient(180deg,#4d82ff,var(--blue));
+      color:white;
+      min-width:128px;
+    }
+
+    .primary:hover{
+      filter:brightness(1.05);
+    }
+
+    .secondary{
+      background:rgba(255,255,255,.05);
+      color:white;
+      border:1px solid var(--line);
+      min-width:110px;
+    }
+
+    .secondary:hover{
+      background:rgba(255,255,255,.07);
+    }
+
+    .secondary:disabled,
+    .primary:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .note{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    @media (max-width: 720px){
+      .container{
+        padding:24px 18px 18px;
+        min-height:620px;
+        border-radius:24px;
+      }
+
+      .helper{
+        font-size:15px;
+        margin-bottom:18px;
+      }
+
+      .dual-inputs,
+      .inline-unit{
+        grid-template-columns:1fr;
+      }
+
+      .option-card{
+        min-height:56px;
+        padding:12px 14px;
+        gap:12px;
+      }
+
+      .option-label{
+        font-size:16px;
+      }
+
+      .secondary,
+      .primary{
+        min-width:104px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="topbar">
+    <div class="step-text" id="stepLabel">Step 1 / 13</div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="question">
+    <h1 id="questionTitle"></h1>
+    <div class="helper" id="helperText"></div>
+    <div class="input-group" id="inputContainer"></div>
+    <div class="note" id="inputNote"></div>
+  </div>
+
+  <div class="bottom">
+    <button class="secondary" id="backBtn" type="button">Back</button>
+    <button class="primary" id="nextBtn" type="button">Next</button>
+  </div>
+
+</div>
+
+<script>
+const customPlan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan")) || {};
+const selectedPlanMeta = JSON.parse(localStorage.getItem("tradeGuardianSelectedPlan")) || {};
+const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
+const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules")) || {};
+
+const sessionRanges = {
+  "Asian Session": { start: "19:00", end: "23:59" },
+  "London Session": { start: "03:00", end: "11:00" },
+  "New York Session": { start: "09:30", end: "16:00" }
+};
+
+const steps = [
+  {
+    key: "riskDefinitionMode",
+    title: "How do you want to define your risk per trade?",
+    helper: "Choose whether your plan should use a fixed dollar amount or a percentage of your account.",
+    type: "radio",
+    options: [
+      "Fixed dollar risk",
+      "Percentage of account"
+    ]
+  },
+  {
+    key: "riskPerTradeValue",
+    title: "What risk per trade do you want to use in your custom plan?",
+    helper: "Enter the exact risk value your plan should use for each trade.",
+    type: "unitInput",
+    note: "You can define this in dollars or percentage."
+  },
+  {
+    key: "minimumRiskReward",
+    title: "What is the minimum risk-to-reward ratio required before you take a trade?",
+    helper: "This helps your plan avoid low-quality setups.",
+    type: "radio",
+    options: [
+      "1 : 1",
+      "1 : 2",
+      "1 : 3 or higher"
+    ]
+  },
+  {
+    key: "maxConsecutiveLosingTrades",
+    title: "After how many consecutive losing trades should you stop trading for the day?",
+    helper: "This helps prevent revenge trading and protect your account.",
+    type: "number"
+  },
+  {
+    key: "tradingSession",
+    title: "Which trading session do you want your trading plan to focus on?",
+    helper: "Choose the main market session your plan should follow.",
+    type: "radio",
+    options: [
+      "Asian Session",
+      "London Session",
+      "New York Session"
+    ]
+  },
+  {
+    key: "tradingWindow",
+    title: "What trading hours do you want to allow within your selected session?",
+    helper: "Choose your exact start and end time inside the session you selected.",
+    type: "timeRange"
+  },
+  {
+    key: "actionAfterDailyLossLimit",
+    title: "What should the system do after you reach your daily loss limit?",
+    helper: "Choose how strict the system should be when you hit your daily loss threshold.",
+    type: "radio",
+    options: [
+      "Stop trading for the day",
+      "Pause trading temporarily",
+      "Allow trading but warn me"
+    ]
+  },
+  {
+    key: "actionAfterDailyProfitTarget",
+    title: "What should the system do after you reach your daily profit target?",
+    helper: "Choose how your plan should behave after hitting your target.",
+    type: "radio",
+    options: [
+      "Stop trading for the day",
+      "Allow one final trade only",
+      "Keep trading with warnings"
+    ]
+  },
+  {
+    key: "maxTradesPerDay",
+    title: "What is the maximum number of trades you want to allow per day?",
+    helper: "This protects your plan from overtrading.",
+    type: "number"
+  },
+  {
+    key: "cooldownAfterTrade",
+    title: "How long should the system enforce a cooldown after closing a trade?",
+    helper: "Choose the minimum wait time before a new trade can be opened.",
+    type: "radio",
+    options: [
+      "No cooldown",
+      "5 minute cooldown",
+      "15 minute cooldown"
+    ]
+  },
+  {
+    key: "maxOpenPositions",
+    title: "What is the maximum number of open positions allowed at the same time?",
+    helper: "This controls your total simultaneous exposure.",
+    type: "number"
+  },
+  {
+    key: "personalDailyRiskLimit",
+    title: "Do you want to define a personal daily risk limit for your trading plan?",
+    helper: "You can add an extra protection layer below your account rules.",
+    type: "dailyRiskLimit"
+  },
+  {
+    key: "maxTradesPerInstrument",
+    title: "Do you want to limit how many trades can be opened on the same instrument at the same time?",
+    helper: "This helps avoid stacking too much exposure on one market.",
+    type: "radio",
+    options: [
+      "Only one trade per instrument",
+      "Allow up to two trades per instrument",
+      "No limit"
+    ]
+  },
+  {
+    key: "maxLosingTradesPerDay",
+    title: "What is the maximum number of losing trades allowed in a single day?",
+    helper: "This stops the day if the market is not working for you.",
+    type: "number"
+  },
+  {
+    key: "maxTotalRiskAcrossOpenTrades",
+    title: "What is the maximum total risk allowed across all open trades?",
+    helper: "This controls total live exposure across every open position.",
+    type: "unitInput",
+    note: "You can define this in dollars or percentage."
+  },
+  {
+    key: "enforcementLevel",
+    title: "How strict should the system be when enforcing your trading plan?",
+    helper: "Choose how much authority Trade Guardian should have over your custom plan.",
+    type: "radio",
+    options: [
+      "Strict enforcement",
+      "Warning mode",
+      "Advisor mode"
+    ]
+  }
+];
+
+let stepIndex = 0;
+
+const titleEl = document.getElementById("questionTitle");
+const helperEl = document.getElementById("helperText");
+const inputContainer = document.getElementById("inputContainer");
+const progressFill = document.getElementById("progressFill");
+const stepLabel = document.getElementById("stepLabel");
+const nextBtn = document.getElementById("nextBtn");
+const backBtn = document.getElementById("backBtn");
+const inputNote = document.getElementById("inputNote");
+
+function getRiskUnitDefault() {
+  if (customPlan.riskDefinitionMode === "Percentage of account") return "%";
+  return "$";
+}
+
+function attachOptionEvents() {
+  const cards = inputContainer.querySelectorAll(".option-card");
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      cards.forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+    });
+  });
+}
+
+function renderTimeOptions(sessionName, selectId, currentValue, labelText, minTime, maxTime) {
+  const range = sessionRanges[sessionName] || sessionRanges["New York Session"];
+  const start = range.start;
+  const end = range.end;
+
+  return `
+    <div style="text-align:left;margin-bottom:8px;color:#dbe7ff;font-size:14px;font-weight:700;">${labelText}</div>
+    <input
+      class="time-input"
+      id="${selectId}"
+      type="time"
+      min="${minTime || start}"
+      max="${maxTime || end}"
+      value="${currentValue || (minTime || start)}"
+    />
+  `;
+}
+
+function renderStep() {
+  const step = steps[stepIndex];
+  titleEl.textContent = step.title;
+  helperEl.textContent = step.helper || "";
+  inputContainer.innerHTML = "";
+  inputNote.textContent = step.note || "";
+
+  if (step.type === "radio") {
+    const currentValue = customPlan[step.key] || "";
+    inputContainer.innerHTML = `
+      <div class="options">
+        ${step.options.map(option => `
+          <div class="option-card ${currentValue === option ? "selected" : ""}" data-value="${option}">
+            <div class="option-indicator"></div>
+            <div class="option-label">${option}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    attachOptionEvents();
+  }
+
+  if (step.type === "number") {
+    inputContainer.innerHTML = `
+      <input class="text-input" id="inputField" type="number" min="0" step="1" value="${customPlan[step.key] || ""}">
+    `;
+  }
+
+  if (step.type === "unitInput") {
+    const currentValue = customPlan[step.key]?.value || "";
+    const currentUnit =
+      customPlan[step.key]?.unit ||
+      (step.key === "riskPerTradeValue" ? getRiskUnitDefault() : "$");
+
+    inputContainer.innerHTML = `
+      <div class="inline-unit">
+        <input class="text-input" id="valueField" type="number" min="0" step="any" value="${currentValue}">
+        <select class="select-input" id="unitField">
+          <option value="$" ${currentUnit === "$" ? "selected" : ""}>$</option>
+          <option value="%" ${currentUnit === "%" ? "selected" : ""}>%</option>
+        </select>
+      </div>
+    `;
+  }
+
+  if (step.type === "timeRange") {
+    const sessionName = customPlan.tradingSession || "New York Session";
+    const range = sessionRanges[sessionName] || sessionRanges["New York Session"];
+    const startValue = customPlan.tradingWindow?.start || range.start;
+    const endValue = customPlan.tradingWindow?.end || range.end;
+
+    inputContainer.innerHTML = `
+      <div class="dual-inputs">
+        <div>
+          ${renderTimeOptions(sessionName, "startTimeField", startValue, "Start Time", range.start, range.end)}
+        </div>
+        <div>
+          ${renderTimeOptions(sessionName, "endTimeField", endValue, "End Time", range.start, range.end)}
+        </div>
+      </div>
+    `;
+  }
+
+  if (step.type === "dailyRiskLimit") {
+    const enabled = customPlan.personalDailyRiskLimit?.enabled || "";
+    const currentValue = customPlan.personalDailyRiskLimit?.value || "";
+    const currentUnit = customPlan.personalDailyRiskLimit?.unit || "$";
+
+    inputContainer.innerHTML = `
+      <div class="options" style="margin-bottom:14px;">
+        <div class="option-card ${enabled === "Yes, define my own daily risk limit" ? "selected" : ""}" data-value="Yes, define my own daily risk limit">
+          <div class="option-indicator"></div>
+          <div class="option-label">Yes, define my own daily risk limit</div>
+        </div>
+        <div class="option-card ${enabled === "No, only follow the account rules" ? "selected" : ""}" data-value="No, only follow the account rules">
+          <div class="option-indicator"></div>
+          <div class="option-label">No, only follow the account rules</div>
+        </div>
+      </div>
+
+      <div id="dailyRiskExtra" style="display:${enabled === "Yes, define my own daily risk limit" ? "block" : "none"};">
+        <div class="inline-unit">
+          <input class="text-input" id="dailyRiskValueField" type="number" min="0" step="any" value="${currentValue}">
+          <select class="select-input" id="dailyRiskUnitField">
+            <option value="$" ${currentUnit === "$" ? "selected" : ""}>$</option>
+            <option value="%" ${currentUnit === "%" ? "selected" : ""}>%</option>
+          </select>
+        </div>
+      </div>
+    `;
+
+    attachOptionEvents();
+
+    const cards = inputContainer.querySelectorAll(".option-card");
+    const extra = document.getElementById("dailyRiskExtra");
+    cards.forEach(card => {
+      card.addEventListener("click", () => {
+        extra.style.display = card.dataset.value === "Yes, define my own daily risk limit" ? "block" : "none";
+      });
+    });
+  }
+
+  stepLabel.textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+  progressFill.style.width = `${((stepIndex + 1) / steps.length) * 100}%`;
+  backBtn.disabled = stepIndex === 0;
+  nextBtn.textContent = stepIndex === steps.length - 1 ? "Continue" : "Next";
+}
+
+function saveAnswer() {
+  const step = steps[stepIndex];
+
+  if (step.type === "radio") {
+    const selected = inputContainer.querySelector(".option-card.selected");
+    customPlan[step.key] = selected ? selected.dataset.value : "";
+  }
+
+  if (step.type === "number") {
+    customPlan[step.key] = document.getElementById("inputField").value.trim();
+  }
+
+  if (step.type === "unitInput") {
+    customPlan[step.key] = {
+      value: document.getElementById("valueField").value.trim(),
+      unit: document.getElementById("unitField").value
+    };
+  }
+
+  if (step.type === "timeRange") {
+    customPlan[step.key] = {
+      start: document.getElementById("startTimeField").value,
+      end: document.getElementById("endTimeField").value
+    };
+  }
+
+  if (step.type === "dailyRiskLimit") {
+    const selected = inputContainer.querySelector(".option-card.selected");
+    const enabled = selected ? selected.dataset.value : "";
+    const data = { enabled };
+
+    if (enabled === "Yes, define my own daily risk limit") {
+      data.value = document.getElementById("dailyRiskValueField").value.trim();
+      data.unit = document.getElementById("dailyRiskUnitField").value;
+    }
+
+    customPlan[step.key] = data;
+  }
+
+  localStorage.setItem("tradeGuardianCustomPlan", JSON.stringify(customPlan));
+}
+
+function validateStep() {
+  const step = steps[stepIndex];
+
+  if (step.type === "radio") {
+    return !!inputContainer.querySelector(".option-card.selected");
+  }
+
+  if (step.type === "number") {
+    return document.getElementById("inputField").value.trim() !== "";
+  }
+
+  if (step.type === "unitInput") {
+    return document.getElementById("valueField").value.trim() !== "";
+  }
+
+  if (step.type === "timeRange") {
+    const start = document.getElementById("startTimeField").value;
+    const end = document.getElementById("endTimeField").value;
+    return start && end && start < end;
+  }
+
+  if (step.type === "dailyRiskLimit") {
+    const selected = inputContainer.querySelector(".option-card.selected");
+    if (!selected) return false;
+
+    if (selected.dataset.value === "Yes, define my own daily risk limit") {
+      return document.getElementById("dailyRiskValueField").value.trim() !== "";
+    }
+    return true;
+  }
+
+  return true;
+}
+
+nextBtn.addEventListener("click", () => {
+  if (!validateStep()) {
+    alert("Please complete this step before continuing.");
+    return;
+  }
+
+  saveAnswer();
+
+  if (stepIndex < steps.length - 1) {
+    stepIndex++;
+    renderStep();
+  } else {
+    const finalPlan = {
+      ...customPlan,
+      tradingOutsideWindowRule: "Blocked",
+      source: "custom-plan",
+      createdFromRecommendedScreen: selectedPlanMeta?.planType === "custom"
+    };
+
+    localStorage.setItem("tradeGuardianCustomPlan", JSON.stringify(finalPlan));
+    window.location.href = "custom-plan-result.html";
+  }
+});
+
+backBtn.addEventListener("click", () => {
+  if (stepIndex > 0) {
+    stepIndex--;
+    renderStep();
+  }
+});
+
+renderStep();
+</script>
+
+</body>
+</html>
