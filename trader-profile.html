@@ -536,13 +536,13 @@ nextBtn.addEventListener("click", () => {
   saveAnswer();
 
   if(stepIndex < steps.length - 1){
-    stepIndex++;
-    renderStep();
-  } else {
-    console.log("PROFILE COMPLETE", traderProfile);
-    localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(traderProfile));
-    alert("Trader profile completed. Next step: Account Setup.");
-  }
+  stepIndex++;
+  renderStep();
+} else {
+  console.log("PROFILE COMPLETE", traderProfile);
+  localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(traderProfile));
+  window.location.href = "account-rules.html";
+}
 });
 
 backBtn.addEventListener("click", () => {
