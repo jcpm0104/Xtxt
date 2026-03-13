@@ -250,6 +250,35 @@
       line-height:1.6;
     }
 
+    .pressure-box{
+      position:relative;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.025);
+      border:1px solid rgba(255,255,255,.05);
+    }
+
+    .pressure-dot{
+      width:12px;
+      height:12px;
+      border-radius:999px;
+      flex:0 0 12px;
+    }
+
+    .pressure-low{ background:var(--green); }
+    .pressure-mid{ background:var(--yellow); }
+    .pressure-high{ background:var(--red); }
+
+    .pressure-text{
+      color:#dbe7ff;
+      font-size:13px;
+      line-height:1.5;
+    }
+
     .cta-row{
       position:relative;
       z-index:1;
@@ -432,7 +461,7 @@ function getContext() {
   };
 }
 
-function calculateIntelligenceScore(ctx) {
+function calculateBehaviorCaution(ctx) {
   let caution = 1;
 
   if (ctx.accountType === "Funded Account") caution -= 0.12;
@@ -451,13 +480,6 @@ function calculateIntelligenceScore(ctx) {
   if (ctx.execution === "Both Manual and Automated") caution -= 0.03;
   if (ctx.execution === "Automated Trading") caution -= 0.02;
 
-  if (ctx.dailyLoss > 0 && ctx.riskMode === "Fixed dollar amount" && ctx.riskValue > 0) {
-    const dailyLossRatio = ctx.riskValue / ctx.dailyLoss;
-    if (dailyLossRatio >= 0.40) caution -= 0.15;
-    else if (dailyLossRatio >= 0.25) caution -= 0.10;
-    else if (dailyLossRatio >= 0.15) caution -= 0.05;
-  }
-
   if (ctx.maxTradesPerDay >= 8) caution -= 0.05;
   else if (ctx.maxTradesPerDay <= 3) caution += 0.02;
 
@@ -475,28 +497,26 @@ function calculateIntelligenceScore(ctx) {
   return clamp(caution, 0.45, 1.00);
 }
 
-function deriveRiskCaps(ctx) {
-  let riskCapByDailyLoss = Infinity;
-  let riskCapByOpenRisk = Infinity;
-
-  if (ctx.dailyLoss > 0) {
-    riskCapByDailyLoss = ctx.dailyLoss * 0.25;
-  }
-
-  if (ctx.maxTotalRiskAcrossOpenTrades > 0) {
-    const slots = Math.max(ctx.maxOpenTradesAtSameTime || 1, 1);
-    riskCapByOpenRisk = ctx.maxTotalRiskAcrossOpenTrades / slots;
-  }
-
+function deriveRiskCap(ctx) {
   let finalCap = ctx.riskValue > 0 ? ctx.riskValue : 0;
 
-  if (isFinite(riskCapByDailyLoss)) finalCap = Math.min(finalCap, riskCapByDailyLoss);
-  if (isFinite(riskCapByOpenRisk)) finalCap = Math.min(finalCap, riskCapByOpenRisk);
+  // Cap by daily loss limit
+  if (ctx.dailyLoss > 0) {
+    const capByDailyLoss = ctx.dailyLoss * 0.25;
+    finalCap = finalCap > 0 ? Math.min(finalCap, capByDailyLoss) : capByDailyLoss;
+  }
+
+  // Cap by total active risk and simultaneous positions
+  if (ctx.maxTotalRiskAcrossOpenTrades > 0) {
+    const slots = Math.max(ctx.maxOpenTradesAtSameTime || 1, 1);
+    const capByOpenRisk = ctx.maxTotalRiskAcrossOpenTrades / slots;
+    finalCap = finalCap > 0 ? Math.min(finalCap, capByOpenRisk) : capByOpenRisk;
+  }
 
   return finalCap > 0 ? finalCap : ctx.riskValue;
 }
 
-function deriveTradeCaps(ctx) {
+function deriveTradeCap(ctx) {
   let maxTradesCap = ctx.maxTradesPerDay > 0 ? ctx.maxTradesPerDay : 1;
 
   if (ctx.minimumTimeBetweenTradesMinutes >= 10) {
@@ -505,18 +525,45 @@ function deriveTradeCaps(ctx) {
     maxTradesCap = Math.min(maxTradesCap, 5);
   }
 
-  if (ctx.maxDifferentInstrumentsPerDay === 1) {
-    maxTradesCap = Math.min(maxTradesCap, maxTradesCap);
-  }
-
   return Math.max(1, maxTradesCap);
+}
+
+function calculateRiskPressure(ctx, effectiveRisk, effectiveMaxTrades) {
+  const dailyPressure = ctx.dailyLoss > 0 ? (effectiveRisk / ctx.dailyLoss) : 0;
+  const stackPressure = ctx.dailyLoss > 0 ? ((effectiveRisk * effectiveMaxTrades) / ctx.dailyLoss) : 0;
+  const drawdownPressure = ctx.maxDrawdown > 0 ? (effectiveRisk / ctx.maxDrawdown) : 0;
+
+  const pressureScore =
+    (dailyPressure * 0.4) +
+    (stackPressure * 0.4) +
+    (drawdownPressure * 0.2);
+
+  return {
+    dailyPressure,
+    stackPressure,
+    drawdownPressure,
+    pressureScore
+  };
+}
+
+function pressureAdjustment(score) {
+  if (score < 0.5) return 1.00;
+  if (score < 1.0) return 0.90;
+  if (score < 1.5) return 0.75;
+  return 0.60;
+}
+
+function getPressureLabel(score) {
+  if (score < 0.5) return { dotClass: "pressure-low", text: "Low risk pressure profile" };
+  if (score < 1.0) return { dotClass: "pressure-mid", text: "Moderate risk pressure profile" };
+  return { dotClass: "pressure-high", text: "High risk pressure profile" };
 }
 
 function buildPlanReasons(ctx) {
   const reasons = [];
 
   if (ctx.accountType === "Funded Account") reasons.push("funded account protection");
-  if (ctx.accountType === "Evaluation Account") reasons.push("evaluation account restrictions");
+  if (ctx.accountType === "Evaluation Account") reasons.push("evaluation restrictions");
   if (ctx.trailingDrawdown === "Yes") reasons.push("trailing drawdown sensitivity");
   if (ctx.consistencyRule === "Yes") reasons.push("consistency rule");
   if (ctx.experience === "Beginner") reasons.push("beginner experience level");
@@ -529,19 +576,29 @@ function buildPlanReasons(ctx) {
 }
 
 function buildPlans(ctx) {
-  const caution = calculateIntelligenceScore(ctx);
-  const cappedRiskValue = deriveRiskCaps(ctx);
-  const cappedTrades = deriveTradeCaps(ctx);
+  const behaviorCaution = calculateBehaviorCaution(ctx);
+  const cappedRisk = deriveRiskCap(ctx);
+  const cappedTrades = deriveTradeCap(ctx);
+  const isPercent = ctx.riskMode === "Percentage of account";
 
-  const riskMode = ctx.riskMode;
-  const isPercent = riskMode === "Percentage of account";
+  // Pressure is calculated from the effective caps, before final tiering
+  const pressure = calculateRiskPressure(
+    ctx,
+    cappedRisk,
+    cappedTrades
+  );
 
-  const maxRisk = cappedRiskValue > 0 ? cappedRiskValue : ctx.riskValue;
-  const maxTrades = cappedTrades > 0 ? cappedTrades : ctx.maxTradesPerDay || 1;
+  const pressureFactor = pressureAdjustment(pressure.pressureScore);
 
-  const conservativeRisk = roundSmart(maxRisk * 0.50 * caution, isPercent ? "percent" : "money");
-  const balancedRisk = roundSmart(maxRisk * 0.75 * caution, isPercent ? "percent" : "money");
-  const aggressiveRisk = roundSmart(maxRisk * 1.00 * caution, isPercent ? "percent" : "money");
+  // Final intelligence factor combines profile caution + pressure factor
+  const intelligenceFactor = clamp(behaviorCaution * pressureFactor, 0.25, 1);
+
+  const maxRisk = cappedRisk > 0 ? cappedRisk : ctx.riskValue;
+  const maxTrades = cappedTrades > 0 ? cappedTrades : (ctx.maxTradesPerDay || 1);
+
+  const conservativeRisk = roundSmart(maxRisk * 0.50 * intelligenceFactor, isPercent ? "percent" : "money");
+  const balancedRisk = roundSmart(maxRisk * 0.75 * intelligenceFactor, isPercent ? "percent" : "money");
+  const aggressiveRisk = roundSmart(maxRisk * 1.00 * intelligenceFactor, isPercent ? "percent" : "money");
 
   const conservativeTrades = Math.max(1, Math.floor(maxTrades * 0.50));
   const balancedTrades = Math.max(1, Math.floor(maxTrades * 0.75));
@@ -562,7 +619,8 @@ function buildPlans(ctx) {
       riskPerTrade: conservativeRisk,
       maxTradesPerDay: conservativeTrades,
       focus: "Preserve capital and reduce emotional pressure.",
-      reason: reasonText
+      reason: reasonText,
+      pressure
     },
     {
       id: "balanced",
@@ -573,7 +631,8 @@ function buildPlans(ctx) {
       riskPerTrade: balancedRisk,
       maxTradesPerDay: balancedTrades,
       focus: "Maintain structure while allowing steady progress.",
-      reason: reasonText
+      reason: reasonText,
+      pressure
     },
     {
       id: "aggressive",
@@ -584,7 +643,8 @@ function buildPlans(ctx) {
       riskPerTrade: aggressiveRisk,
       maxTradesPerDay: aggressiveTrades,
       focus: "Push performance while still respecting account rules.",
-      reason: reasonText
+      reason: reasonText,
+      pressure
     }
   ];
 }
@@ -601,6 +661,8 @@ function renderPlans(plans, ctx) {
   container.innerHTML = "";
 
   plans.forEach(plan => {
+    const pressureInfo = getPressureLabel(plan.pressure.pressureScore);
+
     const card = document.createElement("div");
     card.className = "card";
 
@@ -611,6 +673,11 @@ function renderPlans(plans, ctx) {
           <div class="plan-sub">${plan.description}</div>
         </div>
         <div class="risk-badge ${plan.riskClass}">${plan.riskLabel}</div>
+      </div>
+
+      <div class="pressure-box">
+        <div class="pressure-dot ${pressureInfo.dotClass}"></div>
+        <div class="pressure-text">${pressureInfo.text}</div>
       </div>
 
       <div class="metrics">
@@ -647,7 +714,8 @@ function renderPlans(plans, ctx) {
         riskPerTrade: plan.riskPerTrade,
         maxTradesPerDay: plan.maxTradesPerDay,
         description: plan.description,
-        intelligenceFactorsUsed: buildPlanReasons(ctx)
+        intelligenceFactorsUsed: buildPlanReasons(ctx),
+        pressureScore: plan.pressure.pressureScore
       };
 
       localStorage.setItem("tradeGuardianSelectedPlan", JSON.stringify(selectedPlan));
