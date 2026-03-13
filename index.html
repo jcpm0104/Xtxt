@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Guardian System App</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#08111f;
+      --bg-2:#0d182b;
+      --panel:rgba(255,255,255,.04);
+      --line:rgba(255,255,255,.08);
+      --text:#eaf1ff;
+      --muted:#97a7c0;
+      --blue:#2f6bff;
+      --blue-soft:#79a3ff;
+      --shadow:0 24px 60px rgba(0,0,0,.34);
+      --radius:28px;
+      --max:860px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html,body{
+      min-height:100%;
+    }
+
+    body{
+      font-family:'Inter',system-ui,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top, rgba(47,107,255,.15) 0%, rgba(8,17,31,0) 32%),
+        linear-gradient(180deg,#08111f 0%, #091321 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .app-shell{
+      width:min(var(--max),100%);
+    }
+
+    .onboarding-card{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.025));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:32px 28px 24px;
+      min-height:620px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .onboarding-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at top right, rgba(47,107,255,.16), transparent 24%),
+        radial-gradient(circle at bottom left, rgba(121,163,255,.08), transparent 22%);
+      pointer-events:none;
+    }
+
+    .topbar{
+      position:relative;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:26px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(47,107,255,.18), rgba(47,107,255,.08));
+      border:1px solid rgba(255,255,255,.08);
+      flex:0 0 46px;
+    }
+
+    .brand-copy{
+      line-height:1.05;
+    }
+
+    .brand-name{
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .brand-sub{
+      color:var(--muted);
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .progress-meta{
+      color:#dbe7ff;
+      font-size:13px;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .progress-wrap{
+      position:relative;
+      z-index:1;
+      margin-bottom:30px;
+    }
+
+    .progress-track{
+      width:100%;
+      height:10px;
+      border-radius:999px;
+      background:#162337;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.04);
+    }
+
+    .progress-fill{
+      height:100%;
+      width:16.666%;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--blue), var(--blue-soft));
+      transition:width .35s ease;
+    }
+
+    .content{
+      position:relative;
+      z-index:1;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:8px 4px;
+    }
+
+    .icon-stage{
+      width:112px;
+      height:112px;
+      border-radius:26px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(47,107,255,.16), rgba(47,107,255,.06));
+      border:1px solid rgba(255,255,255,.08);
+      margin-bottom:24px;
+      box-shadow:var(--shadow);
+    }
+
+    h1{
+      font-size:clamp(30px, 4vw, 48px);
+      line-height:1.04;
+      letter-spacing:-.04em;
+      margin-bottom:16px;
+      max-width:680px;
+    }
+
+    .copy{
+      max-width:640px;
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.7;
+    }
+
+    .bottom{
+      position:relative;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-top:28px;
+      flex-wrap:wrap;
+    }
+
+    .step-indicator{
+      color:var(--muted);
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-left:auto;
+    }
+
+    .btn{
+      min-height:48px;
+      padding:0 18px;
+      border-radius:12px;
+      border:1px solid transparent;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s ease;
+      text-decoration:none;
+    }
+
+    .btn-primary{
+      background:linear-gradient(180deg, #4d82ff 0%, var(--blue) 100%);
+      color:white;
+      box-shadow:0 14px 30px rgba(47,107,255,.22);
+    }
+
+    .btn-primary:hover{
+      filter:brightness(1.05);
+      transform:translateY(-1px);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.03);
+      border-color:var(--line);
+      color:var(--text);
+    }
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,.05);
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    @media (max-width: 720px){
+      .onboarding-card{
+        min-height:560px;
+        padding:24px 18px 20px;
+      }
+
+      .topbar{
+        align-items:flex-start;
+      }
+
+      .progress-meta{
+        font-size:12px;
+      }
+
+      .icon-stage{
+        width:92px;
+        height:92px;
+        border-radius:22px;
+      }
+
+      .copy{
+        font-size:16px;
+      }
+
+      .bottom{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .actions{
+        width:100%;
+        margin-left:0;
+      }
+
+      .btn{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+    <div class="onboarding-card">
+
+      <div>
+        <div class="topbar">
+          <div class="brand">
+            <div class="brand-logo" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" fill="#2F6BFF"/>
+                <path d="M8 13L10.2 10.5L12.4 12.1L16 8.2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <div class="brand-copy">
+              <div class="brand-name">Trade Guardian</div>
+              <div class="brand-sub">System App</div>
+            </div>
+          </div>
+
+          <div class="progress-meta" id="progressMeta">Step 1 of 6</div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="icon-stage" id="iconStage">
+          <svg id="iconSvg" width="52" height="52" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" fill="#2F6BFF"/>
+            <path d="M8 13L10.2 10.5L12.4 12.1L16 8.2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <h1 id="title">Welcome to Trade Guardian</h1>
+        <div class="copy" id="copy">
+          Trade Guardian is your personal trading risk copilot, designed to help traders stay aligned with their plan and protect their capital in real time.
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="step-indicator" id="stepIndicator">1 / 6</div>
+
+        <div class="actions">
+          <button class="btn btn-secondary hidden" id="backBtn" type="button">Back</button>
+          <button class="btn btn-primary" id="nextBtn" type="button">Next</button>
+          <button class="btn btn-primary hidden" id="startBtn" type="button">Start System Setup</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const steps = [
+      {
+        title: "Welcome to Trade Guardian",
+        copy: "Trade Guardian is your personal trading risk copilot, designed to help traders stay aligned with their plan and protect their capital in real time.",
+        icon: `
+          <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" fill="#2F6BFF"/>
+          <path d="M8 13L10.2 10.5L12.4 12.1L16 8.2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        `
+      },
+      {
+        title: "Trading discipline is the real edge",
+        copy: "Most trading failures do not come from strategy. They come from broken discipline, inconsistent risk, and emotional decision making. Trade Guardian was built to help traders stay structured under pressure.",
+        icon: `
+          <circle cx="12" cy="12" r="8.5" fill="#2F6BFF"/>
+          <path d="M12 7V12L15.5 14.2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        `
+      },
+      {
+        title: "Your rules become your system",
+        copy: "Before monitoring your activity, Trade Guardian first learns your trading plan, your risk model, and your account rules. Once configured, every action you take can be evaluated against your own structure.",
+        icon: `
+          <rect x="5" y="4.5" width="14" height="15" rx="2.5" fill="#2F6BFF"/>
+          <path d="M8 9H16" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M8 12.5H16" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M8 16H13" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        `
+      },
+      {
+        title: "Understand your risk before mistakes happen",
+        copy: "The platform analyzes your trading behavior and risk exposure while you trade, helping you detect deviations before they damage the account.",
+        icon: `
+          <path d="M4 14L9 9L13 12L20 5" stroke="#2F6BFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20 5V10" stroke="#2F6BFF" stroke-width="2.2" stroke-linecap="round"/>
+        `
+      },
+      {
+        title: "Structure. Consistency. Survival.",
+        copy: "Trade Guardian is designed for traders who care about long-term account survival, disciplined execution, and controlled exposure to risk.",
+        icon: `
+          <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" fill="#2F6BFF"/>
+          <path d="M9 12.2L11.1 14.4L15.4 10.1" stroke="white" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        `
+      },
+      {
+        title: "Let’s configure your system",
+        copy: "To begin, we will guide you through a short setup process where you define your trading environment, your account rules, and your risk structure. Once completed, Trade Guardian will be ready to support your trading discipline.",
+        icon: `
+          <circle cx="12" cy="12" r="9" fill="#2F6BFF"/>
+          <path d="M12 7V17" stroke="white" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M7 12H17" stroke="white" stroke-width="1.9" stroke-linecap="round"/>
+        `
+      }
+    ];
+
+    let currentStep = 0;
+
+    const titleEl = document.getElementById("title");
+    const copyEl = document.getElementById("copy");
+    const iconSvg = document.getElementById("iconSvg");
+    const progressMeta = document.getElementById("progressMeta");
+    const progressFill = document.getElementById("progressFill");
+    const stepIndicator = document.getElementById("stepIndicator");
+    const backBtn = document.getElementById("backBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const startBtn = document.getElementById("startBtn");
+
+    function renderStep() {
+      const step = steps[currentStep];
+      const total = steps.length;
+      const percent = ((currentStep + 1) / total) * 100;
+
+      titleEl.textContent = step.title;
+      copyEl.textContent = step.copy;
+      iconSvg.innerHTML = step.icon;
+
+      progressMeta.textContent = `Step ${currentStep + 1} of ${total}`;
+      stepIndicator.textContent = `${currentStep + 1} / ${total}`;
+      progressFill.style.width = `${percent}%`;
+
+      backBtn.classList.toggle("hidden", currentStep === 0);
+      nextBtn.classList.toggle("hidden", currentStep === total - 1);
+      startBtn.classList.toggle("hidden", currentStep !== total - 1);
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        renderStep();
+      }
+    });
+
+    backBtn.addEventListener("click", () => {
+      if (currentStep > 0) {
+        currentStep--;
+        renderStep();
+      }
+    });
+
+    startBtn.addEventListener("click", () => {
+      // Más adelante aquí conectaremos con trader-profile.html
+      alert("Next step: Trader Profile Setup");
+    });
+
+    renderStep();
+  </script>
+
+</body>
+</html>
