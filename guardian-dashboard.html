@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Guardian Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+--bg:#08111f;
+--panel:#0f1b30;
+--line:rgba(255,255,255,.08);
+--text:#eaf1ff;
+--muted:#93a4c2;
+--blue:#2f6bff;
+--green:#2ed47a;
+--yellow:#f5b94f;
+--red:#ef5c5c;
+}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+font-family:'Inter',sans-serif;
+background:radial-gradient(circle at top,rgba(47,107,255,.12),transparent 40%),var(--bg);
+color:var(--text);
+padding:30px;
+}
+
+.container{
+max-width:1400px;
+margin:auto;
+}
+
+/* header */
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+}
+
+.title{
+font-size:28px;
+font-weight:700;
+}
+
+.connect-btn{
+background:linear-gradient(180deg,#4d82ff,var(--blue));
+border:none;
+padding:12px 18px;
+border-radius:10px;
+color:white;
+font-weight:600;
+cursor:pointer;
+}
+
+/* cards */
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+margin-bottom:30px;
+}
+
+.card{
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:16px;
+padding:20px;
+}
+
+.card-title{
+font-size:14px;
+color:var(--muted);
+margin-bottom:10px;
+}
+
+.card-value{
+font-size:22px;
+font-weight:700;
+}
+
+/* guardian status */
+
+.status-safe{
+color:var(--green);
+}
+
+.status-warning{
+color:var(--yellow);
+}
+
+.status-danger{
+color:var(--red);
+}
+
+/* panels */
+
+.panel{
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:16px;
+padding:20px;
+margin-bottom:20px;
+}
+
+.panel-title{
+font-size:18px;
+margin-bottom:15px;
+}
+
+/* alerts */
+
+.alert{
+padding:10px;
+border-bottom:1px solid var(--line);
+font-size:14px;
+}
+
+.alert:last-child{
+border-bottom:none;
+}
+
+/* trade table */
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:10px;
+text-align:left;
+border-bottom:1px solid var(--line);
+font-size:14px;
+}
+
+th{
+color:var(--muted);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- header -->
+
+<div class="header">
+
+<div class="title">Trade Guardian Dashboard</div>
+
+<button class="connect-btn" onclick="connectAccount()">
+Connect Trading Account
+</button>
+
+</div>
+
+
+<!-- status cards -->
+
+<div class="grid">
+
+<div class="card">
+<div class="card-title">Guardian Status</div>
+<div class="card-value status-safe" id="guardianStatus">
+SAFE
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Account Connection</div>
+<div class="card-value" id="connectionStatus">
+Not Connected
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Session Status</div>
+<div class="card-value" id="sessionStatus">
+Inactive
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Active Plan</div>
+<div class="card-value" id="activePlan">
+No Plan Active
+</div>
+</div>
+
+</div>
+
+
+<!-- risk metrics -->
+
+<div class="grid">
+
+<div class="card">
+<div class="card-title">Daily PnL</div>
+<div class="card-value" id="dailyPnL">
+$0
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Daily Loss Used</div>
+<div class="card-value" id="dailyLoss">
+$0
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Drawdown Used</div>
+<div class="card-value" id="drawdown">
+$0
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">Trades Today</div>
+<div class="card-value" id="tradesToday">
+0
+</div>
+</div>
+
+</div>
+
+
+<!-- open position -->
+
+<div class="panel">
+
+<div class="panel-title">
+Current Position
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Entry</th>
+<th>Stop Loss</th>
+<th>Take Profit</th>
+<th>Size</th>
+<th>PnL</th>
+</tr>
+</thead>
+
+<tbody id="positionTable">
+
+<tr>
+<td colspan="6">No open position</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<!-- alerts -->
+
+<div class="panel">
+
+<div class="panel-title">
+Guardian Alerts
+</div>
+
+<div id="alerts">
+
+<div class="alert">System ready.</div>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<script>
+
+/* connection simulation */
+
+function connectAccount(){
+
+document.getElementById("connectionStatus").innerText="Connected";
+
+document.getElementById("sessionStatus").innerText="Monitoring";
+
+document.getElementById("activePlan").innerText="Guardian Plan";
+
+addAlert("Trading account connected");
+
+}
+
+/* alert system */
+
+function addAlert(text){
+
+const alerts=document.getElementById("alerts");
+
+const newAlert=document.createElement("div");
+
+newAlert.className="alert";
+
+newAlert.innerText=new Date().toLocaleTimeString()+" — "+text;
+
+alerts.prepend(newAlert);
+
+}
+
+/* demo live updates */
+
+setInterval(()=>{
+
+let pnl=(Math.random()*200-100).toFixed(2);
+
+document.getElementById("dailyPnL").innerText="$"+pnl;
+
+document.getElementById("tradesToday").innerText=Math.floor(Math.random()*6);
+
+},4000);
+
+</script>
+
+</body>
+</html>
