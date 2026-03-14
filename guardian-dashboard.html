@@ -1,417 +1,1867 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Trade Guardian</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Guardian Dashboard</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
+  <style>
+    :root{
+      --bg:#070d16;
+      --bg-2:#0b1320;
+      --panel:#101827;
+      --panel-2:#131d2e;
+      --panel-3:#0f1725;
+      --line:rgba(255,255,255,.08);
+      --line-strong:rgba(255,255,255,.14);
+      --text:#ecf3ff;
+      --muted:#8da0c0;
+      --primary:#00d8ff;
+      --primary-soft:rgba(0,216,255,.12);
+      --success:#2df59a;
+      --warning:#ffbd59;
+      --danger:#ff5f6d;
+      --shadow:0 22px 60px rgba(0,0,0,.35);
+      --radius-xl:24px;
+      --radius-lg:18px;
+      --radius-md:14px;
+      --sidebar-w:360px;
+    }
 
-:root{
---bg:#060b15;
---panel:#0f1623;
---panel2:#141d2b;
---line:rgba(255,255,255,0.07);
---text:#e9f0ff;
---muted:#8a9bb7;
---green:#33d17a;
---greenSoft:rgba(51,209,122,.15);
---red:#ef5c5c;
---yellow:#f3b23a;
-}
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
 
-*{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      min-height:100%;
+    }
 
-body{
-font-family:Inter;
-background:radial-gradient(circle at top,#0e1728,var(--bg));
-color:var(--text);
-padding:16px;
-}
+    body{
+      font-family:'Inter',sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0,216,255,.08), transparent 25%),
+        radial-gradient(circle at top right, rgba(45,245,154,.05), transparent 20%),
+        linear-gradient(180deg, #0a111d 0%, #071019 100%);
+      overflow-x:hidden;
+      padding:20px;
+    }
 
-.container{
-max-width:900px;
-margin:auto;
-}
+    .app-shell{
+      max-width:1540px;
+      margin:0 auto;
+      position:relative;
+    }
 
-.header{
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin-bottom:18px;
-}
+    .topbar{
+      height:72px;
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:rgba(14,22,36,.75);
+      backdrop-filter:blur(14px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 22px;
+      box-shadow:var(--shadow);
+      margin-bottom:22px;
+      position:sticky;
+      top:16px;
+      z-index:20;
+    }
 
-.logo{
-display:flex;
-align-items:center;
-gap:10px;
-cursor:pointer;
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      cursor:pointer;
+      user-select:none;
+    }
 
-.logoBox{
-width:38px;
-height:38px;
-border-radius:12px;
-display:grid;
-place-items:center;
-background:linear-gradient(180deg,#20314f,#111827);
-border:1px solid var(--line);
-}
+    .brand-icon{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(0,216,255,.18), rgba(0,216,255,.06));
+      border:1px solid rgba(0,216,255,.2);
+      box-shadow:0 0 20px rgba(0,216,255,.12);
+    }
 
-.logoText{
-font-size:20px;
-font-weight:700;
-}
+    .brand-icon svg{
+      width:18px;
+      height:18px;
+      fill:var(--primary);
+    }
 
-.feed{
-font-size:14px;
-color:var(--muted);
-}
+    .brand-copy{
+      display:flex;
+      align-items:baseline;
+      gap:6px;
+      flex-wrap:wrap;
+    }
 
-.feed span{
-color:var(--green);
-font-weight:600;
-}
+    .brand-title{
+      font-size:21px;
+      font-weight:700;
+      letter-spacing:-.03em;
+      color:#fff;
+    }
 
-.card{
-background:linear-gradient(180deg,var(--panel),var(--panel2));
-border:1px solid var(--line);
-border-radius:20px;
-padding:20px;
-margin-bottom:16px;
-}
+    .brand-title .mono{
+      color:var(--primary);
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight:500;
+    }
 
-.cardTitle{
-font-size:18px;
-font-weight:700;
-margin-bottom:12px;
-}
+    .top-status{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      flex-wrap:wrap;
+    }
 
-.metric{
-font-size:36px;
-font-weight:800;
-margin-top:6px;
-}
+    .status-block{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:500;
+    }
 
-.sub{
-color:var(--muted);
-font-size:14px;
-margin-top:4px;
-}
+    .live-pill,
+    .broker-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      font-size:13px;
+      font-weight:600;
+    }
 
-.riskBar{
-margin-top:12px;
-height:8px;
-background:#182234;
-border-radius:10px;
-overflow:hidden;
-}
+    .live-pill .dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--success);
+      box-shadow:0 0 14px rgba(45,245,154,.6);
+      position:relative;
+    }
 
-.riskFill{
-height:100%;
-width:0%;
-background:linear-gradient(90deg,#1fa85f,#47e694);
-}
+    .live-pill .dot::after{
+      content:"";
+      position:absolute;
+      inset:-4px;
+      border-radius:999px;
+      border:1px solid rgba(45,245,154,.25);
+      animation:pulse 2s infinite;
+    }
 
-.row{
-display:flex;
-justify-content:space-between;
-margin-top:12px;
-font-size:14px;
-color:var(--muted);
-}
+    @keyframes pulse{
+      0%{transform:scale(.7);opacity:.7}
+      100%{transform:scale(1.5);opacity:0}
+    }
 
-.alertBox{
-text-align:center;
-padding:40px 10px;
-}
+    .broker-pill.connected{
+      color:var(--success);
+      border-color:rgba(45,245,154,.2);
+      background:rgba(45,245,154,.08);
+    }
 
-.alertIcon{
-width:70px;
-height:70px;
-margin:auto;
-border-radius:50%;
-display:grid;
-place-items:center;
-background:var(--greenSoft);
-border:1px solid rgba(51,209,122,.25);
-margin-bottom:14px;
-}
+    .broker-pill.connecting{
+      color:var(--warning);
+      border-color:rgba(255,189,89,.2);
+      background:rgba(255,189,89,.08);
+    }
 
-.alertIcon svg{
-color:var(--green);
-}
+    .broker-pill.disconnected{
+      color:var(--danger);
+      border-color:rgba(255,95,109,.2);
+      background:rgba(255,95,109,.08);
+    }
 
-.alertTitle{
-font-size:22px;
-font-weight:700;
-margin-bottom:6px;
-}
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:repeat(12, 1fr);
+      gap:22px;
+    }
 
-.table{
-width:100%;
-margin-top:10px;
-border-collapse:collapse;
-}
+    .metrics-grid{
+      grid-column:1/-1;
+      display:grid;
+      grid-template-columns:repeat(6, 1fr);
+      gap:16px;
+    }
 
-.table th{
-text-align:left;
-font-size:12px;
-color:var(--muted);
-padding-bottom:8px;
-}
+    .metric-card{
+      position:relative;
+      overflow:hidden;
+      min-height:128px;
+      border-radius:20px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(18,28,45,.95), rgba(13,20,33,.95));
+      padding:18px 18px 16px;
+      box-shadow:var(--shadow);
+    }
 
-.table td{
-padding:10px 0;
-border-top:1px solid var(--line);
-}
+    .metric-card.highlight{
+      border-color:rgba(0,216,255,.25);
+      background:linear-gradient(180deg, rgba(0,216,255,.08), rgba(16,24,39,.96));
+    }
 
-.tagLong{
-background:rgba(51,209,122,.15);
-color:#7df5b3;
-padding:4px 10px;
-border-radius:10px;
-font-size:12px;
-font-weight:600;
-}
+    .metric-card.highlight::after{
+      content:"";
+      position:absolute;
+      width:170px;
+      height:170px;
+      border-radius:999px;
+      top:-70px;
+      right:-70px;
+      background:rgba(0,216,255,.16);
+      filter:blur(36px);
+      pointer-events:none;
+    }
 
-.tagShort{
-background:rgba(239,92,92,.15);
-color:#ff9a9a;
-padding:4px 10px;
-border-radius:10px;
-font-size:12px;
-font-weight:600;
-}
+    .metric-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+      gap:12px;
+    }
 
-/* SIDE PANEL */
+    .metric-label{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:600;
+    }
 
-.side{
-position:fixed;
-top:0;
-left:-300px;
-height:100%;
-width:280px;
-background:#0e1626;
-border-right:1px solid var(--line);
-padding:20px;
-transition:0.3s;
-z-index:10;
-overflow:auto;
-}
+    .metric-icon{
+      color:rgba(255,255,255,.45);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
 
-.side.open{
-left:0;
-}
+    .metric-icon svg{
+      width:16px;
+      height:16px;
+      stroke:currentColor;
+    }
 
-.sideTitle{
-font-size:18px;
-font-weight:700;
-margin-bottom:16px;
-}
+    .metric-value{
+      font-size:34px;
+      font-weight:700;
+      line-height:1;
+      letter-spacing:-.04em;
+      color:#fff;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
 
-.menuItem{
-padding:14px;
-border:1px solid var(--line);
-border-radius:12px;
-margin-bottom:10px;
-cursor:pointer;
-}
+    .metric-sub{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:500;
+    }
 
-.expand{
-display:none;
-margin-top:10px;
-color:var(--muted);
-font-size:14px;
-}
+    .metric-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 8px;
+      border-radius:10px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      font-size:11px;
+      font-weight:700;
+    }
 
-.menuItem.active .expand{
-display:block;
-}
+    .risk-panel{
+      grid-column:1 / span 4;
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+    }
 
-</style>
+    .positions-panel{
+      grid-column:5 / span 8;
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+    }
+
+    .panel{
+      position:relative;
+      border-radius:24px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(18,28,45,.95), rgba(13,20,33,.95));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:22px 22px 18px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .panel-title-wrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .panel-title-wrap svg{
+      width:18px;
+      height:18px;
+      stroke:rgba(255,255,255,.7);
+    }
+
+    .panel-title{
+      font-size:19px;
+      font-weight:700;
+      color:#fff;
+    }
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      border:1px solid transparent;
+    }
+
+    .status-safe{
+      background:rgba(45,245,154,.1);
+      color:var(--success);
+      border-color:rgba(45,245,154,.22);
+    }
+
+    .status-warning{
+      background:rgba(255,189,89,.1);
+      color:var(--warning);
+      border-color:rgba(255,189,89,.22);
+    }
+
+    .status-danger{
+      background:rgba(255,95,109,.1);
+      color:var(--danger);
+      border-color:rgba(255,95,109,.22);
+    }
+
+    .panel-body{
+      padding:22px;
+    }
+
+    .risk-grid{
+      display:grid;
+      gap:24px;
+    }
+
+    .risk-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      font-size:14px;
+    }
+
+    .risk-row .left{
+      color:var(--muted);
+      font-weight:500;
+    }
+
+    .risk-row .right{
+      color:#fff;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight:600;
+    }
+
+    .risk-bar-wrap{
+      margin-top:12px;
+    }
+
+    .risk-bar{
+      height:14px;
+      width:100%;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.06);
+      background:#182234;
+      position:relative;
+    }
+
+    .risk-bar::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(45deg, rgba(255,255,255,.03) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.03) 50%, rgba(255,255,255,.03) 75%, transparent 75%, transparent);
+      background-size:22px 22px;
+      opacity:.35;
+      pointer-events:none;
+    }
+
+    .risk-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, var(--success), rgba(45,245,154,.2));
+      transition:width .5s ease;
+    }
+
+    .risk-stats{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,.05);
+    }
+
+    .risk-stat .label{
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:6px;
+    }
+
+    .risk-stat .value{
+      font-size:22px;
+      color:#fff;
+      font-weight:700;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .alert-empty{
+      min-height:300px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      text-align:center;
+      padding:32px 24px 36px;
+    }
+
+    .alert-circle{
+      width:78px;
+      height:78px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:rgba(45,245,154,.1);
+      border:1px solid rgba(45,245,154,.2);
+      box-shadow:0 0 34px rgba(45,245,154,.1);
+      margin-bottom:18px;
+    }
+
+    .alert-circle svg{
+      width:36px;
+      height:36px;
+      stroke:var(--success);
+    }
+
+    .alert-big-title{
+      font-size:24px;
+      font-weight:700;
+      margin-bottom:8px;
+      color:#fff;
+    }
+
+    .alert-copy{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.7;
+      max-width:360px;
+    }
+
+    .alert-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding:18px 22px 22px;
+    }
+
+    .alert-item{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      padding:16px;
+      background:rgba(255,255,255,.03);
+    }
+
+    .alert-item.warning{
+      border-color:rgba(255,189,89,.24);
+      background:rgba(255,189,89,.08);
+    }
+
+    .alert-item.danger{
+      border-color:rgba(255,95,109,.24);
+      background:rgba(255,95,109,.08);
+    }
+
+    .alert-item.info{
+      border-color:rgba(0,216,255,.24);
+      background:rgba(0,216,255,.08);
+    }
+
+    .alert-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+      align-items:center;
+    }
+
+    .alert-type{
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#fff;
+    }
+
+    .alert-time{
+      color:var(--muted);
+      font-size:11px;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .alert-message{
+      color:#fff;
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .table-wrap{
+      overflow:auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:760px;
+    }
+
+    thead{
+      background:rgba(255,255,255,.03);
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    th{
+      text-align:left;
+      padding:16px 22px;
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    td{
+      padding:18px 22px;
+      border-top:1px solid rgba(255,255,255,.05);
+      font-size:14px;
+      color:#fff;
+      white-space:nowrap;
+    }
+
+    tbody tr:hover{
+      background:rgba(255,255,255,.025);
+    }
+
+    .symbol-main{
+      font-weight:700;
+      letter-spacing:.03em;
+      color:#fff;
+    }
+
+    .symbol-sub{
+      margin-top:5px;
+      font-size:12px;
+      color:var(--muted);
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .side-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:10px;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      border:1px solid transparent;
+    }
+
+    .side-pill.long{
+      background:rgba(45,245,154,.1);
+      color:var(--success);
+      border-color:rgba(45,245,154,.22);
+    }
+
+    .side-pill.short{
+      background:rgba(255,95,109,.1);
+      color:var(--danger);
+      border-color:rgba(255,95,109,.22);
+    }
+
+    .mono{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .positive{color:var(--success)}
+    .negative{color:var(--danger)}
+    .neutral{color:var(--muted)}
+
+    .floating-glow{
+      position:absolute;
+      width:220px;
+      height:220px;
+      border-radius:999px;
+      right:-90px;
+      bottom:-90px;
+      background:rgba(45,245,154,.08);
+      filter:blur(90px);
+      pointer-events:none;
+    }
+
+    /* Sidebar */
+    .sidebar-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.42);
+      backdrop-filter:blur(6px);
+      z-index:70;
+      opacity:0;
+      pointer-events:none;
+      transition:.28s ease;
+    }
+
+    .sidebar-overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .sidebar{
+      position:fixed;
+      top:0;
+      left:0;
+      width:var(--sidebar-w);
+      max-width:92vw;
+      height:100vh;
+      background:rgba(10,17,29,.98);
+      border-right:1px solid var(--line);
+      transform:translateX(calc(-1 * var(--sidebar-w) - 20px));
+      transition:.32s ease;
+      z-index:80;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .sidebar.show{
+      transform:translateX(0);
+    }
+
+    .sidebar-head{
+      padding:22px 20px 18px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .sidebar-brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .sidebar-brand .logo-small{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(0,216,255,.18), rgba(0,216,255,.06));
+      border:1px solid rgba(0,216,255,.2);
+    }
+
+    .sidebar-brand .logo-small svg{
+      width:16px;
+      height:16px;
+      fill:var(--primary);
+    }
+
+    .sidebar-title{
+      font-size:18px;
+      font-weight:700;
+      color:#fff;
+    }
+
+    .sidebar-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:3px;
+    }
+
+    .sidebar-close{
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      border:1px solid var(--line);
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .sidebar-body{
+      padding:18px 16px 22px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .accordion-item{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+    }
+
+    .accordion-trigger{
+      width:100%;
+      border:0;
+      background:transparent;
+      color:#fff;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 16px;
+      text-align:left;
+    }
+
+    .accordion-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .accordion-icon{
+      width:34px;
+      height:34px;
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      background:rgba(0,216,255,.08);
+      border:1px solid rgba(0,216,255,.12);
+      color:var(--primary);
+      flex:0 0 34px;
+    }
+
+    .accordion-icon svg{
+      width:15px;
+      height:15px;
+      stroke:currentColor;
+    }
+
+    .accordion-title{
+      font-size:14px;
+      font-weight:700;
+      color:#fff;
+    }
+
+    .accordion-arrow{
+      color:var(--muted);
+      transition:transform .25s ease;
+      font-size:13px;
+    }
+
+    .accordion-item.open .accordion-arrow{
+      transform:rotate(180deg);
+    }
+
+    .accordion-content{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .28s ease;
+      border-top:1px solid rgba(255,255,255,0);
+    }
+
+    .accordion-item.open .accordion-content{
+      max-height:420px;
+      border-top:1px solid rgba(255,255,255,.05);
+    }
+
+    .accordion-inner{
+      padding:14px 16px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .account-detail{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      font-size:14px;
+      padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,.04);
+    }
+
+    .account-detail:last-child{
+      border-bottom:none;
+    }
+
+    .account-detail .label{
+      color:var(--muted);
+    }
+
+    .account-detail .value{
+      color:#fff;
+      font-weight:600;
+      text-align:right;
+    }
+
+    .mini-btn{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.08);
+      font-weight:600;
+      cursor:pointer;
+      text-align:left;
+    }
+
+    .mini-btn.active{
+      border-color:rgba(0,216,255,.22);
+      background:rgba(0,216,255,.08);
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .field label{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:600;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .field input,
+    .field select{
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      padding:0 12px;
+      outline:none;
+    }
+
+    .field input::placeholder{
+      color:rgba(255,255,255,.35);
+    }
+
+    .helper{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    /* Connect Modal */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.48);
+      backdrop-filter:blur(8px);
+      z-index:90;
+      opacity:0;
+      pointer-events:none;
+      transition:.28s ease;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:18px;
+    }
+
+    .modal-backdrop.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .modal{
+      width:min(640px, 100%);
+      border-radius:28px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(16,24,39,.98), rgba(12,19,31,.98));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      transform:translateY(16px) scale(.985);
+      transition:.28s ease;
+    }
+
+    .modal-backdrop.show .modal{
+      transform:translateY(0) scale(1);
+    }
+
+    .modal-head{
+      padding:22px 22px 18px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:flex-start;
+    }
+
+    .modal-title{
+      font-size:26px;
+      font-weight:800;
+      color:#fff;
+      line-height:1.05;
+      letter-spacing:-.04em;
+      margin-bottom:8px;
+    }
+
+    .modal-copy{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.7;
+      max-width:500px;
+    }
+
+    .close-modal{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      font-size:18px;
+      cursor:pointer;
+      flex:0 0 40px;
+    }
+
+    .platform-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      padding:18px 22px 20px;
+    }
+
+    .platform-card{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      padding:16px;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .platform-card:hover{
+      border-color:rgba(255,255,255,.16);
+      background:rgba(255,255,255,.05);
+    }
+
+    .platform-card.selected{
+      border-color:rgba(0,216,255,.28);
+      background:rgba(0,216,255,.08);
+      box-shadow:0 0 0 1px rgba(0,216,255,.08) inset;
+    }
+
+    .platform-name{
+      font-size:18px;
+      font-weight:700;
+      color:#fff;
+      margin-bottom:8px;
+    }
+
+    .platform-sub{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .modal-actions{
+      padding:0 22px 22px;
+      display:flex;
+      justify-content:flex-end;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      min-height:46px;
+      padding:0 18px;
+      border-radius:14px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      font-size:14px;
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.05);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .btn-primary{
+      background:linear-gradient(180deg, #20cfff, #00b8f0);
+      color:#041018;
+      box-shadow:0 14px 28px rgba(0,216,255,.18);
+    }
+
+    @media (max-width: 1280px){
+      .metrics-grid{
+        grid-template-columns:repeat(3, 1fr);
+      }
+
+      .risk-panel{
+        grid-column:1 / span 12;
+      }
+
+      .positions-panel{
+        grid-column:1 / span 12;
+      }
+    }
+
+    @media (max-width: 820px){
+      body{
+        padding:14px;
+      }
+
+      .topbar{
+        height:auto;
+        min-height:72px;
+        padding:14px 16px;
+        align-items:flex-start;
+        gap:14px;
+        flex-direction:column;
+      }
+
+      .top-status{
+        width:100%;
+        justify-content:space-between;
+      }
+
+      .metrics-grid{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .platform-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 560px){
+      .metrics-grid{
+        grid-template-columns:1fr;
+      }
+
+      .top-status{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+      }
+
+      .live-pill,
+      .broker-pill{
+        width:100%;
+        justify-content:flex-start;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="side" id="side">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<div class="sideTitle">Account Panel</div>
+  <aside class="sidebar" id="accountSidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-brand">
+        <div class="logo-small">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="sidebar-title">Trade Guardian</div>
+          <div class="sidebar-sub">Account Control Panel</div>
+        </div>
+      </div>
+      <button class="sidebar-close" id="closeSidebarBtn">×</button>
+    </div>
 
-<div class="menuItem" onclick="toggle(this)">
-Connected Account
-<div class="expand">
-Platform: Tradovate<br>
-Mode: Demo / Live<br>
-Account Size: 50k<br>
-Status: Connected
-</div>
-</div>
+    <div class="sidebar-body">
+      <div class="accordion-item open" data-section="connected">
+        <button class="accordion-trigger">
+          <div class="accordion-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M3 7h18M6 12h12M8 17h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="accordion-title">Connected Account</div>
+          </div>
+          <div class="accordion-arrow">⌄</div>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <div class="account-detail">
+              <div class="label">Platform</div>
+              <div class="value" id="sidePlatform">Tradovate</div>
+            </div>
+            <div class="account-detail">
+              <div class="label">Mode</div>
+              <div class="value" id="sideMode">Live</div>
+            </div>
+            <div class="account-detail">
+              <div class="label">Account Size</div>
+              <div class="value" id="sideAccountSize">$50,000</div>
+            </div>
+            <div class="account-detail">
+              <div class="label">Status</div>
+              <div class="value" id="sideConnectionStatus">Connected</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<div class="menuItem" onclick="toggle(this)">
-Switch Account
-<div class="expand">
-Select another connected account.
-</div>
-</div>
+      <div class="accordion-item" data-section="switch">
+        <button class="accordion-trigger">
+          <div class="accordion-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M8 7H20M20 7L16 3M20 7L16 11M16 17H4M4 17L8 13M4 17L8 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="accordion-title">Switch Account</div>
+          </div>
+          <div class="accordion-arrow">⌄</div>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <button class="mini-btn active">Tradovate — Active Account</button>
+            <button class="mini-btn">NinjaTrader — No secondary account yet</button>
+            <div class="helper">When multiple accounts are connected, you will be able to switch the active dashboard account here.</div>
+          </div>
+        </div>
+      </div>
 
-<div class="menuItem" onclick="toggle(this)">
-Add New Account
-<div class="expand">
-Start the setup flow for a new account.
-</div>
-</div>
+      <div class="accordion-item" data-section="add">
+        <button class="accordion-trigger">
+          <div class="accordion-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="accordion-title">Add New Account</div>
+          </div>
+          <div class="accordion-arrow">⌄</div>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <div class="field">
+              <label>Platform</label>
+              <select id="addPlatform">
+                <option>Tradovate</option>
+                <option>NinjaTrader</option>
+              </select>
+            </div>
 
-<div class="menuItem" onclick="toggle(this)">
-Settings
-<div class="expand">
-Risk per trade<br>
-Daily loss limit<br>
-Max drawdown<br>
-Max positions
-</div>
-</div>
+            <div class="field">
+              <label>Account Mode</label>
+              <select id="addMode">
+                <option>Live</option>
+                <option>Demo</option>
+              </select>
+            </div>
 
-</div>
+            <div class="field">
+              <label>Account Size</label>
+              <input id="addAccountSize" type="number" placeholder="50000" value="50000">
+            </div>
 
-<div class="container">
+            <div class="helper">This section is ready for the real onboarding flow where the trader can connect and configure another account.</div>
+          </div>
+        </div>
+      </div>
 
-<div class="header">
+      <div class="accordion-item" data-section="settings">
+        <button class="accordion-trigger">
+          <div class="accordion-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5A3.5 3.5 0 1 0 12 15.5Z" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M19.4 15a1.6 1.6 0 0 0 .32 1.76l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.6 1.6 0 0 0 15 19.4a1.6 1.6 0 0 0-1 .94 1.6 1.6 0 0 1-3 0a1.6 1.6 0 0 0-1-.94a1.6 1.6 0 0 0-1.76.32l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.6 1.6 0 0 0 4.6 15a1.6 1.6 0 0 0-.94-1a1.6 1.6 0 0 1 0-3a1.6 1.6 0 0 0 .94-1a1.6 1.6 0 0 0-.32-1.76l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.6 1.6 0 0 0 9 4.6a1.6 1.6 0 0 0 1-.94a1.6 1.6 0 0 1 3 0a1.6 1.6 0 0 0 1 .94a1.6 1.6 0 0 0 1.76-.32l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.6 1.6 0 0 0 19.4 9a1.6 1.6 0 0 0 .94 1a1.6 1.6 0 0 1 0 3a1.6 1.6 0 0 0-.94 1Z" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div class="accordion-title">Settings</div>
+          </div>
+          <div class="accordion-arrow">⌄</div>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <div class="field">
+              <label>Risk Per Trade</label>
+              <input id="settingRiskPerTrade" type="number" placeholder="500" value="500">
+            </div>
+            <div class="field">
+              <label>Daily Loss Limit</label>
+              <input id="settingDailyLoss" type="number" placeholder="1500" value="1500">
+            </div>
+            <div class="field">
+              <label>Max Drawdown</label>
+              <input id="settingDrawdown" type="number" placeholder="2500" value="2500">
+            </div>
+            <div class="field">
+              <label>Max Positions</label>
+              <input id="settingMaxPositions" type="number" placeholder="3" value="3">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
 
-<div class="logo" onclick="togglePanel()">
-<div class="logoBox">
-🛡
-</div>
-<div class="logoText">Trade Guardian</div>
-</div>
+  <div class="modal-backdrop" id="connectModal">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Connect Trading Account</div>
+          <div class="modal-copy">
+            Select the platform you use to execute trades. Trade Guardian currently supports Tradovate and NinjaTrader for real-time account monitoring.
+          </div>
+        </div>
+        <button class="close-modal" id="closeModalBtn">×</button>
+      </div>
 
-<div class="feed">
-Live Feed: <span>Active</span>
-</div>
+      <div class="platform-grid" id="platformGrid">
+        <div class="platform-card selected" data-platform="Tradovate">
+          <div class="platform-name">Tradovate</div>
+          <div class="platform-sub">
+            Cloud futures trading platform with strong API support and fast Trade Guardian compatibility.
+          </div>
+        </div>
 
-</div>
+        <div class="platform-card" data-platform="NinjaTrader">
+          <div class="platform-name">NinjaTrader</div>
+          <div class="platform-sub">
+            Professional futures trading platform with strong support for direct order and position monitoring.
+          </div>
+        </div>
+      </div>
 
-<div class="card">
-<div class="cardTitle">Risk Per Trade</div>
-<div class="metric">$500.00</div>
-<div class="sub">1.00% of balance</div>
-</div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+        <button class="btn btn-primary" id="continueConnectBtn">Continue</button>
+      </div>
+    </div>
+  </div>
 
-<div class="card">
-<div class="cardTitle">Trades Today</div>
-<div class="metric">4</div>
-</div>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" id="brandToggle">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z"></path>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <div class="brand-title">Trade <span class="mono">Guardian</span></div>
+        </div>
+      </div>
 
-<div class="card">
-<div class="cardTitle">Risk Meter</div>
+      <div class="top-status">
+        <div class="status-block">
+          <span>Live Feed:</span>
+          <div class="live-pill">
+            <span class="dot"></span>
+            <span>Active</span>
+          </div>
+        </div>
 
-<div class="row">
-<span>Daily Loss Limit Utilized</span>
-<span>0.00%</span>
-</div>
+        <div class="status-block">
+          <span id="brokerLabel">Tradovate:</span>
+          <div class="broker-pill connected" id="brokerStatusPill">
+            <span>Connected</span>
+          </div>
+        </div>
+      </div>
+    </header>
 
-<div class="riskBar">
-<div class="riskFill"></div>
-</div>
+    <main class="dashboard-grid">
+      <section class="metrics-grid">
+        <div class="metric-card highlight">
+          <div class="metric-head">
+            <div class="metric-label">Account Balance</div>
+            <div class="metric-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 2V22M17 5H9.5A3.5 3.5 0 0 0 9.5 12H14.5A3.5 3.5 0 1 1 14.5 19H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="metric-value mono" id="balanceValue">$50,000.00</div>
+        </div>
 
-<div class="row">
-<span>$0.00 used</span>
-<span>$1,500.00 limit</span>
-</div>
+        <div class="metric-card">
+          <div class="metric-head">
+            <div class="metric-label">Total Equity</div>
+            <div class="metric-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 14L8.5 9.5L12 13L20 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="metric-value mono" id="equityValue">$50,000.00</div>
+        </div>
 
-<div class="row">
-<span>Total Open Risk</span>
-<span>$900.00</span>
-</div>
+        <div class="metric-card">
+          <div class="metric-head">
+            <div class="metric-label">Daily P&amp;L</div>
+            <div class="metric-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 12H8L10.5 7L14 17L16.5 12H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="metric-value mono neutral" id="dailyPnlValue">$0.00</div>
+          <div class="metric-sub">
+            <span class="metric-pill" id="dailyPnlPercent">0.00%</span>
+          </div>
+        </div>
 
-<div class="row">
-<span>Max Positions Allowed</span>
-<span>3</span>
-</div>
+        <div class="metric-card">
+          <div class="metric-head">
+            <div class="metric-label">Open Positions</div>
+            <div class="metric-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 7H20M4 12H16M4 17H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="metric-value mono" id="openPositionsCount">2</div>
+        </div>
 
-</div>
+        <div class="metric-card">
+          <div class="metric-head">
+            <div class="metric-label">Risk Per Trade</div>
+            <div class="metric-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="metric-value mono" id="riskPerTradeValue">$500.00</div>
+          <div class="metric-sub" id="riskPerTradeSub">1.00% of balance</div>
+        </div>
 
-<div class="card">
+        <div class="metric-card">
+          <div class="metric-head">
+            <div class="metric-label">Trades Today</div>
+            <div class="metric-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M8 7H20M4 12H20M10 17H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="metric-value mono" id="tradesTodayValue">4</div>
+        </div>
+      </section>
 
-<div class="cardTitle">Guardian Alerts</div>
+      <section class="risk-panel">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title-wrap">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              </svg>
+              <div class="panel-title">Risk Meter</div>
+            </div>
+            <div class="status-badge status-safe" id="riskStatusBadge">Safe</div>
+          </div>
 
-<div class="alertBox">
+          <div class="panel-body">
+            <div class="risk-grid">
+              <div>
+                <div class="risk-row">
+                  <div class="left">Daily Loss Limit Utilized</div>
+                  <div class="right" id="dailyLossPercentLabel">0.00%</div>
+                </div>
 
-<div class="alertIcon">
-✔
-</div>
+                <div class="risk-bar-wrap">
+                  <div class="risk-bar">
+                    <div class="risk-fill" id="riskFill"></div>
+                  </div>
+                </div>
 
-<div class="alertTitle">System All Clear</div>
+                <div class="risk-row" style="margin-top:10px;font-size:12px">
+                  <div class="left mono" id="dailyLossUsedLabel">$0.00 used</div>
+                  <div class="right mono" id="dailyLossLimitLabel">$1,500.00 limit</div>
+                </div>
+              </div>
 
-<div class="sub">
-No active risk alerts. Trade execution is permitted within limits.
-</div>
+              <div class="risk-stats">
+                <div class="risk-stat">
+                  <div class="label">Total Open Risk</div>
+                  <div class="value" id="totalOpenRiskValue">$900.00</div>
+                </div>
+                <div class="risk-stat">
+                  <div class="label">Max Positions Allowed</div>
+                  <div class="value" id="maxPositionsValue">3</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-</div>
+          <div class="floating-glow"></div>
+        </div>
 
-</div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title-wrap">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 3C7 3 3.5 7.03 3.5 12C3.5 16.97 7 21 12 21C17 21 20.5 16.97 20.5 12C20.5 7.03 17 3 12 3Z" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M12 8V12L15 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="panel-title">Guardian Alerts</div>
+            </div>
+          </div>
 
-<div class="card">
+          <div id="alertsContainer">
+            <div class="alert-empty" id="alertsEmpty">
+              <div class="alert-circle">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="alert-big-title">System All Clear</div>
+              <div class="alert-copy">
+                No active risk alerts. Trade execution is permitted within limits.
+              </div>
+            </div>
 
-<div class="cardTitle">
-Open Positions
-</div>
+            <div class="alert-list" id="alertList" style="display:none;"></div>
+          </div>
+        </div>
+      </section>
 
-<table class="table">
+      <section class="positions-panel">
+        <div class="panel" style="min-height:100%;">
+          <div class="panel-head">
+            <div class="panel-title-wrap">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 7H20M4 12H16M4 17H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <div class="panel-title">Open Positions</div>
+            </div>
+            <div class="metric-pill" id="positionsActiveBadge">2 Active</div>
+          </div>
 
-<thead>
-<tr>
-<th>SYMBOL</th>
-<th>SIDE</th>
-<th>QTY</th>
-<th>ENTRY</th>
-</tr>
-</thead>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Side</th>
+                  <th style="text-align:right;">Qty</th>
+                  <th style="text-align:right;">Entry</th>
+                  <th style="text-align:right;">Current</th>
+                  <th style="text-align:right;">Risk Amt</th>
+                  <th style="text-align:right;">Open P&amp;L</th>
+                </tr>
+              </thead>
+              <tbody id="positionsTableBody">
+                <tr>
+                  <td>
+                    <div class="symbol-main">ES</div>
+                    <div class="symbol-sub">08:14:22</div>
+                  </td>
+                  <td><span class="side-pill long">LONG</span></td>
+                  <td style="text-align:right;" class="mono">1</td>
+                  <td style="text-align:right;" class="mono">5278.25</td>
+                  <td style="text-align:right;" class="mono">5281.75</td>
+                  <td style="text-align:right;" class="mono">$250.00</td>
+                  <td style="text-align:right;" class="mono positive">+$175.00</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="symbol-main">NQ</div>
+                    <div class="symbol-sub">08:26:41</div>
+                  </td>
+                  <td><span class="side-pill short">SHORT</span></td>
+                  <td style="text-align:right;" class="mono">1</td>
+                  <td style="text-align:right;" class="mono">18620.00</td>
+                  <td style="text-align:right;" class="mono">18605.00</td>
+                  <td style="text-align:right;" class="mono">$650.00</td>
+                  <td style="text-align:right;" class="mono positive">+$300.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
-<tbody>
+  <script>
+    const accountSidebar = document.getElementById("accountSidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    const brandToggle = document.getElementById("brandToggle");
+    const closeSidebarBtn = document.getElementById("closeSidebarBtn");
 
-<tr>
-<td>ES</td>
-<td><span class="tagLong">LONG</span></td>
-<td>1</td>
-<td>5278.25</td>
-</tr>
+    const connectModal = document.getElementById("connectModal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const cancelModalBtn = document.getElementById("cancelModalBtn");
+    const continueConnectBtn = document.getElementById("continueConnectBtn");
+    const platformCards = document.querySelectorAll(".platform-card");
 
-<tr>
-<td>NQ</td>
-<td><span class="tagShort">SHORT</span></td>
-<td>1</td>
-<td>18620.00</td>
-</tr>
+    let selectedPlatform = localStorage.getItem("tradeGuardianSelectedPlatform") || "Tradovate";
 
-</tbody>
+    const defaultState = {
+      brokerName: selectedPlatform,
+      connectionStatus: "connected",
+      mode: "Live",
+      accountSize: 50000,
+      accountId: "TG-50000-01",
+      balance: 50000,
+      equity: 50000,
+      dailyPnl: 0,
+      dailyPnlPercent: 0,
+      openPositionsCount: 2,
+      riskPerTrade: 500,
+      riskPerTradePercent: 1,
+      tradesToday: 4,
+      dailyLossLimit: 1500,
+      dailyLossUsed: 0,
+      dailyLossPercent: 0,
+      totalOpenRisk: 900,
+      maxPositions: 3,
+      riskStatus: "safe",
+      alerts: [],
+      positions: [
+        {
+          symbol: "ES",
+          openedAt: "08:14:22",
+          side: "long",
+          quantity: 1,
+          entryPrice: 5278.25,
+          currentPrice: 5281.75,
+          riskAmount: 250,
+          unrealizedPnl: 175
+        },
+        {
+          symbol: "NQ",
+          openedAt: "08:26:41",
+          side: "short",
+          quantity: 1,
+          entryPrice: 18620.00,
+          currentPrice: 18605.00,
+          riskAmount: 650,
+          unrealizedPnl: 300
+        }
+      ]
+    };
 
-</table>
+    function formatCurrency(value){
+      const n = Number(value || 0);
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(n);
+    }
 
-</div>
+    function formatPercent(value){
+      const n = Number(value || 0);
+      return `${n.toFixed(2)}%`;
+    }
 
-</div>
+    function formatPnl(value){
+      const n = Number(value || 0);
+      const base = formatCurrency(Math.abs(n));
+      if (n > 0) return `+${base}`;
+      if (n < 0) return `-${base}`;
+      return base;
+    }
 
-<script>
+    function getPnlClass(value){
+      if (value > 0) return "positive";
+      if (value < 0) return "negative";
+      return "neutral";
+    }
 
-function togglePanel(){
-document.getElementById("side").classList.toggle("open");
-}
+    function syncPlatformCards(){
+      platformCards.forEach(card => {
+        card.classList.toggle("selected", card.dataset.platform === selectedPlatform);
+      });
+    }
 
-function toggle(el){
+    function openSidebar(){
+      accountSidebar.classList.add("show");
+      sidebarOverlay.classList.add("show");
+    }
 
-document.querySelectorAll(".menuItem").forEach(i=>{
-if(i!==el){i.classList.remove("active")}
-})
+    function closeSidebar(){
+      accountSidebar.classList.remove("show");
+      sidebarOverlay.classList.remove("show");
+    }
 
-el.classList.toggle("active")
+    function openModal(){
+      syncPlatformCards();
+      connectModal.classList.add("show");
+    }
 
-}
+    function closeModal(){
+      connectModal.classList.remove("show");
+    }
 
-</script>
+    brandToggle.addEventListener("click", openSidebar);
+    closeSidebarBtn.addEventListener("click", closeSidebar);
+    sidebarOverlay.addEventListener("click", closeSidebar);
 
+    document.querySelectorAll(".accordion-item").forEach(item => {
+      const trigger = item.querySelector(".accordion-trigger");
+      trigger.addEventListener("click", () => {
+        document.querySelectorAll(".accordion-item").forEach(other => {
+          if (other !== item) other.classList.remove("open");
+        });
+        item.classList.toggle("open");
+      });
+    });
+
+    platformCards.forEach(card => {
+      card.addEventListener("click", () => {
+        selectedPlatform = card.dataset.platform;
+        syncPlatformCards();
+      });
+    });
+
+    continueConnectBtn.addEventListener("click", () => {
+      localStorage.setItem("tradeGuardianSelectedPlatform", selectedPlatform);
+      defaultState.brokerName = selectedPlatform;
+      document.getElementById("brokerLabel").textContent = `${selectedPlatform}:`;
+      document.getElementById("sidePlatform").textContent = selectedPlatform;
+      closeModal();
+    });
+
+    closeModalBtn.addEventListener("click", closeModal);
+    cancelModalBtn.addEventListener("click", closeModal);
+
+    function renderTopBar(){
+      document.getElementById("brokerLabel").textContent = `${defaultState.brokerName}:`;
+
+      const brokerPill = document.getElementById("brokerStatusPill");
+      brokerPill.className = "broker-pill " + defaultState.connectionStatus;
+      brokerPill.innerHTML = `<span>${defaultState.connectionStatus.charAt(0).toUpperCase() + defaultState.connectionStatus.slice(1)}</span>`;
+
+      document.getElementById("sidePlatform").textContent = defaultState.brokerName;
+      document.getElementById("sideMode").textContent = defaultState.mode;
+      document.getElementById("sideAccountSize").textContent = formatCurrency(defaultState.accountSize);
+      document.getElementById("sideConnectionStatus").textContent = defaultState.connectionStatus.charAt(0).toUpperCase() + defaultState.connectionStatus.slice(1);
+    }
+
+    function renderMetrics(){
+      document.getElementById("balanceValue").textContent = formatCurrency(defaultState.balance);
+      document.getElementById("equityValue").textContent = formatCurrency(defaultState.equity);
+
+      const dailyPnlEl = document.getElementById("dailyPnlValue");
+      dailyPnlEl.textContent = formatPnl(defaultState.dailyPnl);
+      dailyPnlEl.className = `metric-value mono ${getPnlClass(defaultState.dailyPnl)}`;
+
+      document.getElementById("dailyPnlPercent").textContent = formatPercent(defaultState.dailyPnlPercent);
+      document.getElementById("openPositionsCount").textContent = defaultState.openPositionsCount;
+      document.getElementById("riskPerTradeValue").textContent = formatCurrency(defaultState.riskPerTrade);
+      document.getElementById("riskPerTradeSub").textContent = `${formatPercent(defaultState.riskPerTradePercent)} of balance`;
+      document.getElementById("tradesTodayValue").textContent = defaultState.tradesToday;
+    }
+
+    function renderRiskMeter(){
+      document.getElementById("dailyLossPercentLabel").textContent = formatPercent(defaultState.dailyLossPercent);
+      document.getElementById("dailyLossUsedLabel").textContent = `${formatCurrency(defaultState.dailyLossUsed)} used`;
+      document.getElementById("dailyLossLimitLabel").textContent = `${formatCurrency(defaultState.dailyLossLimit)} limit`;
+      document.getElementById("totalOpenRiskValue").textContent = formatCurrency(defaultState.totalOpenRisk);
+      document.getElementById("maxPositionsValue").textContent = defaultState.maxPositions;
+      document.getElementById("riskFill").style.width = `${Math.max(0, Math.min(100, defaultState.dailyLossPercent))}%`;
+
+      const badge = document.getElementById("riskStatusBadge");
+      badge.className = "status-badge";
+      if (defaultState.riskStatus === "warning") {
+        badge.classList.add("status-warning");
+        badge.textContent = "Warning";
+        document.getElementById("riskFill").style.background = "linear-gradient(90deg, var(--warning), rgba(255,189,89,.2))";
+      } else if (defaultState.riskStatus === "danger") {
+        badge.classList.add("status-danger");
+        badge.textContent = "Critical";
+        document.getElementById("riskFill").style.background = "linear-gradient(90deg, var(--danger), rgba(255,95,109,.2))";
+      } else {
+        badge.classList.add("status-safe");
+        badge.textContent = "Safe";
+        document.getElementById("riskFill").style.background = "linear-gradient(90deg, var(--success), rgba(45,245,154,.2))";
+      }
+    }
+
+    function renderAlerts(){
+      const emptyState = document.getElementById("alertsEmpty");
+      const alertList = document.getElementById("alertList");
+
+      if (!defaultState.alerts || defaultState.alerts.length === 0) {
+        emptyState.style.display = "flex";
+        alertList.style.display = "none";
+        alertList.innerHTML = "";
+        return;
+      }
+
+      emptyState.style.display = "none";
+      alertList.style.display = "flex";
+      alertList.innerHTML = "";
+
+      defaultState.alerts.forEach(alert => {
+        const item = document.createElement("div");
+        item.className = `alert-item ${alert.severity || "info"}`;
+        item.innerHTML = `
+          <div class="alert-top">
+            <div class="alert-type">${alert.type || "ALERT"}</div>
+            <div class="alert-time">${alert.time || ""}</div>
+          </div>
+          <div class="alert-message">${alert.message || ""}</div>
+        `;
+        alertList.appendChild(item);
+      });
+    }
+
+    function renderPositions(){
+      const body = document.getElementById("positionsTableBody");
+      const badge = document.getElementById("positionsActiveBadge");
+      badge.textContent = `${defaultState.positions.length} Active`;
+
+      body.innerHTML = "";
+
+      if (!defaultState.positions.length) {
+        body.innerHTML = `
+          <tr>
+            <td colspan="7" style="padding:32px 22px;text-align:center;color:var(--muted);">
+              No open positions
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      defaultState.positions.forEach(pos => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <div class="symbol-main">${pos.symbol}</div>
+            <div class="symbol-sub">${pos.openedAt}</div>
+          </td>
+          <td>
+            <span class="side-pill ${pos.side === "long" ? "long" : "short"}">
+              ${pos.side.toUpperCase()}
+            </span>
+          </td>
+          <td style="text-align:right;" class="mono">${pos.quantity}</td>
+          <td style="text-align:right;" class="mono">${Number(pos.entryPrice).toFixed(2)}</td>
+          <td style="text-align:right;" class="mono">${Number(pos.currentPrice).toFixed(2)}</td>
+          <td style="text-align:right;" class="mono">${formatCurrency(pos.riskAmount)}</td>
+          <td style="text-align:right;" class="mono ${getPnlClass(pos.unrealizedPnl)}">${formatPnl(pos.unrealizedPnl)}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAll(){
+      renderTopBar();
+      renderMetrics();
+      renderRiskMeter();
+      renderAlerts();
+      renderPositions();
+      syncPlatformCards();
+    }
+
+    renderAll();
+
+    // Expose for future real integration
+    window.TradeGuardianDashboard = {
+      setAccountUpdate(payload){
+        defaultState.balance = payload.balance ?? defaultState.balance;
+        defaultState.equity = payload.equity ?? defaultState.equity;
+        defaultState.dailyPnl = payload.dailyPnl ?? defaultState.dailyPnl;
+        defaultState.dailyPnlPercent = payload.dailyPnlPercent ?? defaultState.dailyPnlPercent;
+        defaultState.tradesToday = payload.tradesToday ?? defaultState.tradesToday;
+        defaultState.accountId = payload.accountId ?? defaultState.accountId;
+        defaultState.brokerName = payload.brokerName ?? defaultState.brokerName;
+        renderAll();
+      },
+
+      setRiskUpdate(payload){
+        defaultState.riskPerTrade = payload.riskPerTrade ?? defaultState.riskPerTrade;
+        defaultState.riskPerTradePercent = payload.riskPerTradePercent ?? defaultState.riskPerTradePercent;
+        defaultState.dailyLossLimit = payload.dailyLossLimit ?? defaultState.dailyLossLimit;
+        defaultState.dailyLossUsed = payload.dailyLossUsed ?? defaultState.dailyLossUsed;
+        defaultState.dailyLossPercent = payload.dailyLossPercent ?? defaultState.dailyLossPercent;
+        defaultState.totalOpenRisk = payload.totalOpenRisk ?? defaultState.totalOpenRisk;
+        defaultState.maxPositions = payload.maxPositions ?? defaultState.maxPositions;
+        defaultState.riskStatus = payload.riskStatus ?? defaultState.riskStatus;
+        renderAll();
+      },
+
+      setPositionsUpdate(payload){
+        defaultState.positions = Array.isArray(payload) ? payload : [];
+        defaultState.openPositionsCount = defaultState.positions.length;
+        renderAll();
+      },
+
+      setAlertsUpdate(payload){
+        defaultState.alerts = Array.isArray(payload) ? payload : [];
+        renderAll();
+      },
+
+      openConnectModal(){
+        openModal();
+      }
+    };
+
+    // Optional shortcut: open modal from console if needed
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "c" && e.altKey) openModal();
+    });
+  </script>
 </body>
 </html>
