@@ -1064,72 +1064,26 @@
       <div>
         <div class="modal-title">Connect Trading Account</div>
         <div class="modal-copy">
-          Choose the platform where you execute your trades. This selection will later be used
-          to start the live connection and feed account activity into Trade Guardian.
+          Select the platform you use to execute trades. Trade Guardian currently supports
+          Tradovate and NinjaTrader for real-time account monitoring.
         </div>
       </div>
       <button class="close-btn" id="closeModalBtn">×</button>
     </div>
 
     <div class="platform-grid" id="platformGrid">
-      <div class="platform-card" data-platform="NinjaTrader">
-        <div class="platform-name">NinjaTrader</div>
-        <div class="platform-sub">Top priority for futures traders and real-time order / position monitoring.</div>
-      </div>
-
       <div class="platform-card" data-platform="Tradovate">
         <div class="platform-name">Tradovate</div>
-        <div class="platform-sub">Strong priority for cloud futures trading and API-friendly workflows.</div>
+        <div class="platform-sub">
+          Cloud futures trading platform with strong API support. Recommended for fast and reliable Trade Guardian connection.
+        </div>
       </div>
 
-      <div class="platform-card" data-platform="Rithmic">
-        <div class="platform-name">Rithmic</div>
-        <div class="platform-sub">Professional futures infrastructure with execution and order-report support.</div>
-      </div>
-
-      <div class="platform-card" data-platform="MetaTrader 5">
-        <div class="platform-name">MetaTrader 5</div>
-        <div class="platform-sub">Important for forex expansion and programmatic positions / order access.</div>
-      </div>
-
-      <div class="platform-card" data-platform="Interactive Brokers">
-        <div class="platform-name">Interactive Brokers</div>
-        <div class="platform-sub">Multi-asset priority with official APIs for accounts, positions, and orders.</div>
-      </div>
-
-      <div class="platform-card" data-platform="cTrader">
-        <div class="platform-name">cTrader</div>
-        <div class="platform-sub">Useful for forex and CFD traders with Open API support.</div>
-      </div>
-
-      <div class="platform-card" data-platform="CQG">
-        <div class="platform-name">CQG</div>
-        <div class="platform-sub">Mid-priority futures connectivity with position and order support.</div>
-      </div>
-
-      <div class="platform-card" data-platform="DXtrade">
-        <div class="platform-name">DXtrade</div>
-        <div class="platform-sub">Enterprise-style multi-asset platform with API ecosystem.</div>
-      </div>
-
-      <div class="platform-card" data-platform="Match-Trader">
-        <div class="platform-name">Match-Trader</div>
-        <div class="platform-sub">Broker-platform API option with account, orders, and positions support.</div>
-      </div>
-
-      <div class="platform-card" data-platform="Sierra Chart / Teton">
-        <div class="platform-name">Sierra Chart / Teton</div>
-        <div class="platform-sub">Advanced futures route, useful later in the roadmap.</div>
-      </div>
-
-      <div class="platform-card" data-platform="TradingView">
-        <div class="platform-name">TradingView</div>
-        <div class="platform-sub">Lower priority as a direct connector; usually broker-dependent rather than universal.</div>
-      </div>
-
-      <div class="platform-card" data-platform="Other Platform">
-        <div class="platform-name">Other</div>
-        <div class="platform-sub">For proprietary dashboards, custom bridges, or future integrations.</div>
+      <div class="platform-card" data-platform="NinjaTrader">
+        <div class="platform-name">NinjaTrader</div>
+        <div class="platform-sub">
+          Professional futures trading platform with direct order and position monitoring support.
+        </div>
       </div>
     </div>
 
