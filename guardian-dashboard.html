@@ -15,20 +15,14 @@
       --bg-2:#0b1320;
       --panel:#101827;
       --panel-2:#131d2e;
-      --panel-3:#0f1725;
       --line:rgba(255,255,255,.08);
-      --line-strong:rgba(255,255,255,.14);
       --text:#ecf3ff;
       --muted:#8da0c0;
       --primary:#00d8ff;
-      --primary-soft:rgba(0,216,255,.12);
       --success:#2df59a;
       --warning:#ffbd59;
       --danger:#ff5f6d;
       --shadow:0 22px 60px rgba(0,0,0,.35);
-      --radius-xl:24px;
-      --radius-lg:18px;
-      --radius-md:14px;
       --sidebar-w:360px;
     }
 
@@ -101,13 +95,6 @@
       fill:var(--primary);
     }
 
-    .brand-copy{
-      display:flex;
-      align-items:baseline;
-      gap:6px;
-      flex-wrap:wrap;
-    }
-
     .brand-title{
       font-size:21px;
       font-weight:700;
@@ -154,23 +141,9 @@
       width:8px;
       height:8px;
       border-radius:999px;
-      background:var(--success);
-      box-shadow:0 0 14px rgba(45,245,154,.6);
+      background:var(--danger);
+      box-shadow:none;
       position:relative;
-    }
-
-    .live-pill .dot::after{
-      content:"";
-      position:absolute;
-      inset:-4px;
-      border-radius:999px;
-      border:1px solid rgba(45,245,154,.25);
-      animation:pulse 2s infinite;
-    }
-
-    @keyframes pulse{
-      0%{transform:scale(.7);opacity:.7}
-      100%{transform:scale(1.5);opacity:0}
     }
 
     .broker-pill.connected{
@@ -467,16 +440,16 @@
       border-radius:999px;
       display:grid;
       place-items:center;
-      background:rgba(45,245,154,.1);
-      border:1px solid rgba(45,245,154,.2);
-      box-shadow:0 0 34px rgba(45,245,154,.1);
+      background:rgba(255,189,89,.1);
+      border:1px solid rgba(255,189,89,.2);
+      box-shadow:none;
       margin-bottom:18px;
     }
 
     .alert-circle svg{
       width:36px;
       height:36px;
-      stroke:var(--success);
+      stroke:var(--warning);
     }
 
     .alert-big-title{
@@ -645,7 +618,6 @@
       pointer-events:none;
     }
 
-    /* Sidebar */
     .sidebar-overlay{
       position:fixed;
       inset:0;
@@ -902,7 +874,6 @@
       line-height:1.6;
     }
 
-    /* Connect Modal */
     .modal-backdrop{
       position:fixed;
       inset:0;
@@ -1127,7 +1098,7 @@
     </div>
 
     <div class="sidebar-body">
-      <div class="accordion-item open" data-section="connected">
+      <div class="accordion-item open">
         <button class="accordion-trigger">
           <div class="accordion-left">
             <div class="accordion-icon">
@@ -1143,25 +1114,25 @@
           <div class="accordion-inner">
             <div class="account-detail">
               <div class="label">Platform</div>
-              <div class="value" id="sidePlatform">Tradovate</div>
+              <div class="value" id="sidePlatform">Not Connected</div>
             </div>
             <div class="account-detail">
               <div class="label">Mode</div>
-              <div class="value" id="sideMode">Live</div>
+              <div class="value" id="sideMode">Not Connected</div>
             </div>
             <div class="account-detail">
               <div class="label">Account Size</div>
-              <div class="value" id="sideAccountSize">$50,000</div>
+              <div class="value" id="sideAccountSize">$0.00</div>
             </div>
             <div class="account-detail">
               <div class="label">Status</div>
-              <div class="value" id="sideConnectionStatus">Connected</div>
+              <div class="value" id="sideConnectionStatus">Not Connected</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="accordion-item" data-section="switch">
+      <div class="accordion-item">
         <button class="accordion-trigger">
           <div class="accordion-left">
             <div class="accordion-icon">
@@ -1175,14 +1146,13 @@
         </button>
         <div class="accordion-content">
           <div class="accordion-inner">
-            <button class="mini-btn active">Tradovate — Active Account</button>
-            <button class="mini-btn">NinjaTrader — No secondary account yet</button>
+            <button class="mini-btn active">No account connected yet</button>
             <div class="helper">When multiple accounts are connected, you will be able to switch the active dashboard account here.</div>
           </div>
         </div>
       </div>
 
-      <div class="accordion-item" data-section="add">
+      <div class="accordion-item">
         <button class="accordion-trigger">
           <div class="accordion-left">
             <div class="accordion-icon">
@@ -1222,7 +1192,7 @@
         </div>
       </div>
 
-      <div class="accordion-item" data-section="settings">
+      <div class="accordion-item">
         <button class="accordion-trigger">
           <div class="accordion-left">
             <div class="accordion-icon">
@@ -1239,19 +1209,19 @@
           <div class="accordion-inner">
             <div class="field">
               <label>Risk Per Trade</label>
-              <input id="settingRiskPerTrade" type="number" placeholder="500" value="500">
+              <input id="settingRiskPerTrade" type="number" placeholder="500">
             </div>
             <div class="field">
               <label>Daily Loss Limit</label>
-              <input id="settingDailyLoss" type="number" placeholder="1500" value="1500">
+              <input id="settingDailyLoss" type="number" placeholder="1500">
             </div>
             <div class="field">
               <label>Max Drawdown</label>
-              <input id="settingDrawdown" type="number" placeholder="2500" value="2500">
+              <input id="settingDrawdown" type="number" placeholder="2500">
             </div>
             <div class="field">
               <label>Max Positions</label>
-              <input id="settingMaxPositions" type="number" placeholder="3" value="3">
+              <input id="settingMaxPositions" type="number" placeholder="3">
             </div>
           </div>
         </div>
@@ -1302,24 +1272,22 @@
             <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z"></path>
           </svg>
         </div>
-        <div class="brand-copy">
-          <div class="brand-title">Trade <span class="mono">Guardian</span></div>
-        </div>
+        <div class="brand-title">Trade <span class="mono">Guardian</span></div>
       </div>
 
       <div class="top-status">
         <div class="status-block">
           <span>Live Feed:</span>
-          <div class="live-pill">
+          <div class="live-pill" id="liveFeedPill">
             <span class="dot"></span>
-            <span>Active</span>
+            <span>Inactive</span>
           </div>
         </div>
 
         <div class="status-block">
-          <span id="brokerLabel">Tradovate:</span>
-          <div class="broker-pill connected" id="brokerStatusPill">
-            <span>Connected</span>
+          <span id="brokerLabel">Broker:</span>
+          <div class="broker-pill disconnected" id="brokerStatusPill">
+            <span>Connect Account</span>
           </div>
         </div>
       </div>
@@ -1336,7 +1304,7 @@
               </svg>
             </div>
           </div>
-          <div class="metric-value mono" id="balanceValue">$50,000.00</div>
+          <div class="metric-value mono" id="balanceValue">$0.00</div>
         </div>
 
         <div class="metric-card">
@@ -1348,7 +1316,7 @@
               </svg>
             </div>
           </div>
-          <div class="metric-value mono" id="equityValue">$50,000.00</div>
+          <div class="metric-value mono" id="equityValue">$0.00</div>
         </div>
 
         <div class="metric-card">
@@ -1375,7 +1343,7 @@
               </svg>
             </div>
           </div>
-          <div class="metric-value mono" id="openPositionsCount">2</div>
+          <div class="metric-value mono" id="openPositionsCount">0</div>
         </div>
 
         <div class="metric-card">
@@ -1387,8 +1355,8 @@
               </svg>
             </div>
           </div>
-          <div class="metric-value mono" id="riskPerTradeValue">$500.00</div>
-          <div class="metric-sub" id="riskPerTradeSub">1.00% of balance</div>
+          <div class="metric-value mono" id="riskPerTradeValue">$0.00</div>
+          <div class="metric-sub" id="riskPerTradeSub">No plan loaded yet</div>
         </div>
 
         <div class="metric-card">
@@ -1400,7 +1368,7 @@
               </svg>
             </div>
           </div>
-          <div class="metric-value mono" id="tradesTodayValue">4</div>
+          <div class="metric-value mono" id="tradesTodayValue">0</div>
         </div>
       </section>
 
@@ -1432,18 +1400,18 @@
 
                 <div class="risk-row" style="margin-top:10px;font-size:12px">
                   <div class="left mono" id="dailyLossUsedLabel">$0.00 used</div>
-                  <div class="right mono" id="dailyLossLimitLabel">$1,500.00 limit</div>
+                  <div class="right mono" id="dailyLossLimitLabel">$0.00 limit</div>
                 </div>
               </div>
 
               <div class="risk-stats">
                 <div class="risk-stat">
                   <div class="label">Total Open Risk</div>
-                  <div class="value" id="totalOpenRiskValue">$900.00</div>
+                  <div class="value" id="totalOpenRiskValue">$0.00</div>
                 </div>
                 <div class="risk-stat">
                   <div class="label">Max Positions Allowed</div>
-                  <div class="value" id="maxPositionsValue">3</div>
+                  <div class="value" id="maxPositionsValue">0</div>
                 </div>
               </div>
             </div>
@@ -1457,7 +1425,7 @@
             <div class="panel-title-wrap">
               <svg viewBox="0 0 24 24" fill="none">
                 <path d="M12 3C7 3 3.5 7.03 3.5 12C3.5 16.97 7 21 12 21C17 21 20.5 16.97 20.5 12C20.5 7.03 17 3 12 3Z" stroke="currentColor" stroke-width="1.6"/>
-                <path d="M12 8V12L15 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 8V13M12 17H12.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
               </svg>
               <div class="panel-title">Guardian Alerts</div>
             </div>
@@ -1467,12 +1435,12 @@
             <div class="alert-empty" id="alertsEmpty">
               <div class="alert-circle">
                 <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 9V13M12 17H12.01M10.29 3.86L1.82 18A2 2 0 0 0 3.55 21H20.45A2 2 0 0 0 22.18 18L13.71 3.86A2 2 0 0 0 10.29 3.86Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </div>
-              <div class="alert-big-title">System All Clear</div>
+              <div class="alert-big-title">No Active Connection</div>
               <div class="alert-copy">
-                No active risk alerts. Trade execution is permitted within limits.
+                Connect a trading account to activate live alerts, position tracking, and real-time Guardian monitoring.
               </div>
             </div>
 
@@ -1490,7 +1458,7 @@
               </svg>
               <div class="panel-title">Open Positions</div>
             </div>
-            <div class="metric-pill" id="positionsActiveBadge">2 Active</div>
+            <div class="metric-pill" id="positionsActiveBadge">0 Active</div>
           </div>
 
           <div class="table-wrap">
@@ -1508,28 +1476,9 @@
               </thead>
               <tbody id="positionsTableBody">
                 <tr>
-                  <td>
-                    <div class="symbol-main">ES</div>
-                    <div class="symbol-sub">08:14:22</div>
+                  <td colspan="7" style="padding:32px 22px;text-align:center;color:var(--muted);">
+                    No open positions
                   </td>
-                  <td><span class="side-pill long">LONG</span></td>
-                  <td style="text-align:right;" class="mono">1</td>
-                  <td style="text-align:right;" class="mono">5278.25</td>
-                  <td style="text-align:right;" class="mono">5281.75</td>
-                  <td style="text-align:right;" class="mono">$250.00</td>
-                  <td style="text-align:right;" class="mono positive">+$175.00</td>
-                </tr>
-                <tr>
-                  <td>
-                    <div class="symbol-main">NQ</div>
-                    <div class="symbol-sub">08:26:41</div>
-                  </td>
-                  <td><span class="side-pill short">SHORT</span></td>
-                  <td style="text-align:right;" class="mono">1</td>
-                  <td style="text-align:right;" class="mono">18620.00</td>
-                  <td style="text-align:right;" class="mono">18605.00</td>
-                  <td style="text-align:right;" class="mono">$650.00</td>
-                  <td style="text-align:right;" class="mono positive">+$300.00</td>
                 </tr>
               </tbody>
             </table>
@@ -1553,49 +1502,103 @@
 
     let selectedPlatform = localStorage.getItem("tradeGuardianSelectedPlatform") || "Tradovate";
 
+    function getLoadedPlan() {
+      const activePlan = JSON.parse(localStorage.getItem("tradeGuardianActivePlan") || "{}");
+      const selectedPlan = JSON.parse(localStorage.getItem("tradeGuardianSelectedPlan") || "{}");
+      const customPlan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan") || "{}");
+
+      if (activePlan && Object.keys(activePlan).length) return activePlan;
+      if (selectedPlan && Object.keys(selectedPlan).length) return selectedPlan;
+      if (customPlan && Object.keys(customPlan).length) return customPlan;
+      return {};
+    }
+
+    function getAccountRules() {
+      return JSON.parse(localStorage.getItem("tradeGuardianAccountRules") || "{}");
+    }
+
+    function getRiskPerTrade(plan, accountRules) {
+      if (plan.riskPerTrade !== undefined && plan.riskPerTrade !== null) {
+        const mode = plan.riskPerTradeMode || "$";
+        if (mode === "Percentage of account") {
+          return {
+            value: 0,
+            text: `${Number(plan.riskPerTrade || 0).toFixed(2)}% of balance`
+          };
+        }
+        return {
+          value: Number(plan.riskPerTrade || 0),
+          text: `${formatCurrency(Number(plan.riskPerTrade || 0))}`
+        };
+      }
+
+      if (plan.riskPerTradeValue && typeof plan.riskPerTradeValue === "object") {
+        const unit = plan.riskPerTradeValue.unit || "$";
+        const value = Number(plan.riskPerTradeValue.value || 0);
+        if (unit === "%") {
+          return {
+            value: 0,
+            text: `${value.toFixed(2)}% of balance`
+          };
+        }
+        return {
+          value,
+          text: `${formatCurrency(value)}`
+        };
+      }
+
+      return {
+        value: 0,
+        text: "No plan loaded yet"
+      };
+    }
+
+    function getDailyLossLimit(plan, accountRules) {
+      const v = Number(accountRules.dailyLossLimit || 0);
+      return v;
+    }
+
+    function getMaxPositions(plan, accountRules) {
+      return Number(
+        plan.maxOpenPositions ||
+        accountRules.maxOpenTradesAtSameTime ||
+        0
+      );
+    }
+
+    const plan = getLoadedPlan();
+    const accountRules = getAccountRules();
+    const riskPlan = getRiskPerTrade(plan, accountRules);
+
     const defaultState = {
-      brokerName: selectedPlatform,
-      connectionStatus: "connected",
-      mode: "Live",
-      accountSize: 50000,
-      accountId: "TG-50000-01",
-      balance: 50000,
-      equity: 50000,
+      brokerName: "Connect Account",
+      connectionStatus: "disconnected",
+      mode: "Not Connected",
+      accountSize: 0,
+      accountId: "—",
+
+      balance: 0,
+      equity: 0,
       dailyPnl: 0,
       dailyPnlPercent: 0,
-      openPositionsCount: 2,
-      riskPerTrade: 500,
-      riskPerTradePercent: 1,
-      tradesToday: 4,
-      dailyLossLimit: 1500,
+
+      openPositionsCount: 0,
+
+      riskPerTrade: riskPlan.value,
+      riskPerTradeText: riskPlan.text,
+      riskPerTradePercent: 0,
+      tradesToday: 0,
+
+      dailyLossLimit: getDailyLossLimit(plan, accountRules),
       dailyLossUsed: 0,
       dailyLossPercent: 0,
-      totalOpenRisk: 900,
-      maxPositions: 3,
+      totalOpenRisk: 0,
+      maxPositions: getMaxPositions(plan, accountRules),
+
       riskStatus: "safe",
+
       alerts: [],
-      positions: [
-        {
-          symbol: "ES",
-          openedAt: "08:14:22",
-          side: "long",
-          quantity: 1,
-          entryPrice: 5278.25,
-          currentPrice: 5281.75,
-          riskAmount: 250,
-          unrealizedPnl: 175
-        },
-        {
-          symbol: "NQ",
-          openedAt: "08:26:41",
-          side: "short",
-          quantity: 1,
-          entryPrice: 18620.00,
-          currentPrice: 18605.00,
-          riskAmount: 650,
-          unrealizedPnl: 300
-        }
-      ]
+      positions: []
     };
 
     function formatCurrency(value){
@@ -1676,25 +1679,56 @@
     continueConnectBtn.addEventListener("click", () => {
       localStorage.setItem("tradeGuardianSelectedPlatform", selectedPlatform);
       defaultState.brokerName = selectedPlatform;
-      document.getElementById("brokerLabel").textContent = `${selectedPlatform}:`;
-      document.getElementById("sidePlatform").textContent = selectedPlatform;
+      defaultState.connectionStatus = "connecting";
+      defaultState.mode = "Connecting";
+      renderAll();
       closeModal();
     });
 
     closeModalBtn.addEventListener("click", closeModal);
     cancelModalBtn.addEventListener("click", closeModal);
 
+    document.getElementById("brokerStatusPill").addEventListener("click", () => {
+      if (defaultState.connectionStatus !== "connected") openModal();
+    });
+
     function renderTopBar(){
-      document.getElementById("brokerLabel").textContent = `${defaultState.brokerName}:`;
+      document.getElementById("brokerLabel").textContent =
+        defaultState.brokerName === "Connect Account"
+          ? "Broker:"
+          : `${defaultState.brokerName}:`;
 
       const brokerPill = document.getElementById("brokerStatusPill");
-      brokerPill.className = "broker-pill " + defaultState.connectionStatus;
-      brokerPill.innerHTML = `<span>${defaultState.connectionStatus.charAt(0).toUpperCase() + defaultState.connectionStatus.slice(1)}</span>`;
 
-      document.getElementById("sidePlatform").textContent = defaultState.brokerName;
+      if (defaultState.connectionStatus === "connected") {
+        brokerPill.className = "broker-pill connected";
+        brokerPill.innerHTML = `<span>Connected</span>`;
+      } else if (defaultState.connectionStatus === "connecting") {
+        brokerPill.className = "broker-pill connecting";
+        brokerPill.innerHTML = `<span>Connecting</span>`;
+      } else {
+        brokerPill.className = "broker-pill disconnected";
+        brokerPill.innerHTML = `<span>Connect Account</span>`;
+      }
+
+      document.getElementById("sidePlatform").textContent =
+        defaultState.brokerName === "Connect Account" ? "Not Connected" : defaultState.brokerName;
+
       document.getElementById("sideMode").textContent = defaultState.mode;
       document.getElementById("sideAccountSize").textContent = formatCurrency(defaultState.accountSize);
-      document.getElementById("sideConnectionStatus").textContent = defaultState.connectionStatus.charAt(0).toUpperCase() + defaultState.connectionStatus.slice(1);
+      document.getElementById("sideConnectionStatus").textContent =
+        defaultState.connectionStatus === "connected"
+          ? "Connected"
+          : defaultState.connectionStatus === "connecting"
+          ? "Connecting"
+          : "Not Connected";
+
+      const livePill = document.getElementById("liveFeedPill");
+      if (defaultState.connectionStatus === "connected") {
+        livePill.innerHTML = `<span class="dot" style="background:var(--success);box-shadow:0 0 14px rgba(45,245,154,.6);"></span><span>Active</span>`;
+      } else {
+        livePill.innerHTML = `<span class="dot"></span><span>Inactive</span>`;
+      }
     }
 
     function renderMetrics(){
@@ -1707,8 +1741,11 @@
 
       document.getElementById("dailyPnlPercent").textContent = formatPercent(defaultState.dailyPnlPercent);
       document.getElementById("openPositionsCount").textContent = defaultState.openPositionsCount;
-      document.getElementById("riskPerTradeValue").textContent = formatCurrency(defaultState.riskPerTrade);
-      document.getElementById("riskPerTradeSub").textContent = `${formatPercent(defaultState.riskPerTradePercent)} of balance`;
+
+      document.getElementById("riskPerTradeValue").textContent =
+        defaultState.riskPerTrade > 0 ? formatCurrency(defaultState.riskPerTrade) : "$0.00";
+      document.getElementById("riskPerTradeSub").textContent = defaultState.riskPerTradeText;
+
       document.getElementById("tradesTodayValue").textContent = defaultState.tradesToday;
     }
 
@@ -1735,6 +1772,11 @@
         badge.textContent = "Safe";
         document.getElementById("riskFill").style.background = "linear-gradient(90deg, var(--success), rgba(45,245,154,.2))";
       }
+
+      document.getElementById("settingRiskPerTrade").value = defaultState.riskPerTrade || "";
+      document.getElementById("settingDailyLoss").value = defaultState.dailyLossLimit || "";
+      document.getElementById("settingDrawdown").value = "";
+      document.getElementById("settingMaxPositions").value = defaultState.maxPositions || "";
     }
 
     function renderAlerts(){
@@ -1817,7 +1859,6 @@
 
     renderAll();
 
-    // Expose for future real integration
     window.TradeGuardianDashboard = {
       setAccountUpdate(payload){
         defaultState.balance = payload.balance ?? defaultState.balance;
@@ -1827,6 +1868,9 @@
         defaultState.tradesToday = payload.tradesToday ?? defaultState.tradesToday;
         defaultState.accountId = payload.accountId ?? defaultState.accountId;
         defaultState.brokerName = payload.brokerName ?? defaultState.brokerName;
+        defaultState.connectionStatus = payload.connectionStatus ?? "connected";
+        defaultState.mode = payload.mode ?? "Live";
+        defaultState.accountSize = payload.accountSize ?? defaultState.accountSize;
         renderAll();
       },
 
@@ -1857,11 +1901,6 @@
         openModal();
       }
     };
-
-    // Optional shortcut: open modal from console if needed
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "c" && e.altKey) openModal();
-    });
   </script>
 </body>
 </html>
