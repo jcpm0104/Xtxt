@@ -904,6 +904,108 @@
       background:rgba(255,255,255,.02);
     }
 
+
+    .status-summary{
+      display:grid;
+      gap:12px;
+    }
+
+    .status-card{
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      padding:16px;
+    }
+
+    .status-card .label{
+      color:var(--muted);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:6px;
+    }
+
+    .status-card .value{
+      color:#fff;
+      font-size:15px;
+      font-weight:700;
+      line-height:1.5;
+    }
+
+    .usage-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .usage-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      padding:14px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .usage-item:last-child{
+      border-bottom:none;
+      padding-bottom:0;
+    }
+
+    .usage-item .label{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .usage-item .value{
+      color:#fff;
+      font-size:14px;
+      font-weight:700;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      text-align:right;
+    }
+
+    .activity-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .activity-item{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.08);
+      padding:14px 16px;
+      background:rgba(255,255,255,.03);
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .activity-time{
+      min-width:64px;
+      color:var(--primary);
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      padding-top:2px;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .activity-copy{
+      color:#fff;
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .activity-empty{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.7;
+      text-align:center;
+      padding:8px 0 2px;
+    }
+
     .modal-backdrop{
       position:fixed;
       inset:0;
@@ -1452,6 +1554,68 @@
           <div class="floating-glow"></div>
         </div>
 
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title-wrap">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              </svg>
+              <div class="panel-title">Guardian Status</div>
+            </div>
+            <div class="status-badge status-warning" id="guardianStatusBadge">Standby</div>
+          </div>
+
+          <div class="panel-body">
+            <div class="status-summary">
+              <div class="status-card">
+                <div class="label">Status</div>
+                <div class="value" id="guardianStatusValue">Standby</div>
+              </div>
+              <div class="status-card">
+                <div class="label">Reason</div>
+                <div class="value" id="guardianReasonValue">No connected account. Guardian is waiting for live credentials and account authorization.</div>
+              </div>
+              <div class="status-card">
+                <div class="label">Action</div>
+                <div class="value" id="guardianActionValue">Trading supervision is not active until a real account connection is authenticated.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title-wrap">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M4 7H20M4 12H20M4 17H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <div class="panel-title">Rule Usage Today</div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <div class="usage-list">
+              <div class="usage-item">
+                <div class="label">Trades Used</div>
+                <div class="value" id="usageTradesValue">0 / 0</div>
+              </div>
+              <div class="usage-item">
+                <div class="label">Daily Loss Used</div>
+                <div class="value" id="usageDailyLossValue">$0.00 / $0.00</div>
+              </div>
+              <div class="usage-item">
+                <div class="label">Open Risk</div>
+                <div class="value" id="usageOpenRiskValue">$0.00 / $0.00</div>
+              </div>
+              <div class="usage-item">
+                <div class="label">Open Positions</div>
+                <div class="value" id="usagePositionsValue">0 / 0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="panel">
           <div class="panel-head">
             <div class="panel-title-wrap">
@@ -1479,6 +1643,23 @@
             <div class="alert-list" id="alertList" style="display:none;"></div>
           </div>
         </div>
+
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title-wrap">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 8V12L15 14M21 12A9 9 0 1 1 3 12A9 9 0 0 1 21 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="panel-title">Guardian Activity</div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+            <div class="activity-list" id="activityLogList"></div>
+          </div>
+        </div>
+
       </section>
 
       <section class="positions-panel">
@@ -1651,6 +1832,44 @@
       return "neutral";
     }
 
+    function getNowTimeLabel(){
+      const d = new Date();
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+
+    function pushActivity(message){
+      defaultState.activityLog = defaultState.activityLog || [];
+      defaultState.activityLog.unshift({
+        time: getNowTimeLabel(),
+        message
+      });
+      defaultState.activityLog = defaultState.activityLog.slice(0, 8);
+    }
+
+    function syncGuardianState(){
+      if (defaultState.connectionStatus !== "connected") {
+        defaultState.guardianStatus = "standby";
+        defaultState.guardianReason = "No connected account. Guardian is waiting for live credentials and account authorization.";
+        defaultState.guardianAction = "Trading supervision is not active until a real account connection is authenticated.";
+        return;
+      }
+
+      if (defaultState.riskStatus === "danger") {
+        defaultState.guardianStatus = "locked";
+        defaultState.guardianReason = "A critical risk threshold has been breached.";
+        defaultState.guardianAction = "Trading should remain locked until the violation is resolved.";
+      } else if (defaultState.riskStatus === "warning") {
+        defaultState.guardianStatus = "warning";
+        defaultState.guardianReason = "A risk threshold is approaching its limit.";
+        defaultState.guardianAction = "Proceed carefully and monitor rule usage closely.";
+      } else {
+        defaultState.guardianStatus = "safe";
+        defaultState.guardianReason = "All monitored rules are within allowed thresholds.";
+        defaultState.guardianAction = "Trading may continue within your current plan limits.";
+      }
+    }
+
+
     function getDraftAccounts(){
       return JSON.parse(localStorage.getItem("tg_draft_accounts") || "[]");
     }
@@ -1690,6 +1909,16 @@
       maxPositions: getMaxPositions(plan, accountRules, settingsStore),
 
       riskStatus: "safe",
+      guardianStatus: "standby",
+      guardianReason: "No connected account. Guardian is waiting for live credentials and account authorization.",
+      guardianAction: "Trading supervision is not active until a real account connection is authenticated.",
+      maxTrades: Number(plan.maxTradesPerDay || accountRules.maxTradesPerDay || 0),
+      activityLog: [
+        {
+          time: "SYSTEM",
+          message: "Dashboard initialized. Waiting for live account connection."
+        }
+      ],
       alerts: [],
       positions: []
     };
@@ -1751,6 +1980,7 @@
         mode: document.getElementById("addMode").value,
         size: Number(document.getElementById("addAccountSize").value || 0)
       };
+      pushActivity(`${selectedPlatform} credential flow opened.`);
       closeModal();
       closeSidebar();
     });
@@ -1779,6 +2009,7 @@
       defaultState.dailyLossLimit = Number(settings.dailyLossLimit || 0);
       defaultState.maxPositions = Number(settings.maxPositions || 0);
 
+      pushActivity(`Settings updated from the dashboard panel.`);
       renderAll();
     });
 
@@ -1809,6 +2040,7 @@
           defaultState.dailyLossPercent = 0;
           defaultState.alerts = [];
           defaultState.positions = [];
+          pushActivity(`Account disconnected from dashboard view.`);
           renderAll();
         });
         inner.appendChild(btn);
@@ -1836,6 +2068,7 @@
           // Prepared for future real switching when actual API-based connections exist.
           const updated = draftAccounts.map((acc, i) => ({ ...acc, active: i === index }));
           saveDraftAccounts(updated);
+          pushActivity(`Draft account focus changed to ${account.platform} • ${account.mode}.`);
           renderSwitchAccountSection();
         });
         inner.appendChild(btn);
@@ -1963,6 +2196,70 @@
       });
     }
 
+
+    function renderGuardianStatus(){
+      syncGuardianState();
+
+      const badge = document.getElementById("guardianStatusBadge");
+      const statusValue = document.getElementById("guardianStatusValue");
+      const reasonValue = document.getElementById("guardianReasonValue");
+      const actionValue = document.getElementById("guardianActionValue");
+
+      badge.className = "status-badge";
+      if (defaultState.guardianStatus === "locked") {
+        badge.classList.add("status-danger");
+        badge.textContent = "Locked";
+        statusValue.textContent = "Locked";
+      } else if (defaultState.guardianStatus === "warning") {
+        badge.classList.add("status-warning");
+        badge.textContent = "Warning";
+        statusValue.textContent = "Warning";
+      } else if (defaultState.guardianStatus === "safe") {
+        badge.classList.add("status-safe");
+        badge.textContent = "Safe";
+        statusValue.textContent = "Safe";
+      } else {
+        badge.classList.add("status-warning");
+        badge.textContent = "Standby";
+        statusValue.textContent = "Standby";
+      }
+
+      reasonValue.textContent = defaultState.guardianReason;
+      actionValue.textContent = defaultState.guardianAction;
+    }
+
+    function renderRuleUsage(){
+      const maxTrades = Number(defaultState.maxTrades || 0);
+      const maxPositions = Number(defaultState.maxPositions || 0);
+      const allowedOpenRisk = Number(defaultState.riskPerTrade || 0);
+
+      document.getElementById("usageTradesValue").textContent = `${defaultState.tradesToday} / ${maxTrades}`;
+      document.getElementById("usageDailyLossValue").textContent = `${formatCurrency(defaultState.dailyLossUsed)} / ${formatCurrency(defaultState.dailyLossLimit)}`;
+      document.getElementById("usageOpenRiskValue").textContent = `${formatCurrency(defaultState.totalOpenRisk)} / ${formatCurrency(allowedOpenRisk)}`;
+      document.getElementById("usagePositionsValue").textContent = `${defaultState.openPositionsCount} / ${maxPositions}`;
+    }
+
+    function renderActivityLog(){
+      const wrap = document.getElementById("activityLogList");
+      wrap.innerHTML = "";
+
+      const entries = defaultState.activityLog || [];
+      if (!entries.length) {
+        wrap.innerHTML = `<div class="activity-empty">No Guardian activity has been recorded yet.</div>`;
+        return;
+      }
+
+      entries.forEach(entry => {
+        const row = document.createElement("div");
+        row.className = "activity-item";
+        row.innerHTML = `
+          <div class="activity-time">${entry.time || "LOG"}</div>
+          <div class="activity-copy">${entry.message || ""}</div>
+        `;
+        wrap.appendChild(row);
+      });
+    }
+
     function renderPositions(){
       const body = document.getElementById("positionsTableBody");
       const badge = document.getElementById("positionsActiveBadge");
@@ -2007,7 +2304,10 @@
       renderTopBar();
       renderMetrics();
       renderRiskMeter();
+      renderGuardianStatus();
+      renderRuleUsage();
       renderAlerts();
+      renderActivityLog();
       renderPositions();
       renderConnectedAccountSection();
       renderSwitchAccountSection();
@@ -2028,6 +2328,7 @@
         defaultState.connectionStatus = payload.connectionStatus ?? "connected";
         defaultState.mode = payload.mode ?? "Live";
         defaultState.accountSize = payload.accountSize ?? defaultState.accountSize;
+        pushActivity(`Account update received from live connection.`);
         renderAll();
       },
 
@@ -2040,17 +2341,20 @@
         defaultState.totalOpenRisk = payload.totalOpenRisk ?? defaultState.totalOpenRisk;
         defaultState.maxPositions = payload.maxPositions ?? defaultState.maxPositions;
         defaultState.riskStatus = payload.riskStatus ?? defaultState.riskStatus;
+        pushActivity(`Risk metrics refreshed.`);
         renderAll();
       },
 
       setPositionsUpdate(payload){
         defaultState.positions = Array.isArray(payload) ? payload : [];
         defaultState.openPositionsCount = defaultState.positions.length;
+        pushActivity(`Positions updated: ${defaultState.openPositionsCount} open.`);
         renderAll();
       },
 
       setAlertsUpdate(payload){
         defaultState.alerts = Array.isArray(payload) ? payload : [];
+        if (defaultState.alerts.length) pushActivity(`Guardian alerts updated.`);
         renderAll();
       },
 
