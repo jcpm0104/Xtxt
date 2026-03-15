@@ -295,6 +295,10 @@
 </head>
 <body>
 
+  <script>
+    localStorage.clear();
+  </script>
+
   <div class="app-shell">
     <div class="onboarding-card">
 
@@ -451,8 +455,8 @@
     });
 
     startBtn.addEventListener("click", () => {
-  window.location.href = "trader-profile.html";
-});
+      window.location.href = "trader-profile.html";
+    });
 
     renderStep();
   </script>
