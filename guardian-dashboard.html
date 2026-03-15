@@ -1844,9 +1844,12 @@
         return Number(settingsStore.dailyLossLimit || 0);
       }
 
+      if (plan.dailyLossLimit !== undefined && plan.dailyLossLimit !== null && plan.dailyLossLimit !== "") {
+        return Number(plan.dailyLossLimit || 0);
+      }
+
       if (
         plan.personalDailyRiskLimit &&
-        plan.personalDailyRiskLimit.enabled === "Yes, define my own daily risk limit" &&
         plan.personalDailyRiskLimit.value !== undefined &&
         plan.personalDailyRiskLimit.value !== null &&
         plan.personalDailyRiskLimit.value !== ""
@@ -1856,6 +1859,15 @@
           plan.personalDailyRiskLimit.unit || "$",
           accountRules
         );
+      }
+
+      if (
+        plan.maxDailyAccountRiskPercent !== undefined &&
+        plan.maxDailyAccountRiskPercent !== null &&
+        plan.maxDailyAccountRiskPercent !== "" &&
+        getAccountSize(accountRules) > 0
+      ) {
+        return resolveDollarValue(plan.maxDailyAccountRiskPercent, "%", accountRules);
       }
 
       return Number(accountRules.dailyLossLimit || 0);
