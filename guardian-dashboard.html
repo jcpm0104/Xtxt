@@ -1697,6 +1697,8 @@
     </main>
   </div>
 
+  <script src="tradeGuardianDisplayUtils.js"></script>
+
   <script>
     const accountSidebar = document.getElementById("accountSidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
@@ -1753,6 +1755,25 @@
       return numeric;
     }
 
+    function getDualDisplay(value, unit, accountSize) {
+      if (typeof tgDualValue === "function") {
+        return tgDualValue(value, unit, accountSize);
+      }
+
+      const rawValue = Number(value || 0);
+      const size = Number(accountSize || 0);
+      const dollars = unit === "%" ? size * (rawValue / 100) : rawValue;
+      const percent = !size ? 0 : (unit === "$" ? (rawValue / size) * 100 : rawValue);
+
+      return {
+        dollars,
+        percent,
+        moneyText: formatCurrency(dollars),
+        percentText: formatPercent(percent),
+        display: `${formatCurrency(dollars)} (${formatPercent(percent)})`
+      };
+    }
+
     function formatCurrency(value) {
       const n = Number(value || 0);
       return new Intl.NumberFormat("en-US", {
@@ -1788,34 +1809,30 @@
     }
 
     function getRiskPerTrade(plan, accountRules) {
-      if (plan.riskPerTrade !== undefined && plan.riskPerTrade !== null) {
-        const mode = plan.riskPerTradeMode || "$";
-        if (mode === "Percentage of account") {
-          return {
-            value: 0,
-            text: `${Number(plan.riskPerTrade || 0).toFixed(2)}% of balance`
-          };
-        }
+      const accountSize = getAccountSize(accountRules);
+
+      if (plan.riskPerTrade !== undefined && plan.riskPerTrade !== null && plan.riskPerTrade !== "") {
+        const mode = plan.riskPerTradeMode === "Percentage of account" ? "%" : "$";
+        const dual = getDualDisplay(plan.riskPerTrade, mode, accountSize);
+
         return {
-          value: Number(plan.riskPerTrade || 0),
-          text: formatCurrency(Number(plan.riskPerTrade || 0))
+          value: dual.dollars,
+          percentValue: dual.percent,
+          text: `${dual.percentText} of balance`,
+          dualDisplay: dual.display
         };
       }
 
       if (plan.riskPerTradeValue && typeof plan.riskPerTradeValue === "object") {
         const unit = plan.riskPerTradeValue.unit || "$";
         const rawValue = Number(plan.riskPerTradeValue.value || 0);
-
-        if (unit === "%") {
-          return {
-            value: resolveDollarValue(rawValue, unit, accountRules),
-            text: `${rawValue.toFixed(2)}% of balance`
-          };
-        }
+        const dual = getDualDisplay(rawValue, unit, accountSize);
 
         return {
-          value: rawValue,
-          text: formatCurrency(rawValue)
+          value: dual.dollars,
+          percentValue: dual.percent,
+          text: `${dual.percentText} of balance`,
+          dualDisplay: dual.display
         };
       }
 
@@ -1824,23 +1841,22 @@
         accountRules.riskPerTradeValue !== null &&
         accountRules.riskPerTradeValue !== ""
       ) {
-        if (accountRules.riskPerTradeMode === "Percentage of account") {
-          const rawValue = Number(accountRules.riskPerTradeValue || 0);
-          return {
-            value: resolveDollarValue(rawValue, "%", accountRules),
-            text: `${rawValue.toFixed(2)}% of balance`
-          };
-        }
+        const unit = accountRules.riskPerTradeMode === "Percentage of account" ? "%" : "$";
+        const dual = getDualDisplay(accountRules.riskPerTradeValue, unit, accountSize);
 
         return {
-          value: Number(accountRules.riskPerTradeValue || 0),
-          text: formatCurrency(Number(accountRules.riskPerTradeValue || 0))
+          value: dual.dollars,
+          percentValue: dual.percent,
+          text: `${dual.percentText} of balance`,
+          dualDisplay: dual.display
         };
       }
 
       return {
         value: 0,
-        text: "No plan loaded yet"
+        percentValue: 0,
+        text: "No plan loaded yet",
+        dualDisplay: "$0.00 (0.00%)"
       };
     }
 
@@ -1949,7 +1965,7 @@
 
       riskPerTrade: riskPlan.value,
       riskPerTradeText: riskPlan.text,
-      riskPerTradePercent: 0,
+      riskPerTradePercent: riskPlan.percentValue,
       tradesToday: 0,
 
       dailyLossLimit: getDailyLossLimit(plan, accountRules),
@@ -1982,10 +1998,9 @@
         settingsStore.riskPerTrade !== ""
       ) {
         defaultState.riskPerTrade = Number(settingsStore.riskPerTrade || 0);
-        defaultState.riskPerTradeText =
-          defaultState.riskPerTrade > 0
-            ? formatCurrency(defaultState.riskPerTrade)
-            : "No plan loaded yet";
+        const manualDual = getDualDisplay(defaultState.riskPerTrade, "$", getAccountSize(accountRules));
+        defaultState.riskPerTradeText = `${manualDual.percentText} of balance`;
+        defaultState.riskPerTradePercent = manualDual.percent;
       }
 
       if (
@@ -2130,10 +2145,12 @@
       saveSettingsStore(settings);
 
       defaultState.riskPerTrade = Number(settings.riskPerTrade || 0);
+      const manualDual = getDualDisplay(defaultState.riskPerTrade, "$", getAccountSize(accountRules));
       defaultState.riskPerTradeText =
         defaultState.riskPerTrade > 0
-          ? formatCurrency(defaultState.riskPerTrade)
+          ? `${manualDual.percentText} of balance`
           : "No plan loaded yet";
+      defaultState.riskPerTradePercent = manualDual.percent;
 
       defaultState.dailyLossLimit = Number(settings.dailyLossLimit || 0);
       defaultState.maxPositions = Number(settings.maxPositions || 0);
@@ -2497,7 +2514,5 @@
       }
     };
   </script>
-
-  <script src="tradeGuardianDisplayUtils.js"></script>
 </body>
 </html>
