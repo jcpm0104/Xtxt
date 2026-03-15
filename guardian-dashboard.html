@@ -1737,6 +1737,10 @@
       localStorage.setItem("tg_dashboard_settings", JSON.stringify(data));
     }
 
+    function settingsWereApplied(settingsStore) {
+      return settingsStore && settingsStore.userHasAppliedSettings === true;
+    }
+
     function getAccountSize(accountRules) {
       return Number(accountRules.accountSize || 0);
     }
@@ -1783,21 +1787,7 @@
       return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     }
 
-    function getRiskPerTrade(plan, accountRules, settingsStore) {
-      if (
-        settingsStore.riskPerTrade !== undefined &&
-        settingsStore.riskPerTrade !== null &&
-        settingsStore.riskPerTrade !== ""
-      ) {
-        return {
-          value: Number(settingsStore.riskPerTrade || 0),
-          text:
-            Number(settingsStore.riskPerTrade || 0) > 0
-              ? formatCurrency(Number(settingsStore.riskPerTrade || 0))
-              : "No plan loaded yet"
-        };
-      }
-
+    function getRiskPerTrade(plan, accountRules) {
       if (plan.riskPerTrade !== undefined && plan.riskPerTrade !== null) {
         const mode = plan.riskPerTradeMode || "$";
         if (mode === "Percentage of account") {
@@ -1829,19 +1819,38 @@
         };
       }
 
+      if (
+        accountRules.riskPerTradeValue !== undefined &&
+        accountRules.riskPerTradeValue !== null &&
+        accountRules.riskPerTradeValue !== ""
+      ) {
+        if (accountRules.riskPerTradeMode === "Percentage of account") {
+          const rawValue = Number(accountRules.riskPerTradeValue || 0);
+          return {
+            value: resolveDollarValue(rawValue, "%", accountRules),
+            text: `${rawValue.toFixed(2)}% of balance`
+          };
+        }
+
+        return {
+          value: Number(accountRules.riskPerTradeValue || 0),
+          text: formatCurrency(Number(accountRules.riskPerTradeValue || 0))
+        };
+      }
+
       return {
         value: 0,
         text: "No plan loaded yet"
       };
     }
 
-    function getDailyLossLimit(plan, accountRules, settingsStore) {
+    function getDailyLossLimit(plan, accountRules) {
       if (
-        settingsStore.dailyLossLimit !== undefined &&
-        settingsStore.dailyLossLimit !== null &&
-        settingsStore.dailyLossLimit !== ""
+        accountRules.dailyLossLimit !== undefined &&
+        accountRules.dailyLossLimit !== null &&
+        accountRules.dailyLossLimit !== ""
       ) {
-        return Number(settingsStore.dailyLossLimit || 0);
+        return Number(accountRules.dailyLossLimit || 0);
       }
 
       if (plan.dailyLossLimit !== undefined && plan.dailyLossLimit !== null && plan.dailyLossLimit !== "") {
@@ -1870,30 +1879,30 @@
         return resolveDollarValue(plan.maxDailyAccountRiskPercent, "%", accountRules);
       }
 
-      return Number(accountRules.dailyLossLimit || 0);
+      return 0;
     }
 
-    function getMaxPositions(plan, accountRules, settingsStore) {
-      if (
-        settingsStore.maxPositions !== undefined &&
-        settingsStore.maxPositions !== null &&
-        settingsStore.maxPositions !== ""
-      ) {
-        return Number(settingsStore.maxPositions || 0);
-      }
-
+    function getMaxPositions(plan, accountRules) {
       return Number(
-        plan.maxOpenPositions ||
         accountRules.maxOpenTradesAtSameTime ||
+        plan.maxOpenPositions ||
         0
       );
     }
 
     function getMaxTrades(plan, accountRules) {
-      return Number(plan.maxTradesPerDay || accountRules.maxTradesPerDay || 0);
+      return Number(accountRules.maxTradesPerDay || plan.maxTradesPerDay || 0);
     }
 
     function getOpenRiskLimit(plan, accountRules) {
+      if (
+        accountRules.maxTotalRiskAcrossOpenTrades !== undefined &&
+        accountRules.maxTotalRiskAcrossOpenTrades !== null &&
+        accountRules.maxTotalRiskAcrossOpenTrades !== ""
+      ) {
+        return Number(accountRules.maxTotalRiskAcrossOpenTrades || 0);
+      }
+
       if (
         plan.maxTotalRiskAcrossOpenTrades &&
         typeof plan.maxTotalRiskAcrossOpenTrades === "object" &&
@@ -1908,7 +1917,7 @@
         );
       }
 
-      return Number(accountRules.maxTotalRiskAcrossOpenTrades || 0);
+      return 0;
     }
 
     function getDraftAccounts() {
@@ -1922,7 +1931,7 @@
     const plan = getLoadedPlan();
     const accountRules = getAccountRules();
     const settingsStore = getSettingsStore();
-    const riskPlan = getRiskPerTrade(plan, accountRules, settingsStore);
+    const riskPlan = getRiskPerTrade(plan, accountRules);
 
     const defaultState = {
       brokerName: "Connect Account",
@@ -1943,12 +1952,12 @@
       riskPerTradePercent: 0,
       tradesToday: 0,
 
-      dailyLossLimit: getDailyLossLimit(plan, accountRules, settingsStore),
+      dailyLossLimit: getDailyLossLimit(plan, accountRules),
       dailyLossUsed: 0,
       dailyLossPercent: 0,
       totalOpenRisk: 0,
       openRiskLimit: getOpenRiskLimit(plan, accountRules),
-      maxPositions: getMaxPositions(plan, accountRules, settingsStore),
+      maxPositions: getMaxPositions(plan, accountRules),
       maxTrades: getMaxTrades(plan, accountRules),
 
       riskStatus: "safe",
@@ -1965,6 +1974,36 @@
       alerts: [],
       positions: []
     };
+
+    if (settingsWereApplied(settingsStore)) {
+      if (
+        settingsStore.riskPerTrade !== undefined &&
+        settingsStore.riskPerTrade !== null &&
+        settingsStore.riskPerTrade !== ""
+      ) {
+        defaultState.riskPerTrade = Number(settingsStore.riskPerTrade || 0);
+        defaultState.riskPerTradeText =
+          defaultState.riskPerTrade > 0
+            ? formatCurrency(defaultState.riskPerTrade)
+            : "No plan loaded yet";
+      }
+
+      if (
+        settingsStore.dailyLossLimit !== undefined &&
+        settingsStore.dailyLossLimit !== null &&
+        settingsStore.dailyLossLimit !== ""
+      ) {
+        defaultState.dailyLossLimit = Number(settingsStore.dailyLossLimit || 0);
+      }
+
+      if (
+        settingsStore.maxPositions !== undefined &&
+        settingsStore.maxPositions !== null &&
+        settingsStore.maxPositions !== ""
+      ) {
+        defaultState.maxPositions = Number(settingsStore.maxPositions || 0);
+      }
+    }
 
     function pushActivity(message) {
       defaultState.activityLog = defaultState.activityLog || [];
@@ -2084,10 +2123,10 @@
         riskPerTrade: document.getElementById("settingRiskPerTrade").value,
         dailyLossLimit: document.getElementById("settingDailyLoss").value,
         maxDrawdown: document.getElementById("settingDrawdown").value,
-        maxPositions: document.getElementById("settingMaxPositions").value
+        maxPositions: document.getElementById("settingMaxPositions").value,
+        userHasAppliedSettings: true
       };
 
-      Object.assign(settingsStore, settings);
       saveSettingsStore(settings);
 
       defaultState.riskPerTrade = Number(settings.riskPerTrade || 0);
@@ -2252,10 +2291,14 @@
         document.getElementById("riskFill").style.background = "linear-gradient(90deg, var(--success), rgba(45,245,154,.2))";
       }
 
-      document.getElementById("settingRiskPerTrade").value = defaultState.riskPerTrade || "";
-      document.getElementById("settingDailyLoss").value = defaultState.dailyLossLimit || "";
-      document.getElementById("settingDrawdown").value = settingsStore.maxDrawdown || "";
-      document.getElementById("settingMaxPositions").value = defaultState.maxPositions || "";
+      document.getElementById("settingRiskPerTrade").value =
+        settingsWereApplied(settingsStore) ? (settingsStore.riskPerTrade || "") : "";
+      document.getElementById("settingDailyLoss").value =
+        settingsWereApplied(settingsStore) ? (settingsStore.dailyLossLimit || "") : "";
+      document.getElementById("settingDrawdown").value =
+        settingsWereApplied(settingsStore) ? (settingsStore.maxDrawdown || "") : "";
+      document.getElementById("settingMaxPositions").value =
+        settingsWereApplied(settingsStore) ? (settingsStore.maxPositions || "") : "";
     }
 
     function renderAlerts() {
