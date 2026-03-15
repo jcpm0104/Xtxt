@@ -904,7 +904,6 @@
       background:rgba(255,255,255,.02);
     }
 
-
     .status-summary{
       display:grid;
       gap:12px;
@@ -1554,7 +1553,6 @@
           <div class="floating-glow"></div>
         </div>
 
-
         <div class="panel">
           <div class="panel-head">
             <div class="panel-title-wrap">
@@ -1644,7 +1642,6 @@
           </div>
         </div>
 
-
         <div class="panel">
           <div class="panel-head">
             <div class="panel-title-wrap">
@@ -1659,7 +1656,6 @@
             <div class="activity-list" id="activityLogList"></div>
           </div>
         </div>
-
       </section>
 
       <section class="positions-panel">
@@ -1720,7 +1716,6 @@
     ];
 
     let selectedPlatform = localStorage.getItem("tradeGuardianSelectedPlatform") || "Tradovate";
-    let pendingConnectionDraft = null;
 
     function getLoadedPlan() {
       for (const key of planStorageKeys) {
@@ -1742,11 +1737,64 @@
       localStorage.setItem("tg_dashboard_settings", JSON.stringify(data));
     }
 
+    function getAccountSize(accountRules) {
+      return Number(accountRules.accountSize || 0);
+    }
+
+    function resolveDollarValue(rawValue, unit, accountRules) {
+      const numeric = Number(rawValue || 0);
+      if (unit === "%" && getAccountSize(accountRules) > 0) {
+        return (getAccountSize(accountRules) * numeric) / 100;
+      }
+      return numeric;
+    }
+
+    function formatCurrency(value) {
+      const n = Number(value || 0);
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(n);
+    }
+
+    function formatPercent(value) {
+      const n = Number(value || 0);
+      return `${n.toFixed(2)}%`;
+    }
+
+    function formatPnl(value) {
+      const n = Number(value || 0);
+      const base = formatCurrency(Math.abs(n));
+      if (n > 0) return `+${base}`;
+      if (n < 0) return `-${base}`;
+      return base;
+    }
+
+    function getPnlClass(value) {
+      if (value > 0) return "positive";
+      if (value < 0) return "negative";
+      return "neutral";
+    }
+
+    function getNowTimeLabel() {
+      const d = new Date();
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+
     function getRiskPerTrade(plan, accountRules, settingsStore) {
-      if (settingsStore.riskPerTrade !== undefined && settingsStore.riskPerTrade !== null && settingsStore.riskPerTrade !== "") {
+      if (
+        settingsStore.riskPerTrade !== undefined &&
+        settingsStore.riskPerTrade !== null &&
+        settingsStore.riskPerTrade !== ""
+      ) {
         return {
           value: Number(settingsStore.riskPerTrade || 0),
-          text: settingsStore.riskPerTrade > 0 ? `${formatCurrency(Number(settingsStore.riskPerTrade || 0))}` : "No plan loaded yet"
+          text:
+            Number(settingsStore.riskPerTrade || 0) > 0
+              ? formatCurrency(Number(settingsStore.riskPerTrade || 0))
+              : "No plan loaded yet"
         };
       }
 
@@ -1760,22 +1808,24 @@
         }
         return {
           value: Number(plan.riskPerTrade || 0),
-          text: `${formatCurrency(Number(plan.riskPerTrade || 0))}`
+          text: formatCurrency(Number(plan.riskPerTrade || 0))
         };
       }
 
       if (plan.riskPerTradeValue && typeof plan.riskPerTradeValue === "object") {
         const unit = plan.riskPerTradeValue.unit || "$";
-        const value = Number(plan.riskPerTradeValue.value || 0);
+        const rawValue = Number(plan.riskPerTradeValue.value || 0);
+
         if (unit === "%") {
           return {
-            value: 0,
-            text: `${value.toFixed(2)}% of balance`
+            value: resolveDollarValue(rawValue, unit, accountRules),
+            text: `${rawValue.toFixed(2)}% of balance`
           };
         }
+
         return {
-          value,
-          text: `${formatCurrency(value)}`
+          value: rawValue,
+          text: formatCurrency(rawValue)
         };
       }
 
@@ -1786,16 +1836,40 @@
     }
 
     function getDailyLossLimit(plan, accountRules, settingsStore) {
-      if (settingsStore.dailyLossLimit !== undefined && settingsStore.dailyLossLimit !== null && settingsStore.dailyLossLimit !== "") {
+      if (
+        settingsStore.dailyLossLimit !== undefined &&
+        settingsStore.dailyLossLimit !== null &&
+        settingsStore.dailyLossLimit !== ""
+      ) {
         return Number(settingsStore.dailyLossLimit || 0);
       }
+
+      if (
+        plan.personalDailyRiskLimit &&
+        plan.personalDailyRiskLimit.enabled === "Yes, define my own daily risk limit" &&
+        plan.personalDailyRiskLimit.value !== undefined &&
+        plan.personalDailyRiskLimit.value !== null &&
+        plan.personalDailyRiskLimit.value !== ""
+      ) {
+        return resolveDollarValue(
+          plan.personalDailyRiskLimit.value,
+          plan.personalDailyRiskLimit.unit || "$",
+          accountRules
+        );
+      }
+
       return Number(accountRules.dailyLossLimit || 0);
     }
 
     function getMaxPositions(plan, accountRules, settingsStore) {
-      if (settingsStore.maxPositions !== undefined && settingsStore.maxPositions !== null && settingsStore.maxPositions !== "") {
+      if (
+        settingsStore.maxPositions !== undefined &&
+        settingsStore.maxPositions !== null &&
+        settingsStore.maxPositions !== ""
+      ) {
         return Number(settingsStore.maxPositions || 0);
       }
+
       return Number(
         plan.maxOpenPositions ||
         accountRules.maxOpenTradesAtSameTime ||
@@ -1803,78 +1877,33 @@
       );
     }
 
-    function formatCurrency(value){
-      const n = Number(value || 0);
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(n);
+    function getMaxTrades(plan, accountRules) {
+      return Number(plan.maxTradesPerDay || accountRules.maxTradesPerDay || 0);
     }
 
-    function formatPercent(value){
-      const n = Number(value || 0);
-      return `${n.toFixed(2)}%`;
-    }
-
-    function formatPnl(value){
-      const n = Number(value || 0);
-      const base = formatCurrency(Math.abs(n));
-      if (n > 0) return `+${base}`;
-      if (n < 0) return `-${base}`;
-      return base;
-    }
-
-    function getPnlClass(value){
-      if (value > 0) return "positive";
-      if (value < 0) return "negative";
-      return "neutral";
-    }
-
-    function getNowTimeLabel(){
-      const d = new Date();
-      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    }
-
-    function pushActivity(message){
-      defaultState.activityLog = defaultState.activityLog || [];
-      defaultState.activityLog.unshift({
-        time: getNowTimeLabel(),
-        message
-      });
-      defaultState.activityLog = defaultState.activityLog.slice(0, 8);
-    }
-
-    function syncGuardianState(){
-      if (defaultState.connectionStatus !== "connected") {
-        defaultState.guardianStatus = "standby";
-        defaultState.guardianReason = "No connected account. Guardian is waiting for live credentials and account authorization.";
-        defaultState.guardianAction = "Trading supervision is not active until a real account connection is authenticated.";
-        return;
+    function getOpenRiskLimit(plan, accountRules) {
+      if (
+        plan.maxTotalRiskAcrossOpenTrades &&
+        typeof plan.maxTotalRiskAcrossOpenTrades === "object" &&
+        plan.maxTotalRiskAcrossOpenTrades.value !== undefined &&
+        plan.maxTotalRiskAcrossOpenTrades.value !== null &&
+        plan.maxTotalRiskAcrossOpenTrades.value !== ""
+      ) {
+        return resolveDollarValue(
+          plan.maxTotalRiskAcrossOpenTrades.value,
+          plan.maxTotalRiskAcrossOpenTrades.unit || "$",
+          accountRules
+        );
       }
 
-      if (defaultState.riskStatus === "danger") {
-        defaultState.guardianStatus = "locked";
-        defaultState.guardianReason = "A critical risk threshold has been breached.";
-        defaultState.guardianAction = "Trading should remain locked until the violation is resolved.";
-      } else if (defaultState.riskStatus === "warning") {
-        defaultState.guardianStatus = "warning";
-        defaultState.guardianReason = "A risk threshold is approaching its limit.";
-        defaultState.guardianAction = "Proceed carefully and monitor rule usage closely.";
-      } else {
-        defaultState.guardianStatus = "safe";
-        defaultState.guardianReason = "All monitored rules are within allowed thresholds.";
-        defaultState.guardianAction = "Trading may continue within your current plan limits.";
-      }
+      return Number(accountRules.maxTotalRiskAcrossOpenTrades || 0);
     }
 
-
-    function getDraftAccounts(){
+    function getDraftAccounts() {
       return JSON.parse(localStorage.getItem("tg_draft_accounts") || "[]");
     }
 
-    function saveDraftAccounts(accounts){
+    function saveDraftAccounts(accounts) {
       localStorage.setItem("tg_draft_accounts", JSON.stringify(accounts));
     }
 
@@ -1906,13 +1935,15 @@
       dailyLossUsed: 0,
       dailyLossPercent: 0,
       totalOpenRisk: 0,
+      openRiskLimit: getOpenRiskLimit(plan, accountRules),
       maxPositions: getMaxPositions(plan, accountRules, settingsStore),
+      maxTrades: getMaxTrades(plan, accountRules),
 
       riskStatus: "safe",
       guardianStatus: "standby",
       guardianReason: "No connected account. Guardian is waiting for live credentials and account authorization.",
       guardianAction: "Trading supervision is not active until a real account connection is authenticated.",
-      maxTrades: Number(plan.maxTradesPerDay || accountRules.maxTradesPerDay || 0),
+
       activityLog: [
         {
           time: "SYSTEM",
@@ -1923,28 +1954,60 @@
       positions: []
     };
 
-    function syncPlatformCards(){
+    function pushActivity(message) {
+      defaultState.activityLog = defaultState.activityLog || [];
+      defaultState.activityLog.unshift({
+        time: getNowTimeLabel(),
+        message
+      });
+      defaultState.activityLog = defaultState.activityLog.slice(0, 8);
+    }
+
+    function syncGuardianState() {
+      if (defaultState.connectionStatus !== "connected") {
+        defaultState.guardianStatus = "standby";
+        defaultState.guardianReason = "No connected account. Guardian is waiting for live credentials and account authorization.";
+        defaultState.guardianAction = "Trading supervision is not active until a real account connection is authenticated.";
+        return;
+      }
+
+      if (defaultState.riskStatus === "danger") {
+        defaultState.guardianStatus = "locked";
+        defaultState.guardianReason = "A critical risk threshold has been breached.";
+        defaultState.guardianAction = "Trading should remain locked until the violation is resolved.";
+      } else if (defaultState.riskStatus === "warning") {
+        defaultState.guardianStatus = "warning";
+        defaultState.guardianReason = "A risk threshold is approaching its limit.";
+        defaultState.guardianAction = "Proceed carefully and monitor rule usage closely.";
+      } else {
+        defaultState.guardianStatus = "safe";
+        defaultState.guardianReason = "All monitored rules are within allowed thresholds.";
+        defaultState.guardianAction = "Trading may continue within your current plan limits.";
+      }
+    }
+
+    function syncPlatformCards() {
       platformCards.forEach(card => {
         card.classList.toggle("selected", card.dataset.platform === selectedPlatform);
       });
     }
 
-    function openSidebar(){
+    function openSidebar() {
       accountSidebar.classList.add("show");
       sidebarOverlay.classList.add("show");
     }
 
-    function closeSidebar(){
+    function closeSidebar() {
       accountSidebar.classList.remove("show");
       sidebarOverlay.classList.remove("show");
     }
 
-    function openModal(){
+    function openModal() {
       syncPlatformCards();
       connectModal.classList.add("show");
     }
 
-    function closeModal(){
+    function closeModal() {
       connectModal.classList.remove("show");
     }
 
@@ -1973,16 +2036,25 @@
     cancelModalBtn.addEventListener("click", closeModal);
 
     continueConnectBtn.addEventListener("click", () => {
-      // Only save the chosen platform and move the user into the future credential flow.
       localStorage.setItem("tradeGuardianSelectedPlatform", selectedPlatform);
-      pendingConnectionDraft = {
+
+      const draftAccounts = getDraftAccounts();
+      const newDraft = {
+        id: `draft-${Date.now()}`,
         platform: selectedPlatform,
         mode: document.getElementById("addMode").value,
-        size: Number(document.getElementById("addAccountSize").value || 0)
+        size: Number(document.getElementById("addAccountSize").value || 0),
+        active: draftAccounts.length === 0
       };
+
+      draftAccounts.push(newDraft);
+      saveDraftAccounts(draftAccounts);
+
       pushActivity(`${selectedPlatform} credential flow opened.`);
       closeModal();
       closeSidebar();
+      renderSwitchAccountSection();
+      renderActivityLog();
     });
 
     document.getElementById("brokerStatusPill").addEventListener("click", () => {
@@ -2002,14 +2074,20 @@
         maxDrawdown: document.getElementById("settingDrawdown").value,
         maxPositions: document.getElementById("settingMaxPositions").value
       };
+
+      Object.assign(settingsStore, settings);
       saveSettingsStore(settings);
 
       defaultState.riskPerTrade = Number(settings.riskPerTrade || 0);
-      defaultState.riskPerTradeText = defaultState.riskPerTrade > 0 ? formatCurrency(defaultState.riskPerTrade) : "No plan loaded yet";
+      defaultState.riskPerTradeText =
+        defaultState.riskPerTrade > 0
+          ? formatCurrency(defaultState.riskPerTrade)
+          : "No plan loaded yet";
+
       defaultState.dailyLossLimit = Number(settings.dailyLossLimit || 0);
       defaultState.maxPositions = Number(settings.maxPositions || 0);
 
-      pushActivity(`Settings updated from the dashboard panel.`);
+      pushActivity("Settings updated from the dashboard panel.");
       renderAll();
     });
 
@@ -2040,7 +2118,7 @@
           defaultState.dailyLossPercent = 0;
           defaultState.alerts = [];
           defaultState.positions = [];
-          pushActivity(`Account disconnected from dashboard view.`);
+          pushActivity("Account disconnected from dashboard view.");
           renderAll();
         });
         inner.appendChild(btn);
@@ -2065,11 +2143,11 @@
         btn.className = "mini-btn" + (account.active ? " active" : "");
         btn.textContent = `${account.platform} • ${account.mode} • ${formatCurrency(account.size)}`;
         btn.addEventListener("click", () => {
-          // Prepared for future real switching when actual API-based connections exist.
           const updated = draftAccounts.map((acc, i) => ({ ...acc, active: i === index }));
           saveDraftAccounts(updated);
           pushActivity(`Draft account focus changed to ${account.platform} • ${account.mode}.`);
           renderSwitchAccountSection();
+          renderActivityLog();
         });
         inner.appendChild(btn);
       });
@@ -2080,7 +2158,7 @@
       inner.appendChild(helper);
     }
 
-    function renderTopBar(){
+    function renderTopBar() {
       document.getElementById("brokerLabel").textContent =
         defaultState.brokerName === "Connect Account"
           ? "Broker:"
@@ -2119,7 +2197,7 @@
       }
     }
 
-    function renderMetrics(){
+    function renderMetrics() {
       document.getElementById("balanceValue").textContent = formatCurrency(defaultState.balance);
       document.getElementById("equityValue").textContent = formatCurrency(defaultState.equity);
 
@@ -2137,7 +2215,7 @@
       document.getElementById("tradesTodayValue").textContent = defaultState.tradesToday;
     }
 
-    function renderRiskMeter(){
+    function renderRiskMeter() {
       document.getElementById("dailyLossPercentLabel").textContent = formatPercent(defaultState.dailyLossPercent);
       document.getElementById("dailyLossUsedLabel").textContent = `${formatCurrency(defaultState.dailyLossUsed)} used`;
       document.getElementById("dailyLossLimitLabel").textContent = `${formatCurrency(defaultState.dailyLossLimit)} limit`;
@@ -2147,6 +2225,7 @@
 
       const badge = document.getElementById("riskStatusBadge");
       badge.className = "status-badge";
+
       if (defaultState.riskStatus === "warning") {
         badge.classList.add("status-warning");
         badge.textContent = "Warning";
@@ -2167,7 +2246,7 @@
       document.getElementById("settingMaxPositions").value = defaultState.maxPositions || "";
     }
 
-    function renderAlerts(){
+    function renderAlerts() {
       const emptyState = document.getElementById("alertsEmpty");
       const alertList = document.getElementById("alertList");
 
@@ -2196,8 +2275,7 @@
       });
     }
 
-
-    function renderGuardianStatus(){
+    function renderGuardianStatus() {
       syncGuardianState();
 
       const badge = document.getElementById("guardianStatusBadge");
@@ -2206,6 +2284,7 @@
       const actionValue = document.getElementById("guardianActionValue");
 
       badge.className = "status-badge";
+
       if (defaultState.guardianStatus === "locked") {
         badge.classList.add("status-danger");
         badge.textContent = "Locked";
@@ -2228,10 +2307,10 @@
       actionValue.textContent = defaultState.guardianAction;
     }
 
-    function renderRuleUsage(){
+    function renderRuleUsage() {
       const maxTrades = Number(defaultState.maxTrades || 0);
       const maxPositions = Number(defaultState.maxPositions || 0);
-      const allowedOpenRisk = Number(defaultState.riskPerTrade || 0);
+      const allowedOpenRisk = Number(defaultState.openRiskLimit || 0);
 
       document.getElementById("usageTradesValue").textContent = `${defaultState.tradesToday} / ${maxTrades}`;
       document.getElementById("usageDailyLossValue").textContent = `${formatCurrency(defaultState.dailyLossUsed)} / ${formatCurrency(defaultState.dailyLossLimit)}`;
@@ -2239,7 +2318,7 @@
       document.getElementById("usagePositionsValue").textContent = `${defaultState.openPositionsCount} / ${maxPositions}`;
     }
 
-    function renderActivityLog(){
+    function renderActivityLog() {
       const wrap = document.getElementById("activityLogList");
       wrap.innerHTML = "";
 
@@ -2260,7 +2339,7 @@
       });
     }
 
-    function renderPositions(){
+    function renderPositions() {
       const body = document.getElementById("positionsTableBody");
       const badge = document.getElementById("positionsActiveBadge");
       badge.textContent = `${defaultState.positions.length} Active`;
@@ -2300,7 +2379,7 @@
       });
     }
 
-    function renderAll(){
+    function renderAll() {
       renderTopBar();
       renderMetrics();
       renderRiskMeter();
@@ -2317,7 +2396,7 @@
     renderAll();
 
     window.TradeGuardianDashboard = {
-      setAccountUpdate(payload){
+      setAccountUpdate(payload) {
         defaultState.balance = payload.balance ?? defaultState.balance;
         defaultState.equity = payload.equity ?? defaultState.equity;
         defaultState.dailyPnl = payload.dailyPnl ?? defaultState.dailyPnl;
@@ -2328,11 +2407,11 @@
         defaultState.connectionStatus = payload.connectionStatus ?? "connected";
         defaultState.mode = payload.mode ?? "Live";
         defaultState.accountSize = payload.accountSize ?? defaultState.accountSize;
-        pushActivity(`Account update received from live connection.`);
+        pushActivity("Account update received from live connection.");
         renderAll();
       },
 
-      setRiskUpdate(payload){
+      setRiskUpdate(payload) {
         defaultState.riskPerTrade = payload.riskPerTrade ?? defaultState.riskPerTrade;
         defaultState.riskPerTradePercent = payload.riskPerTradePercent ?? defaultState.riskPerTradePercent;
         defaultState.dailyLossLimit = payload.dailyLossLimit ?? defaultState.dailyLossLimit;
@@ -2341,30 +2420,27 @@
         defaultState.totalOpenRisk = payload.totalOpenRisk ?? defaultState.totalOpenRisk;
         defaultState.maxPositions = payload.maxPositions ?? defaultState.maxPositions;
         defaultState.riskStatus = payload.riskStatus ?? defaultState.riskStatus;
-        pushActivity(`Risk metrics refreshed.`);
+        pushActivity("Risk metrics refreshed.");
         renderAll();
       },
 
-      setPositionsUpdate(payload){
+      setPositionsUpdate(payload) {
         defaultState.positions = Array.isArray(payload) ? payload : [];
         defaultState.openPositionsCount = defaultState.positions.length;
         pushActivity(`Positions updated: ${defaultState.openPositionsCount} open.`);
         renderAll();
       },
 
-      setAlertsUpdate(payload){
+      setAlertsUpdate(payload) {
         defaultState.alerts = Array.isArray(payload) ? payload : [];
-        if (defaultState.alerts.length) pushActivity(`Guardian alerts updated.`);
+        if (defaultState.alerts.length) pushActivity("Guardian alerts updated.");
         renderAll();
       },
 
-      openConnectModal(){
+      openConnectModal() {
         openModal();
       }
     };
   </script>
-  
-  <script src="guardianEngine.js"></script>
-  
 </body>
 </html>
