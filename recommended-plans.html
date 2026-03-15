@@ -500,13 +500,11 @@ function calculateBehaviorCaution(ctx) {
 function deriveRiskCap(ctx) {
   let finalCap = ctx.riskValue > 0 ? ctx.riskValue : 0;
 
-  // Cap by daily loss limit
   if (ctx.dailyLoss > 0) {
     const capByDailyLoss = ctx.dailyLoss * 0.25;
     finalCap = finalCap > 0 ? Math.min(finalCap, capByDailyLoss) : capByDailyLoss;
   }
 
-  // Cap by total active risk and simultaneous positions
   if (ctx.maxTotalRiskAcrossOpenTrades > 0) {
     const slots = Math.max(ctx.maxOpenTradesAtSameTime || 1, 1);
     const capByOpenRisk = ctx.maxTotalRiskAcrossOpenTrades / slots;
@@ -581,7 +579,6 @@ function buildPlans(ctx) {
   const cappedTrades = deriveTradeCap(ctx);
   const isPercent = ctx.riskMode === "Percentage of account";
 
-  // Pressure is calculated from the effective caps, before final tiering
   const pressure = calculateRiskPressure(
     ctx,
     cappedRisk,
@@ -589,8 +586,6 @@ function buildPlans(ctx) {
   );
 
   const pressureFactor = pressureAdjustment(pressure.pressureScore);
-
-  // Final intelligence factor combines profile caution + pressure factor
   const intelligenceFactor = clamp(behaviorCaution * pressureFactor, 0.25, 1);
 
   const maxRisk = cappedRisk > 0 ? cappedRisk : ctx.riskValue;
@@ -656,6 +651,26 @@ function renderSummary(ctx) {
   document.getElementById("summaryMaxTrades").textContent = ctx.maxTradesPerDay ? ctx.maxTradesPerDay : "—";
 }
 
+function activateRecommendedPlan(plan, ctx) {
+  const selectedPlan = {
+    planType: "recommended",
+    selectedId: plan.id,
+    selectedName: plan.name,
+    riskLabel: plan.riskLabel,
+    riskPerTradeMode: ctx.riskMode,
+    riskPerTrade: plan.riskPerTrade,
+    maxTradesPerDay: plan.maxTradesPerDay,
+    description: plan.description,
+    intelligenceFactorsUsed: buildPlanReasons(ctx),
+    pressureScore: plan.pressure.pressureScore
+  };
+
+  localStorage.setItem("tradeGuardianSelectedPlan", JSON.stringify(selectedPlan));
+  localStorage.setItem("tradeGuardianActivePlan", JSON.stringify(selectedPlan));
+  localStorage.removeItem("tradeGuardianCustomPlan");
+  window.location.href = "guardian-dashboard.html";
+}
+
 function renderPlans(plans, ctx) {
   const container = document.getElementById("planCards");
   container.innerHTML = "";
@@ -705,21 +720,7 @@ function renderPlans(plans, ctx) {
     `;
 
     card.querySelector("button").addEventListener("click", () => {
-      const selectedPlan = {
-        planType: "recommended",
-        selectedId: plan.id,
-        selectedName: plan.name,
-        riskLabel: plan.riskLabel,
-        riskPerTradeMode: ctx.riskMode,
-        riskPerTrade: plan.riskPerTrade,
-        maxTradesPerDay: plan.maxTradesPerDay,
-        description: plan.description,
-        intelligenceFactorsUsed: buildPlanReasons(ctx),
-        pressureScore: plan.pressure.pressureScore
-      };
-
-      localStorage.setItem("tradeGuardianSelectedPlan", JSON.stringify(selectedPlan));
-      window.location.href = "guardian-dashboard.html";
+      activateRecommendedPlan(plan, ctx);
     });
 
     container.appendChild(card);
