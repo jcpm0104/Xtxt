@@ -395,6 +395,8 @@
 <script>
 const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
 const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules")) || {};
+window._tg_traderProfile = traderProfile;
+window._tg_accountRules = accountRules;
 
 function safeNumber(value) {
   const n = Number(value);

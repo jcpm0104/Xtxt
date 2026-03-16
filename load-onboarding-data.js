@@ -16,53 +16,65 @@ if (!config) {
   console.warn("[TradeGuardian] load-onboarding-data.js: unrecognised page:", PAGE);
 }
 
+// Mutate an existing in-memory state object in place so all existing references
+// (the inline script's const variables) immediately reflect the new data.
+function mutateObject(target, source) {
+  if (!target || typeof target !== "object") return;
+  Object.keys(target).forEach(k => delete target[k]);
+  Object.assign(target, source || {});
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (!user || !config) return;
 
-  // Session flag scoped to both the user uid and the section name.
-  // Using sessionStorage (tab-scoped, cleared on tab close) means:
-  // - The same user in the same tab never reloads more than once per section per session.
-  // - A different user in the same tab gets a fresh fetch because their uid produces a
-  //   different key that has never been set.
-  const sessionKey = `tg_fs_loaded_${config.section}_${user.uid}`;
-  const alreadyLoadedThisSession = !!sessionStorage.getItem(sessionKey);
-
   try {
     const snap = await getDoc(doc(db, "traders", user.uid));
-    if (!snap.exists()) return;
+
+    if (!snap.exists()) {
+      // This user has no Firestore document. The inline script already initialised
+      // the state objects from localStorage (which auth-guard may have cleared).
+      // Nothing to do — the form is correctly blank for a brand-new user.
+      return;
+    }
 
     const data = snap.data();
     const sectionData = data[config.section];
-    if (!sectionData || typeof sectionData !== "object") return;
 
-    // Capture what the inline script already rendered before we overwrite it.
-    const prevData = localStorage.getItem(config.lsKey);
-    const newData  = JSON.stringify(sectionData);
-
-    // Always write the authoritative Firestore data for this user.
-    localStorage.setItem(config.lsKey, newData);
+    // ── 1. Write authoritative Firestore data to localStorage ──────────────────
+    // This ensures a future page reload also shows the correct user's data.
+    if (sectionData && typeof sectionData === "object") {
+      localStorage.setItem(config.lsKey, JSON.stringify(sectionData));
+    }
     if (data.profile)      localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(data.profile));
     if (data.accountRules) localStorage.setItem("tradeGuardianAccountRules",  JSON.stringify(data.accountRules));
 
-    if (!alreadyLoadedThisSession) {
-      // Mark before reloading so the post-reload run does not loop.
-      sessionStorage.setItem(sessionKey, "1");
+    // ── 2. Update in-memory state objects that the inline scripts already created ─
+    // Each page exposes its state object(s) on window so we can mutate them here.
+    // Mutating in place means the inline script's const references still work.
 
-      // Only reload if what the inline script displayed differs from Firestore.
-      // If localStorage was already correct there is no need to re-render.
-      if (prevData !== newData) {
-        console.log("[TradeGuardian] Firestore data written; reloading to display correct data for:", PAGE);
-        window.location.reload();
-        return;
-      }
+    // traderProfile is used on trader-profile.html, recommended-plans.html,
+    // and custom-trading-plan.html.
+    if (window._tg_traderProfile && data.profile) {
+      mutateObject(window._tg_traderProfile, data.profile);
     }
 
-    // Data is already in sync — just refresh the rendered form if the page supports it.
+    // accountRules is used on account-rules.html, recommended-plans.html,
+    // and custom-trading-plan.html.
+    if (window._tg_accountRules && data.accountRules) {
+      mutateObject(window._tg_accountRules, data.accountRules);
+    }
+
+    // customPlan is used on custom-trading-plan.html only.
+    if (window._tg_customPlan && config.section === "tradingPlan" && sectionData) {
+      mutateObject(window._tg_customPlan, sectionData);
+    }
+
+    // ── 3. Re-render the form with the correct user's data ─────────────────────
     if (typeof window.renderStep === "function") {
       window.renderStep();
     }
 
-    console.log("[TradeGuardian] Onboarding page prefilled from Firestore:", PAGE);
+    console.log("[TradeGuardian] Onboarding page hydrated from Firestore for:", PAGE);
   } catch (err) {
     console.error("[TradeGuardian] load-onboarding-data error:", err);
   }
