@@ -164,38 +164,33 @@ onAuthStateChanged(auth, async (user) => {
       if (d.tradeGuardianSelectedPlatform) localStorage.setItem("tradeGuardianSelectedPlatform_"   + uid, d.tradeGuardianSelectedPlatform);
     }
 
-    // Don't override if the user has manually applied custom settings
     if (!window.TradeGuardianDashboard) return;
-    const settings = JSON.parse(localStorage.getItem("tg_dashboard_settings_" + uid) || "{}");
-    if (settings.userHasAppliedSettings) return;
+
+    const settings         = JSON.parse(localStorage.getItem("tg_dashboard_settings_" + uid) || "{}");
+    const hasManualOverrides = settings.userHasAppliedSettings === true;
 
     // Use the same field resolution order the dashboard itself uses
     const accountRules = data.accountRules || {};
-    const plan = data.planResult || data.tradingPlan || data.recommendedPlan || {};
+    const plan         = data.planResult || data.tradingPlan || data.recommendedPlan || {};
 
-    // Guard 1: if Firestore returned no account rules AND no plan data there is nothing
-    // to compute. The inline script already computed correct values from localStorage —
-    // do not touch the dashboard at all.
+    // Guard 1: nothing to work from — keep whatever the inline script already rendered.
     const hasAccountRules = Object.keys(accountRules).length > 0;
     const hasPlan         = Object.keys(plan).length > 0;
-    if (!hasAccountRules && !hasPlan) {
-      console.log("[TradeGuardian] Firestore has no risk data; preserving localStorage-computed dashboard values.");
+    if (!hasAccountRules && !hasPlan && !hasManualOverrides) {
+      console.log("[TradeGuardian] Firestore has no risk data; preserving dashboard values.");
       return;
     }
 
+    // Compute plan-derived baseline values.
     const rpt       = computeRiskPerTrade(plan, accountRules);
     const dailyLoss = computeDailyLossLimit(plan, accountRules);
     const openRisk  = computeOpenRiskLimit(plan, accountRules);
     const maxPos    = computeMaxPositions(plan, accountRules);
     const maxTrd    = computeMaxTrades(plan, accountRules);
 
-    // Guard 2: only include each field in the payload when it resolved to a real
-    // non-zero value. A zero result means every fallback returned nothing useful,
-    // so the key is left out of the payload entirely.
-    // setRiskUpdate uses the ?? operator, which treats 0 as a valid value, so
-    // sending 0 WOULD overwrite an already-correct value with zero.
+    // Start with plan-derived values. Only include a field when it resolved to
+    // something real — sending 0 via ?? would overwrite a correct value with zero.
     const payload = {};
-
     if (rpt.value > 0) {
       payload.riskPerTrade        = rpt.value;
       payload.riskPerTradePercent = rpt.percent;
@@ -206,7 +201,35 @@ onAuthStateChanged(auth, async (user) => {
     if (maxPos    > 0) payload.maxPositions    = maxPos;
     if (maxTrd    > 0) payload.maxTrades       = maxTrd;
 
-    // Guard 3: if every value resolved to zero, there is nothing worth sending.
+    // If the user has applied manual overrides via the settings form, merge those
+    // on top of the plan-derived baseline. This ensures the correct values are
+    // always pushed to the dashboard even on a fresh-session load where localStorage
+    // was empty when the inline script ran and defaultState was initialised to zero.
+    if (hasManualOverrides) {
+      const accountSize = getAccountSize(accountRules);
+
+      if (settings.riskPerTrade !== undefined && settings.riskPerTrade !== null && settings.riskPerTrade !== "") {
+        const manualRPT = Number(settings.riskPerTrade || 0);
+        if (manualRPT > 0) {
+          const manualDual = getDualDisplay(manualRPT, "$", accountSize);
+          payload.riskPerTrade        = manualRPT;
+          payload.riskPerTradePercent = manualDual.percent;
+          payload.riskPerTradeText    = `${manualDual.percentText} of balance`;
+        }
+      }
+
+      if (settings.dailyLossLimit !== undefined && settings.dailyLossLimit !== null && settings.dailyLossLimit !== "") {
+        const manualDLL = Number(settings.dailyLossLimit || 0);
+        if (manualDLL > 0) payload.dailyLossLimit = manualDLL;
+      }
+
+      if (settings.maxPositions !== undefined && settings.maxPositions !== null && settings.maxPositions !== "") {
+        const manualMP = Number(settings.maxPositions || 0);
+        if (manualMP > 0) payload.maxPositions = manualMP;
+      }
+    }
+
+    // Guard 2: nothing actionable computed.
     if (Object.keys(payload).length === 0) {
       console.log("[TradeGuardian] Firestore risk data resolved to no actionable values; preserving current dashboard state.");
       return;
