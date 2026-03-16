@@ -1356,42 +1356,6 @@
         </div>
       </div>
 
-      <div class="accordion-item">
-        <button class="accordion-trigger">
-          <div class="accordion-left">
-            <div class="accordion-icon">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5A3.5 3.5 0 1 0 12 15.5Z" stroke="currentColor" stroke-width="1.8"/>
-                <path d="M19.4 15a1.6 1.6 0 0 0 .32 1.76l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.6 1.6 0 0 0 15 19.4a1.6 1.6 0 0 0-1 .94 1.6 1.6 0 0 1-3 0a1.6 1.6 0 0 0-1-.94a1.6 1.6 0 0 0-1.76.32l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.6 1.6 0 0 0 4.6 15a1.6 1.6 0 0 0-.94-1a1.6 1.6 0 0 1 0-3a1.6 1.6 0 0 0 .94-1a1.6 1.6 0 0 0-.32-1.76l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.6 1.6 0 0 0 9 4.6a1.6 1.6 0 0 0 1-.94a1.6 1.6 0 0 1 3 0a1.6 1.6 0 0 0 1 .94a1.6 1.6 0 0 0 1.76-.32l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.6 1.6 0 0 0 19.4 9a1.6 1.6 0 0 0 .94 1a1.6 1.6 0 0 1 0 3a1.6 1.6 0 0 0-.94 1Z" stroke="currentColor" stroke-width="1.2"/>
-              </svg>
-            </div>
-            <div class="accordion-title">Settings</div>
-          </div>
-          <div class="accordion-arrow">⌄</div>
-        </button>
-        <div class="accordion-content">
-          <div class="accordion-inner">
-            <div class="field">
-              <label>Risk Per Trade</label>
-              <input id="settingRiskPerTrade" type="number" placeholder="500">
-            </div>
-            <div class="field">
-              <label>Daily Loss Limit</label>
-              <input id="settingDailyLoss" type="number" placeholder="1500">
-            </div>
-            <div class="field">
-              <label>Max Drawdown</label>
-              <input id="settingDrawdown" type="number" placeholder="2500">
-            </div>
-            <div class="field">
-              <label>Max Positions</label>
-              <input id="settingMaxPositions" type="number" placeholder="3">
-            </div>
-            <button class="mini-btn primary" id="applySettingsBtn">Apply Settings</button>
-          </div>
-        </div>
-      </div>
-
       <div class="sidebar-footer-actions">
         <a href="trader-profile.html" class="mini-btn primary sidebar-action-btn">Edit Trading Plan</a>
         <button id="logoutBtn" class="mini-btn danger sidebar-action-btn">Sign Out</button>
@@ -2122,35 +2086,6 @@
       openModal();
     });
 
-    document.getElementById("applySettingsBtn").addEventListener("click", () => {
-      const settings = {
-        riskPerTrade: document.getElementById("settingRiskPerTrade").value,
-        dailyLossLimit: document.getElementById("settingDailyLoss").value,
-        maxDrawdown: document.getElementById("settingDrawdown").value,
-        maxPositions: document.getElementById("settingMaxPositions").value,
-        userHasAppliedSettings: true
-      };
-
-      Object.assign(settingsStore, settings);
-      window.dispatchEvent(new CustomEvent("tg:save", {
-        detail: { section: "dashboard", data: { settings } }
-      }));
-
-      defaultState.riskPerTrade = Number(settings.riskPerTrade || 0);
-      const manualDual = getDualDisplay(defaultState.riskPerTrade, "$", getAccountSize(accountRules));
-      defaultState.riskPerTradeText =
-        defaultState.riskPerTrade > 0
-          ? `${manualDual.percentText} of balance`
-          : "No plan loaded yet";
-      defaultState.riskPerTradePercent = manualDual.percent;
-
-      defaultState.dailyLossLimit = Number(settings.dailyLossLimit || 0);
-      defaultState.maxPositions = Number(settings.maxPositions || 0);
-
-      pushActivity("Settings updated from the dashboard panel.");
-      renderAll();
-    });
-
     function renderConnectedAccountSection() {
       const inner = document.getElementById("connectedAccountInner");
       const existing = document.getElementById("disconnectAccountBtn");
@@ -2300,14 +2235,6 @@
         document.getElementById("riskFill").style.background = "linear-gradient(90deg, var(--success), rgba(45,245,154,.2))";
       }
 
-      document.getElementById("settingRiskPerTrade").value =
-        settingsWereApplied(settingsStore) ? (settingsStore.riskPerTrade || "") : "";
-      document.getElementById("settingDailyLoss").value =
-        settingsWereApplied(settingsStore) ? (settingsStore.dailyLossLimit || "") : "";
-      document.getElementById("settingDrawdown").value =
-        settingsWereApplied(settingsStore) ? (settingsStore.maxDrawdown || "") : "";
-      document.getElementById("settingMaxPositions").value =
-        settingsWereApplied(settingsStore) ? (settingsStore.maxPositions || "") : "";
     }
 
     function renderAlerts() {
