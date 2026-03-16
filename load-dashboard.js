@@ -171,19 +171,47 @@ onAuthStateChanged(auth, async (user) => {
     const accountRules = data.accountRules || {};
     const plan = data.planResult || data.tradingPlan || data.recommendedPlan || {};
 
-    const rpt = computeRiskPerTrade(plan, accountRules);
+    // Guard 1: if Firestore returned no account rules AND no plan data there is nothing
+    // to compute. The inline script already computed correct values from localStorage —
+    // do not touch the dashboard at all.
+    const hasAccountRules = Object.keys(accountRules).length > 0;
+    const hasPlan         = Object.keys(plan).length > 0;
+    if (!hasAccountRules && !hasPlan) {
+      console.log("[TradeGuardian] Firestore has no risk data; preserving localStorage-computed dashboard values.");
+      return;
+    }
 
-    window.TradeGuardianDashboard.setRiskUpdate({
-      riskPerTrade:        rpt.value,
-      riskPerTradePercent: rpt.percent,
-      riskPerTradeText:    rpt.text,
-      dailyLossLimit:      computeDailyLossLimit(plan, accountRules),
-      openRiskLimit:       computeOpenRiskLimit(plan, accountRules),
-      maxPositions:        computeMaxPositions(plan, accountRules),
-      maxTrades:           computeMaxTrades(plan, accountRules)
-    });
+    const rpt       = computeRiskPerTrade(plan, accountRules);
+    const dailyLoss = computeDailyLossLimit(plan, accountRules);
+    const openRisk  = computeOpenRiskLimit(plan, accountRules);
+    const maxPos    = computeMaxPositions(plan, accountRules);
+    const maxTrd    = computeMaxTrades(plan, accountRules);
 
-    console.log("[TradeGuardian] Dashboard risk metrics loaded from Firestore.");
+    // Guard 2: only include each field in the payload when it resolved to a real
+    // non-zero value. A zero result means every fallback returned nothing useful,
+    // so the key is left out of the payload entirely.
+    // setRiskUpdate uses the ?? operator, which treats 0 as a valid value, so
+    // sending 0 WOULD overwrite an already-correct value with zero.
+    const payload = {};
+
+    if (rpt.value > 0) {
+      payload.riskPerTrade        = rpt.value;
+      payload.riskPerTradePercent = rpt.percent;
+      payload.riskPerTradeText    = rpt.text;
+    }
+    if (dailyLoss > 0) payload.dailyLossLimit = dailyLoss;
+    if (openRisk  > 0) payload.openRiskLimit  = openRisk;
+    if (maxPos    > 0) payload.maxPositions    = maxPos;
+    if (maxTrd    > 0) payload.maxTrades       = maxTrd;
+
+    // Guard 3: if every value resolved to zero, there is nothing worth sending.
+    if (Object.keys(payload).length === 0) {
+      console.log("[TradeGuardian] Firestore risk data resolved to no actionable values; preserving current dashboard state.");
+      return;
+    }
+
+    window.TradeGuardianDashboard.setRiskUpdate(payload);
+    console.log("[TradeGuardian] Dashboard risk metrics updated from Firestore:", payload);
   } catch (err) {
     console.error("[TradeGuardian] load-dashboard error:", err);
   }
