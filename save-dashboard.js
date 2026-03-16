@@ -6,7 +6,6 @@ const UID = localStorage.getItem("tg_last_user") || "";
 // localStorage keys are the base names plus the UID suffix.
 const BASE_KEYS = [
   "tradeGuardianSelectedPlatform",
-  "tradeGuardianAccountRules",
   "tg_dashboard_settings",
   "tg_draft_accounts"
 ];

@@ -194,7 +194,13 @@ onAuthStateChanged(auth, async (user) => {
     if (rpt.value > 0) {
       payload.riskPerTrade        = rpt.value;
       payload.riskPerTradePercent = rpt.percent;
-      payload.riskPerTradeText    = rpt.text;
+    }
+    // Always send riskPerTradeText when a plan structure was found, regardless of
+    // whether the dollar value is non-zero. This prevents "No plan loaded yet"
+    // from persisting when the plan exists but computes to $0 (e.g. percentage
+    // mode with accountSize = 0).
+    if (rpt.text && rpt.text !== "No plan loaded yet") {
+      payload.riskPerTradeText = rpt.text;
     }
     if (dailyLoss > 0) payload.dailyLossLimit = dailyLoss;
     if (openRisk  > 0) payload.openRiskLimit  = openRisk;
