@@ -5,10 +5,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/f
 const PAGE = window.location.pathname.split("/").pop() || window.location.pathname;
 
 const KEY_MAP = {
-  "trader-profile.html":      { section: "profile",         lsKey: "tradeGuardianTraderProfile" },
-  "account-rules.html":       { section: "accountRules",    lsKey: "tradeGuardianAccountRules"  },
-  "recommended-plans.html":   { section: "recommendedPlan", lsKey: "tradeGuardianActivePlan"    },
-  "custom-trading-plan.html": { section: "tradingPlan",     lsKey: "tradeGuardianCustomPlan"    }
+  "trader-profile.html":      { section: "profile",         lsKeyBase: "tradeGuardianTraderProfile" },
+  "account-rules.html":       { section: "accountRules",    lsKeyBase: "tradeGuardianAccountRules"  },
+  "recommended-plans.html":   { section: "recommendedPlan", lsKeyBase: "tradeGuardianActivePlan"    },
+  "custom-trading-plan.html": { section: "tradingPlan",     lsKeyBase: "tradeGuardianCustomPlan"    }
 };
 
 const config = KEY_MAP[PAGE];
@@ -31,40 +31,28 @@ onAuthStateChanged(auth, async (user) => {
     const snap = await getDoc(doc(db, "traders", user.uid));
 
     if (!snap.exists()) {
-      // This user has no Firestore document. The inline script already initialised
-      // the state objects from localStorage (which auth-guard may have cleared).
-      // Nothing to do — the form is correctly blank for a brand-new user.
+      // Brand-new user — no Firestore data yet; the blank form is correct.
       return;
     }
 
-    const data = snap.data();
+    const data        = snap.data();
+    const uid         = user.uid;
     const sectionData = data[config.section];
 
-    // ── 1. Write authoritative Firestore data to localStorage ──────────────────
-    // This ensures a future page reload also shows the correct user's data.
+    // ── 1. Write Firestore data to UID-scoped localStorage keys ────────────────
     if (sectionData && typeof sectionData === "object") {
-      localStorage.setItem(config.lsKey, JSON.stringify(sectionData));
+      localStorage.setItem(config.lsKeyBase + "_" + uid, JSON.stringify(sectionData));
     }
-    if (data.profile)      localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(data.profile));
-    if (data.accountRules) localStorage.setItem("tradeGuardianAccountRules",  JSON.stringify(data.accountRules));
+    if (data.profile)      localStorage.setItem("tradeGuardianTraderProfile_" + uid, JSON.stringify(data.profile));
+    if (data.accountRules) localStorage.setItem("tradeGuardianAccountRules_"  + uid, JSON.stringify(data.accountRules));
 
-    // ── 2. Update in-memory state objects that the inline scripts already created ─
-    // Each page exposes its state object(s) on window so we can mutate them here.
-    // Mutating in place means the inline script's const references still work.
-
-    // traderProfile is used on trader-profile.html, recommended-plans.html,
-    // and custom-trading-plan.html.
+    // ── 2. Update the in-memory state objects exposed on window ────────────────
     if (window._tg_traderProfile && data.profile) {
       mutateObject(window._tg_traderProfile, data.profile);
     }
-
-    // accountRules is used on account-rules.html, recommended-plans.html,
-    // and custom-trading-plan.html.
     if (window._tg_accountRules && data.accountRules) {
       mutateObject(window._tg_accountRules, data.accountRules);
     }
-
-    // customPlan is used on custom-trading-plan.html only.
     if (window._tg_customPlan && config.section === "tradingPlan" && sectionData) {
       mutateObject(window._tg_customPlan, sectionData);
     }

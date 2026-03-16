@@ -329,10 +329,11 @@
 </div>
 
 <script>
-const customPlan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan")) || {};
-const selectedPlanMeta = JSON.parse(localStorage.getItem("tradeGuardianSelectedPlan")) || {};
-const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
-const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules")) || {};
+const _tg_uid = localStorage.getItem("tg_last_user") || "";
+const customPlan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan_" + _tg_uid)) || {};
+const selectedPlanMeta = JSON.parse(localStorage.getItem("tradeGuardianSelectedPlan_" + _tg_uid)) || {};
+const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile_" + _tg_uid)) || {};
+const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules_" + _tg_uid)) || {};
 window._tg_customPlan = customPlan;
 window._tg_traderProfile = traderProfile;
 window._tg_accountRules = accountRules;
@@ -674,7 +675,7 @@ function saveAnswer() {
     customPlan[step.key] = data;
   }
 
-  localStorage.setItem("tradeGuardianCustomPlan", JSON.stringify(customPlan));
+  localStorage.setItem("tradeGuardianCustomPlan_" + _tg_uid, JSON.stringify(customPlan));
 }
 
 function validateStep() {
@@ -730,7 +731,7 @@ nextBtn.addEventListener("click", () => {
       createdFromRecommendedScreen: selectedPlanMeta?.planType === "custom"
     };
 
-    localStorage.setItem("tradeGuardianCustomPlan", JSON.stringify(finalPlan));
+    localStorage.setItem("tradeGuardianCustomPlan_" + _tg_uid, JSON.stringify(finalPlan));
     window.location.href = "custom-plan-result.html";
   }
 });

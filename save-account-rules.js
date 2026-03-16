@@ -1,6 +1,6 @@
 import { saveUserData } from "./save-data.js";
 
-const KEY = "tradeGuardianAccountRules";
+const KEY = "tradeGuardianAccountRules_" + (localStorage.getItem("tg_last_user") || "");
 
 function trySave(raw) {
   try {

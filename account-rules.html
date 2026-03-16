@@ -350,7 +350,8 @@ button{
 </div>
 
 <script>
-const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules")) || {};
+const _tg_uid = localStorage.getItem("tg_last_user") || "";
+const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules_" + _tg_uid)) || {};
 window._tg_accountRules = accountRules;
 
 const steps = [
@@ -645,7 +646,7 @@ function saveAnswer() {
     }
   }
 
-  localStorage.setItem("tradeGuardianAccountRules", JSON.stringify(accountRules));
+  localStorage.setItem("tradeGuardianAccountRules_" + _tg_uid, JSON.stringify(accountRules));
 }
 
 function validateStep() {
@@ -676,7 +677,7 @@ nextBtn.addEventListener("click", () => {
     renderStep();
   } else {
     console.log("ACCOUNT RULES COMPLETE", accountRules);
-    localStorage.setItem("tradeGuardianAccountRules", JSON.stringify(accountRules));
+    localStorage.setItem("tradeGuardianAccountRules_" + _tg_uid, JSON.stringify(accountRules));
     window.location.href = "recommended-plans.html";
   }
 });

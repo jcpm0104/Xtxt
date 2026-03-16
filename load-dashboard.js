@@ -148,23 +148,25 @@ onAuthStateChanged(auth, async (user) => {
 
     const data = snap.data();
 
-    // Write to localStorage so page-reload also works
-    if (data.profile)        localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(data.profile));
-    if (data.accountRules)   localStorage.setItem("tradeGuardianAccountRules",  JSON.stringify(data.accountRules));
-    if (data.tradingPlan)    localStorage.setItem("tradeGuardianCustomPlan",     JSON.stringify(data.tradingPlan));
-    if (data.recommendedPlan)localStorage.setItem("tradeGuardianActivePlan",     JSON.stringify(data.recommendedPlan));
-    if (data.planResult)     localStorage.setItem("tradeGuardianActivePlan",     JSON.stringify(data.planResult));
+    // Write to UID-scoped localStorage so page-reload also works correctly
+    // even when multiple users share the same browser.
+    const uid = user.uid;
+    if (data.profile)        localStorage.setItem("tradeGuardianTraderProfile_" + uid, JSON.stringify(data.profile));
+    if (data.accountRules)   localStorage.setItem("tradeGuardianAccountRules_"  + uid, JSON.stringify(data.accountRules));
+    if (data.tradingPlan)    localStorage.setItem("tradeGuardianCustomPlan_"     + uid, JSON.stringify(data.tradingPlan));
+    if (data.recommendedPlan)localStorage.setItem("tradeGuardianActivePlan_"     + uid, JSON.stringify(data.recommendedPlan));
+    if (data.planResult)     localStorage.setItem("tradeGuardianActivePlan_"     + uid, JSON.stringify(data.planResult));
 
     if (data.dashboard) {
       const d = data.dashboard;
-      if (d.tg_dashboard_settings)         localStorage.setItem("tg_dashboard_settings",          JSON.stringify(d.tg_dashboard_settings));
-      if (d.tg_draft_accounts)             localStorage.setItem("tg_draft_accounts",               JSON.stringify(d.tg_draft_accounts));
-      if (d.tradeGuardianSelectedPlatform) localStorage.setItem("tradeGuardianSelectedPlatform",   d.tradeGuardianSelectedPlatform);
+      if (d.tg_dashboard_settings)         localStorage.setItem("tg_dashboard_settings_"          + uid, JSON.stringify(d.tg_dashboard_settings));
+      if (d.tg_draft_accounts)             localStorage.setItem("tg_draft_accounts_"               + uid, JSON.stringify(d.tg_draft_accounts));
+      if (d.tradeGuardianSelectedPlatform) localStorage.setItem("tradeGuardianSelectedPlatform_"   + uid, d.tradeGuardianSelectedPlatform);
     }
 
     // Don't override if the user has manually applied custom settings
     if (!window.TradeGuardianDashboard) return;
-    const settings = JSON.parse(localStorage.getItem("tg_dashboard_settings") || "{}");
+    const settings = JSON.parse(localStorage.getItem("tg_dashboard_settings_" + uid) || "{}");
     if (settings.userHasAppliedSettings) return;
 
     // Use the same field resolution order the dashboard itself uses

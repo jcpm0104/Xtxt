@@ -333,7 +333,8 @@ button{
 </div>
 
 <script>
-const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
+const _tg_uid = localStorage.getItem("tg_last_user") || "";
+const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile_" + _tg_uid)) || {};
 window._tg_traderProfile = traderProfile;
 
 const steps = [
@@ -541,7 +542,7 @@ nextBtn.addEventListener("click", () => {
   renderStep();
 } else {
   console.log("PROFILE COMPLETE", traderProfile);
-  localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(traderProfile));
+  localStorage.setItem("tradeGuardianTraderProfile_" + _tg_uid, JSON.stringify(traderProfile));
   window.location.href = "account-rules.html";
 }
 });
