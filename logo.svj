@@ -1,0 +1,17 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+<path d="M20 5 L35 10 L35 28 C35 40 28 48 20 52 C12 48 5 40 5 28 L5 10 Z"
+fill="#2F6BFF"/>
+
+<polyline points="10,30 16,22 22,26 28,18"
+stroke="white"
+stroke-width="2"
+fill="none"
+stroke-linecap="round"
+stroke-linejoin="round"/>
+
+<text x="50" y="35" fill="#E5E7EB" font-family="Inter, sans-serif" font-size="20" font-weight="600">
+Trade Guardian
+</text>
+
+</svg>
