@@ -2,23 +2,32 @@ import { auth, db } from "./firebase-init.js";
 import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-let currentUser = null;
-
-onAuthStateChanged(auth, (user) => {
-  currentUser = user;
-});
+// Resolves with the current user as soon as auth state is known.
+// Uses auth.currentUser directly if already available (synchronous),
+// otherwise waits for onAuthStateChanged to fire once.
+function getAuthUser() {
+  if (auth.currentUser) return Promise.resolve(auth.currentUser);
+  return new Promise(resolve => {
+    const unsub = onAuthStateChanged(auth, user => {
+      unsub();
+      resolve(user);
+    });
+  });
+}
 
 window.addEventListener("tg:save", async (e) => {
   const { section, data, markComplete, onSuccess } = e.detail || {};
   if (!section || data === undefined) return;
 
-  if (!currentUser) {
+  const user = await getAuthUser();
+
+  if (!user) {
     console.error("[TradeGuardian] tg:save: no authenticated user — cannot write to Firestore.");
     return;
   }
 
   try {
-    const ref = doc(db, "traders", currentUser.uid);
+    const ref = doc(db, "traders", user.uid);
     const payload = {
       [section]: data,
       updatedAt: serverTimestamp()
