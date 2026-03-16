@@ -179,94 +179,78 @@ Once activated, Trade Guardian will enforce these rules automatically.
 
 <script>
 
-const plan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan")) || {};
+let plan = {};
 
 const summary = document.getElementById("planSummary");
 
-function addItem(label,value){
-
-const row = document.createElement("div");
-row.className = "plan-item";
-
-row.innerHTML = `
-<span class="label">${label}</span>
-<span class="value">${value}</span>
-`;
-
-summary.appendChild(row);
-
+function addItem(label, value) {
+  const row = document.createElement("div");
+  row.className = "plan-item";
+  row.innerHTML = `<span class="label">${label}</span><span class="value">${value}</span>`;
+  summary.appendChild(row);
 }
 
-if(plan.riskPerTradeValue){
-addItem("Risk per trade",
-plan.riskPerTradeValue.value + plan.riskPerTradeValue.unit
-);
+function renderPlan() {
+  summary.innerHTML = "";
+
+  if (plan.riskPerTradeValue) {
+    addItem("Risk per trade", plan.riskPerTradeValue.value + plan.riskPerTradeValue.unit);
+  }
+  if (plan.minimumRiskReward) {
+    addItem("Minimum Risk Reward", plan.minimumRiskReward);
+  }
+  if (plan.tradingSession) {
+    addItem("Trading Session", plan.tradingSession);
+  }
+  if (plan.tradingWindow) {
+    addItem("Trading Window", plan.tradingWindow.start + " - " + plan.tradingWindow.end);
+  }
+  if (plan.maxTradesPerDay) {
+    addItem("Max Trades Per Day", plan.maxTradesPerDay);
+  }
+  if (plan.maxOpenPositions) {
+    addItem("Max Open Positions", plan.maxOpenPositions);
+  }
+  if (plan.cooldownAfterTrade) {
+    addItem("Cooldown After Trade", plan.cooldownAfterTrade);
+  }
+  if (plan.maxConsecutiveLosingTrades) {
+    addItem("Max Consecutive Losses", plan.maxConsecutiveLosingTrades);
+  }
+  if (plan.maxLosingTradesPerDay) {
+    addItem("Max Losing Trades Per Day", plan.maxLosingTradesPerDay);
+  }
+  if (plan.maxTradesPerInstrument) {
+    addItem("Max Trades Per Instrument", plan.maxTradesPerInstrument);
+  }
+  if (plan.personalDailyRiskLimit?.enabled === "Yes, define my own daily risk limit") {
+    addItem("Personal Daily Risk Limit", plan.personalDailyRiskLimit.value + plan.personalDailyRiskLimit.unit);
+  }
+  if (plan.maxTotalRiskAcrossOpenTrades) {
+    addItem("Total Open Risk Limit", plan.maxTotalRiskAcrossOpenTrades.value + plan.maxTotalRiskAcrossOpenTrades.unit);
+  }
+  if (plan.enforcementLevel) {
+    addItem("Guardian Enforcement", plan.enforcementLevel);
+  }
 }
 
-if(plan.minimumRiskReward){
-addItem("Minimum Risk Reward",plan.minimumRiskReward);
+function activatePlan() {
+  window.dispatchEvent(new CustomEvent("tg:save", {
+    detail: {
+      section: "planResult",
+      data: Object.assign({}, plan),
+      markComplete: true,
+      onSuccess() { window.location.href = "guardian-dashboard.html"; }
+    }
+  }));
 }
 
-if(plan.tradingSession){
-addItem("Trading Session",plan.tradingSession);
-}
+window.tgSetPlanData = function(data) {
+  plan = data;
+  renderPlan();
+};
 
-if(plan.tradingWindow){
-addItem("Trading Window",
-plan.tradingWindow.start + " - " + plan.tradingWindow.end
-);
-}
-
-if(plan.maxTradesPerDay){
-addItem("Max Trades Per Day",plan.maxTradesPerDay);
-}
-
-if(plan.maxOpenPositions){
-addItem("Max Open Positions",plan.maxOpenPositions);
-}
-
-if(plan.cooldownAfterTrade){
-addItem("Cooldown After Trade",plan.cooldownAfterTrade);
-}
-
-if(plan.maxConsecutiveLosingTrades){
-addItem("Max Consecutive Losses",plan.maxConsecutiveLosingTrades);
-}
-
-if(plan.maxLosingTradesPerDay){
-addItem("Max Losing Trades Per Day",plan.maxLosingTradesPerDay);
-}
-
-if(plan.maxTradesPerInstrument){
-addItem("Max Trades Per Instrument",plan.maxTradesPerInstrument);
-}
-
-if(plan.personalDailyRiskLimit?.enabled === "Yes, define my own daily risk limit"){
-addItem("Personal Daily Risk Limit",
-plan.personalDailyRiskLimit.value + plan.personalDailyRiskLimit.unit
-);
-}
-
-if(plan.maxTotalRiskAcrossOpenTrades){
-addItem("Total Open Risk Limit",
-plan.maxTotalRiskAcrossOpenTrades.value +
-plan.maxTotalRiskAcrossOpenTrades.unit
-);
-}
-
-if(plan.enforcementLevel){
-addItem("Guardian Enforcement",plan.enforcementLevel);
-}
-
-function activatePlan(){
-
-localStorage.setItem("tradeGuardianActivePlan",
-JSON.stringify(plan)
-);
-
-window.location.href = "guardian-dashboard.html";
-
-}
+renderPlan();
 
 </script>
 
@@ -274,6 +258,6 @@ window.location.href = "guardian-dashboard.html";
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth-guard.js"></script>
   <script type="module" src="save-data.js"></script>
-  <script type="module" src="save-plan-result.js"></script>
+  <script type="module" src="load-plan-result.js"></script>
 </body>
 </html>

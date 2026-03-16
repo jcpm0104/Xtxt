@@ -329,10 +329,10 @@
 </div>
 
 <script>
-const customPlan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan")) || {};
-const selectedPlanMeta = JSON.parse(localStorage.getItem("tradeGuardianSelectedPlan")) || {};
-const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
-const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules")) || {};
+let customPlan = {};
+let selectedPlanMeta = {};
+let traderProfile = {};
+let accountRules = {};
 
 const sessionRanges = {
   "Asian Session": { start: "19:00", end: "23:59" },
@@ -670,8 +670,6 @@ function saveAnswer() {
 
     customPlan[step.key] = data;
   }
-
-  localStorage.setItem("tradeGuardianCustomPlan", JSON.stringify(customPlan));
 }
 
 function validateStep() {
@@ -727,8 +725,14 @@ nextBtn.addEventListener("click", () => {
       createdFromRecommendedScreen: selectedPlanMeta?.planType === "custom"
     };
 
-    localStorage.setItem("tradeGuardianCustomPlan", JSON.stringify(finalPlan));
-    window.location.href = "custom-plan-result.html";
+    window.dispatchEvent(new CustomEvent("tg:save", {
+      detail: {
+        section: "tradingPlan",
+        data: finalPlan,
+        markComplete: true,
+        onSuccess() { window.location.href = "custom-plan-result.html"; }
+      }
+    }));
   }
 });
 
@@ -740,13 +744,20 @@ backBtn.addEventListener("click", () => {
 });
 
 renderStep();
+
+window.tgSetFormData = function(data) {
+  if (data.customPlan && typeof data.customPlan === "object") Object.assign(customPlan, data.customPlan);
+  if (data.selectedPlanMeta && typeof data.selectedPlanMeta === "object") Object.assign(selectedPlanMeta, data.selectedPlanMeta);
+  if (data.traderProfile && typeof data.traderProfile === "object") Object.assign(traderProfile, data.traderProfile);
+  if (data.accountRules && typeof data.accountRules === "object") Object.assign(accountRules, data.accountRules);
+  renderStep();
+};
 </script>
 
 
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth-guard.js"></script>
   <script type="module" src="save-data.js"></script>
-  <script type="module" src="save-custom-plan.js"></script>
   <script type="module" src="load-onboarding-data.js"></script>
 </body>
 </html>

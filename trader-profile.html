@@ -333,7 +333,7 @@ button{
 </div>
 
 <script>
-const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
+const traderProfile = {};
 
 const steps = [
   { key:"fullName", title:"What is your full name?", helper:"Enter your first and last name to create your trader profile.", type:"fullname" },
@@ -540,8 +540,13 @@ nextBtn.addEventListener("click", () => {
   renderStep();
 } else {
   console.log("PROFILE COMPLETE", traderProfile);
-  localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(traderProfile));
-  window.location.href = "account-rules.html";
+  window.dispatchEvent(new CustomEvent("tg:save", {
+    detail: {
+      section: "profile",
+      data: Object.assign({}, traderProfile),
+      onSuccess() { window.location.href = "account-rules.html"; }
+    }
+  }));
 }
 });
 
@@ -553,12 +558,16 @@ backBtn.addEventListener("click", () => {
 });
 
 renderStep();
+
+window.tgSetFormData = function(data) {
+  Object.assign(traderProfile, data);
+  renderStep();
+};
 </script>
 
 <script type="module" src="firebase-init.js"></script>
 <script type="module" src="auth-guard.js"></script>
 <script type="module" src="save-data.js"></script>
-<script type="module" src="save-trader-profile.js"></script>
 <script type="module" src="load-onboarding-data.js"></script>
 </body>
 </html>

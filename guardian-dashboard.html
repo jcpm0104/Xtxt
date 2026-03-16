@@ -1749,33 +1749,8 @@
     const continueConnectBtn = document.getElementById("continueConnectBtn");
     const platformCards = document.querySelectorAll(".platform-card");
 
-    const planStorageKeys = [
-      "tradeGuardianActivePlan",
-      "tradeGuardianSelectedPlan",
-      "tradeGuardianCustomPlan"
-    ];
-
-    let selectedPlatform = localStorage.getItem("tradeGuardianSelectedPlatform") || "Tradovate";
-
-    function getLoadedPlan() {
-      for (const key of planStorageKeys) {
-        const value = JSON.parse(localStorage.getItem(key) || "{}");
-        if (value && Object.keys(value).length) return value;
-      }
-      return {};
-    }
-
-    function getAccountRules() {
-      return JSON.parse(localStorage.getItem("tradeGuardianAccountRules") || "{}");
-    }
-
-    function getSettingsStore() {
-      return JSON.parse(localStorage.getItem("tg_dashboard_settings") || "{}");
-    }
-
-    function saveSettingsStore(data) {
-      localStorage.setItem("tg_dashboard_settings", JSON.stringify(data));
-    }
+    let selectedPlatform = "Tradovate";
+    let settingsStore = {};
 
     function settingsWereApplied(settingsStore) {
       return settingsStore && settingsStore.userHasAppliedSettings === true;
@@ -1974,18 +1949,21 @@
       return 0;
     }
 
+    let draftAccounts = [];
+
     function getDraftAccounts() {
-      return JSON.parse(localStorage.getItem("tg_draft_accounts") || "[]");
+      return draftAccounts;
     }
 
     function saveDraftAccounts(accounts) {
-      localStorage.setItem("tg_draft_accounts", JSON.stringify(accounts));
+      draftAccounts = accounts;
+      window.dispatchEvent(new CustomEvent("tg:save", {
+        detail: { section: "dashboard", data: { draftAccounts: accounts } }
+      }));
     }
 
-    const plan = getLoadedPlan();
-    const accountRules = getAccountRules();
-    const settingsStore = getSettingsStore();
-    const riskPlan = getRiskPerTrade(plan, accountRules);
+    let plan = {};
+    let accountRules = {};
 
     const defaultState = {
       brokerName: "Connect Account",
@@ -2001,18 +1979,18 @@
 
       openPositionsCount: 0,
 
-      riskPerTrade: riskPlan.value,
-      riskPerTradeText: riskPlan.text,
-      riskPerTradePercent: riskPlan.percentValue,
+      riskPerTrade: 0,
+      riskPerTradeText: "Loading...",
+      riskPerTradePercent: 0,
       tradesToday: 0,
 
-      dailyLossLimit: getDailyLossLimit(plan, accountRules),
+      dailyLossLimit: 0,
       dailyLossUsed: 0,
       dailyLossPercent: 0,
       totalOpenRisk: 0,
-      openRiskLimit: getOpenRiskLimit(plan, accountRules),
-      maxPositions: getMaxPositions(plan, accountRules),
-      maxTrades: getMaxTrades(plan, accountRules),
+      openRiskLimit: 0,
+      maxPositions: 0,
+      maxTrades: 0,
 
       riskStatus: "safe",
       guardianStatus: "standby",
@@ -2028,35 +2006,6 @@
       alerts: [],
       positions: []
     };
-
-    if (settingsWereApplied(settingsStore)) {
-      if (
-        settingsStore.riskPerTrade !== undefined &&
-        settingsStore.riskPerTrade !== null &&
-        settingsStore.riskPerTrade !== ""
-      ) {
-        defaultState.riskPerTrade = Number(settingsStore.riskPerTrade || 0);
-        const manualDual = getDualDisplay(defaultState.riskPerTrade, "$", getAccountSize(accountRules));
-        defaultState.riskPerTradeText = `${manualDual.percentText} of balance`;
-        defaultState.riskPerTradePercent = manualDual.percent;
-      }
-
-      if (
-        settingsStore.dailyLossLimit !== undefined &&
-        settingsStore.dailyLossLimit !== null &&
-        settingsStore.dailyLossLimit !== ""
-      ) {
-        defaultState.dailyLossLimit = Number(settingsStore.dailyLossLimit || 0);
-      }
-
-      if (
-        settingsStore.maxPositions !== undefined &&
-        settingsStore.maxPositions !== null &&
-        settingsStore.maxPositions !== ""
-      ) {
-        defaultState.maxPositions = Number(settingsStore.maxPositions || 0);
-      }
-    }
 
     function pushActivity(message) {
       defaultState.activityLog = defaultState.activityLog || [];
@@ -2140,7 +2089,9 @@
     cancelModalBtn.addEventListener("click", closeModal);
 
     continueConnectBtn.addEventListener("click", () => {
-      localStorage.setItem("tradeGuardianSelectedPlatform", selectedPlatform);
+      window.dispatchEvent(new CustomEvent("tg:save", {
+        detail: { section: "dashboard", data: { selectedPlatform } }
+      }));
 
       const draftAccounts = getDraftAccounts();
       const newDraft = {
@@ -2180,7 +2131,10 @@
         userHasAppliedSettings: true
       };
 
-      saveSettingsStore(settings);
+      Object.assign(settingsStore, settings);
+      window.dispatchEvent(new CustomEvent("tg:save", {
+        detail: { section: "dashboard", data: { settings } }
+      }));
 
       defaultState.riskPerTrade = Number(settings.riskPerTrade || 0);
       const manualDual = getDualDisplay(defaultState.riskPerTrade, "$", getAccountSize(accountRules));
@@ -2537,6 +2491,15 @@
         renderAll();
       },
 
+      setDashboardUpdate(payload) {
+        if (payload.accountRules && typeof payload.accountRules === "object") Object.assign(accountRules, payload.accountRules);
+        if (payload.plan && typeof payload.plan === "object") Object.assign(plan, payload.plan);
+        if (payload.draftAccounts && Array.isArray(payload.draftAccounts)) draftAccounts = payload.draftAccounts;
+        if (payload.settingsStore && typeof payload.settingsStore === "object") Object.assign(settingsStore, payload.settingsStore);
+        if (payload.selectedPlatform) selectedPlatform = payload.selectedPlatform;
+        renderAll();
+      },
+
       setPositionsUpdate(payload) {
         defaultState.positions = Array.isArray(payload) ? payload : [];
         defaultState.openPositionsCount = defaultState.positions.length;
@@ -2559,7 +2522,6 @@
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth-guard.js"></script>
   <script type="module" src="save-data.js"></script>
-  <script type="module" src="save-dashboard.js"></script>
   <script type="module" src="load-dashboard.js"></script>
   <script type="module" src="logout.js"></script>
 </body>

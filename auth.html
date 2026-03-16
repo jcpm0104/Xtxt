@@ -44,9 +44,15 @@ function getAuthErrorMessage(code) {
 async function routeUser(uid) {
   try {
     const snap = await getDoc(doc(db, "traders", uid));
-    window.location.href = snap.exists()
-      ? "guardian-dashboard.html"
-      : "welcome.html";
+    if (snap.exists()) {
+      const d = snap.data();
+      // Route to dashboard if: newly onboarded (flag set) OR existing user with completed data (backwards compat)
+      const isComplete = d.onboardingComplete === true ||
+        (d.accountRules && (d.recommendedPlan || d.tradingPlan || d.planResult));
+      window.location.href = isComplete ? "guardian-dashboard.html" : "welcome.html";
+    } else {
+      window.location.href = "welcome.html";
+    }
   } catch (err) {
     console.error("[TradeGuardian] routing error:", err);
     window.location.href = "welcome.html";

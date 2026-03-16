@@ -28,7 +28,6 @@ function getDualDisplay(value, unit, accountSize) {
   return { dollars, percent, moneyText, percentText, display: `${moneyText} (${percentText})` };
 }
 
-// Priority: plan.riskPerTrade → plan.riskPerTradeValue{obj} → accountRules.riskPerTradeValue
 function computeRiskPerTrade(plan, accountRules) {
   const accountSize = getAccountSize(accountRules);
 
@@ -58,8 +57,6 @@ function computeRiskPerTrade(plan, accountRules) {
   return { value: 0, percent: 0, text: "No plan loaded yet" };
 }
 
-// Priority: accountRules.dailyLossLimit → plan.dailyLossLimit →
-//           plan.personalDailyRiskLimit{obj} → plan.maxDailyAccountRiskPercent%
 function computeDailyLossLimit(plan, accountRules) {
   if (
     accountRules.dailyLossLimit !== undefined &&
@@ -102,7 +99,6 @@ function computeDailyLossLimit(plan, accountRules) {
   return 0;
 }
 
-// Priority: accountRules.maxTotalRiskAcrossOpenTrades → plan.maxTotalRiskAcrossOpenTrades{obj}
 function computeOpenRiskLimit(plan, accountRules) {
   if (
     accountRules.maxTotalRiskAcrossOpenTrades !== undefined &&
@@ -137,7 +133,7 @@ function computeMaxTrades(plan, accountRules) {
   return Number(accountRules.maxTradesPerDay || plan.maxTradesPerDay || 0);
 }
 
-// ─── Main: load Firestore → localStorage, then push computed values to dashboard ─
+// ─── Main: load Firestore → push computed values to dashboard ─────────────────
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
@@ -148,70 +144,71 @@ onAuthStateChanged(auth, async (user) => {
 
     const data = snap.data();
 
-    // Write to localStorage so page-reload also works
-    if (data.profile)        localStorage.setItem("tradeGuardianTraderProfile", JSON.stringify(data.profile));
-    if (data.accountRules)   localStorage.setItem("tradeGuardianAccountRules",  JSON.stringify(data.accountRules));
-    if (data.tradingPlan)    localStorage.setItem("tradeGuardianCustomPlan",     JSON.stringify(data.tradingPlan));
-    if (data.recommendedPlan)localStorage.setItem("tradeGuardianActivePlan",     JSON.stringify(data.recommendedPlan));
-    if (data.planResult)     localStorage.setItem("tradeGuardianActivePlan",     JSON.stringify(data.planResult));
-
-    if (data.dashboard) {
-      const d = data.dashboard;
-      if (d.tg_dashboard_settings)         localStorage.setItem("tg_dashboard_settings",          JSON.stringify(d.tg_dashboard_settings));
-      if (d.tg_draft_accounts)             localStorage.setItem("tg_draft_accounts",               JSON.stringify(d.tg_draft_accounts));
-      if (d.tradeGuardianSelectedPlatform) localStorage.setItem("tradeGuardianSelectedPlatform",   d.tradeGuardianSelectedPlatform);
-    }
-
-    // Don't override if the user has manually applied custom settings
-    if (!window.TradeGuardianDashboard) return;
-    const settings = JSON.parse(localStorage.getItem("tg_dashboard_settings") || "{}");
-    if (settings.userHasAppliedSettings) return;
-
-    // Use the same field resolution order the dashboard itself uses
     const accountRules = data.accountRules || {};
     const plan = data.planResult || data.tradingPlan || data.recommendedPlan || {};
+    const dashboardData = data.dashboard || {};
+    const settingsStore = dashboardData.settings || {};
+    const draftAccounts = Array.isArray(dashboardData.draftAccounts) ? dashboardData.draftAccounts : [];
+    const selectedPlatform = dashboardData.selectedPlatform || null;
 
-    // Guard 1: if Firestore returned no account rules AND no plan data there is nothing
-    // to compute. The inline script already computed correct values from localStorage —
-    // do not touch the dashboard at all.
+    if (!window.TradeGuardianDashboard) return;
+
+    // Push account context, draft accounts, settings, and platform into the inline script scope
+    const dashboardUpdate = { accountRules, plan, draftAccounts, settingsStore };
+    if (selectedPlatform) dashboardUpdate.selectedPlatform = selectedPlatform;
+    window.TradeGuardianDashboard.setDashboardUpdate(dashboardUpdate);
+
+    // If the user has manually applied custom settings, use those values for risk metrics
+    if (settingsStore.userHasAppliedSettings === true) {
+      const accountSize = getAccountSize(accountRules);
+      const manualRisk = Number(settingsStore.riskPerTrade || 0);
+      const manualPercent = accountSize > 0 ? (manualRisk / accountSize) * 100 : 0;
+
+      window.TradeGuardianDashboard.setRiskUpdate({
+        riskPerTrade: manualRisk,
+        riskPerTradePercent: manualPercent,
+        riskPerTradeText: manualRisk > 0 ? `${manualPercent.toFixed(2)}% of balance` : "No plan loaded yet",
+        dailyLossLimit: Number(settingsStore.dailyLossLimit || 0),
+        maxPositions: Number(settingsStore.maxPositions || 0),
+        openRiskLimit: computeOpenRiskLimit(plan, accountRules),
+        maxTrades: computeMaxTrades(plan, accountRules)
+      });
+
+      console.log("[TradeGuardian] Dashboard loaded from Firestore (user settings applied).");
+      return;
+    }
+
+    // Normal flow: compute all risk metrics from plan + accountRules
     const hasAccountRules = Object.keys(accountRules).length > 0;
-    const hasPlan         = Object.keys(plan).length > 0;
+    const hasPlan = Object.keys(plan).length > 0;
     if (!hasAccountRules && !hasPlan) {
-      console.log("[TradeGuardian] Firestore has no risk data; preserving localStorage-computed dashboard values.");
+      console.log("[TradeGuardian] Firestore has no risk data for this user.");
       return;
     }
 
-    const rpt       = computeRiskPerTrade(plan, accountRules);
+    const rpt = computeRiskPerTrade(plan, accountRules);
     const dailyLoss = computeDailyLossLimit(plan, accountRules);
-    const openRisk  = computeOpenRiskLimit(plan, accountRules);
-    const maxPos    = computeMaxPositions(plan, accountRules);
-    const maxTrd    = computeMaxTrades(plan, accountRules);
+    const openRisk = computeOpenRiskLimit(plan, accountRules);
+    const maxPos = computeMaxPositions(plan, accountRules);
+    const maxTrd = computeMaxTrades(plan, accountRules);
 
-    // Guard 2: only include each field in the payload when it resolved to a real
-    // non-zero value. A zero result means every fallback returned nothing useful,
-    // so the key is left out of the payload entirely.
-    // setRiskUpdate uses the ?? operator, which treats 0 as a valid value, so
-    // sending 0 WOULD overwrite an already-correct value with zero.
-    const payload = {};
+    window.TradeGuardianDashboard.setRiskUpdate({
+      riskPerTrade: rpt.value,
+      riskPerTradePercent: rpt.percent,
+      riskPerTradeText: rpt.text,
+      dailyLossLimit: dailyLoss,
+      openRiskLimit: openRisk,
+      maxPositions: maxPos,
+      maxTrades: maxTrd
+    });
 
-    if (rpt.value > 0) {
-      payload.riskPerTrade        = rpt.value;
-      payload.riskPerTradePercent = rpt.percent;
-      payload.riskPerTradeText    = rpt.text;
-    }
-    if (dailyLoss > 0) payload.dailyLossLimit = dailyLoss;
-    if (openRisk  > 0) payload.openRiskLimit  = openRisk;
-    if (maxPos    > 0) payload.maxPositions    = maxPos;
-    if (maxTrd    > 0) payload.maxTrades       = maxTrd;
-
-    // Guard 3: if every value resolved to zero, there is nothing worth sending.
-    if (Object.keys(payload).length === 0) {
-      console.log("[TradeGuardian] Firestore risk data resolved to no actionable values; preserving current dashboard state.");
-      return;
-    }
-
-    window.TradeGuardianDashboard.setRiskUpdate(payload);
-    console.log("[TradeGuardian] Dashboard risk metrics updated from Firestore:", payload);
+    console.log("[TradeGuardian] Dashboard risk metrics loaded from Firestore:", {
+      riskPerTrade: rpt.value,
+      dailyLossLimit: dailyLoss,
+      openRiskLimit: openRisk,
+      maxPositions: maxPos,
+      maxTrades: maxTrd
+    });
   } catch (err) {
     console.error("[TradeGuardian] load-dashboard error:", err);
   }
