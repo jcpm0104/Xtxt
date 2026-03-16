@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trade Guardian System</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#08111f;
+      --bg-2:#0c1728;
+      --panel:#101b2d;
+      --panel-2:#13213a;
+      --line:rgba(255,255,255,0.08);
+      --text:#eaf1ff;
+      --muted:#97a7c0;
+      --blue:#2f6bff;
+      --blue-soft:#79a3ff;
+      --green:#22c55e;
+      --danger:#ef4444;
+      --shadow:0 24px 60px rgba(0,0,0,.32);
+      --radius:24px;
+      --radius-sm:16px;
+      --max:1180px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      font-family:'Inter',system-ui,sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(47,107,255,.14) 0%, rgba(8,17,31,0) 32%),
+        linear-gradient(180deg, #08111f 0%, #091321 100%);
+      color:var(--text);
+      line-height:1.6;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .container{
+      width:min(var(--max), calc(100% - 28px));
+      margin:0 auto;
+    }
+
+    .section{
+      padding:96px 0;
+      scroll-margin-top:90px;
+    }
+
+    .section-header{
+      max-width:760px;
+      margin:0 auto 42px;
+      text-align:center;
+    }
+
+    .section-label{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      color:#cddbff;
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-bottom:16px;
+    }
+
+    .section-label::before{
+      content:"";
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--blue);
+      box-shadow:0 0 18px rgba(47,107,255,.65);
+    }
+
+    h1,h2,h3,h4{
+      letter-spacing:-0.03em;
+      line-height:1.06;
+    }
+
+    .section-title{
+      font-size:clamp(30px, 4.8vw, 48px);
+      margin-bottom:14px;
+    }
+
+    .section-copy{
+      color:var(--muted);
+      font-size:17px;
+    }
+
+    .btn-row{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      min-height:48px;
+      padding:0 18px;
+      border-radius:12px;
+      font-weight:700;
+      font-size:15px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      transition:.2s ease;
+      border:1px solid transparent;
+    }
+
+    .btn-primary{
+      background:linear-gradient(180deg, #4d82ff 0%, var(--blue) 100%);
+      color:#fff;
+      box-shadow:0 14px 30px rgba(47,107,255,.22);
+    }
+
+    .btn-primary:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.04);
+    }
+
+    .btn-secondary{
+      background:rgba(255,255,255,.03);
+      border-color:var(--line);
+      color:var(--text);
+    }
+
+    .btn-secondary:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.05);
+    }
+
+    .nav-wrap{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(8,17,31,.78);
+      border-bottom:1px solid rgba(255,255,255,.04);
+    }
+
+    .nav{
+      min-height:76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:42px;
+      height:42px;
+      border-radius:13px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(180deg, rgba(47,107,255,.18), rgba(47,107,255,.08));
+      border:1px solid rgba(255,255,255,.08);
+      flex:0 0 42px;
+    }
+
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      line-height:1.05;
+    }
+
+    .brand-name{
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .brand-sub{
+      font-size:11px;
+      color:var(--muted);
+      font-weight:700;
+      letter-spacing:.08em;
+    }
+
+    .nav-links{
+      display:flex;
+      align-items:center;
+      gap:26px;
+      flex-wrap:wrap;
+    }
+
+    .nav-links a{
+      color:#c8d5ea;
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .nav-links a:hover{
+      color:#fff;
+    }
+
+    .hero{
+      padding:72px 0 54px;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:36px;
+      align-items:center;
+    }
+
+    .hero-left{
+      max-width:640px;
+    }
+
+    .hero-logo-wrap{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      margin-bottom:24px;
+    }
+
+    .hero-logo{
+      width:86px;
+      height:86px;
+      border-radius:24px;
+      display:grid;
+      place-items:center;
+      background:
+        linear-gradient(180deg, rgba(47,107,255,.22), rgba(47,107,255,.08));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      flex:0 0 86px;
+    }
+
+    .hero-kicker{
+      color:#c8d7f4;
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+
+    .hero-title{
+      font-size:clamp(38px, 6vw, 68px);
+      margin-bottom:14px;
+    }
+
+    .hero-tagline{
+      font-size:clamp(20px, 2.2vw, 28px);
+      font-weight:700;
+      color:#f3f7ff;
+      margin-bottom:14px;
+      letter-spacing:-0.03em;
+    }
+
+    .hero-copy{
+      color:var(--muted);
+      font-size:18px;
+      max-width:620px;
+    }
+
+    .hero-actions{
+      margin-top:28px;
+    }
+
+    .hero-stats{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:14px;
+      margin-top:32px;
+    }
+
+    .hero-stat{
+      padding:18px 16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+    }
+
+    .hero-stat strong{
+      display:block;
+      font-size:15px;
+      margin-bottom:6px;
+    }
+
+    .hero-stat span{
+      display:block;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .mockup{
+      border-radius:30px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at top right, rgba(47,107,255,.18), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow:var(--shadow);
+    }
+
+    .mockup-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.02);
+    }
+
+    .mockup-dots{
+      display:flex;
+      gap:8px;
+    }
+
+    .mockup-dots span{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:rgba(255,255,255,.16);
+    }
+
+    .mockup-title{
+      font-size:13px;
+      font-weight:700;
+      color:#dbe7ff;
+      letter-spacing:.03em;
+    }
+
+    .live-pill{
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(34,197,94,.08);
+      border:1px solid rgba(34,197,94,.18);
+      color:#a6f3c4;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .mockup-body{
+      padding:18px;
+      display:grid;
+      gap:16px;
+    }
+
+    .stat-grid{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:12px;
+    }
+
+    .mini-card{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .mini-card .label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+      font-weight:600;
+    }
+
+    .mini-card .value{
+      font-size:24px;
+      font-weight:800;
+      letter-spacing:-0.03em;
+    }
+
+    .mini-card .hint{
+      margin-top:8px;
+      font-size:12px;
+      color:#bfd0ec;
+    }
+
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:16px;
+    }
+
+    .panel{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:20px;
+      padding:18px;
+    }
+
+    .panel h4{
+      font-size:15px;
+      margin-bottom:14px;
+    }
+
+    .bars{
+      display:grid;
+      gap:12px;
+    }
+
+    .bar-row{
+      display:grid;
+      gap:8px;
+    }
+
+    .bar-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      font-size:13px;
+      color:#d7e4ff;
+    }
+
+    .bar-track{
+      height:10px;
+      border-radius:999px;
+      background:#1a2940;
+      overflow:hidden;
+    }
+
+    .bar-fill{
+      display:block;
+      height:100%;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--blue), var(--blue-soft));
+    }
+
+    .alerts{
+      display:grid;
+      gap:10px;
+    }
+
+    .alert{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:12px 13px;
+      border-radius:14px;
+      background:#121f34;
+      border:1px solid rgba(255,255,255,.05);
+    }
+
+    .alert-icon{
+      width:24px;
+      height:24px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      font-size:12px;
+      font-weight:800;
+      flex:0 0 24px;
+    }
+
+    .alert.info .alert-icon{
+      background:rgba(47,107,255,.16);
+      color:#bfd4ff;
+    }
+
+    .alert.warn .alert-icon{
+      background:rgba(239,68,68,.16);
+      color:#ffb6b6;
+    }
+
+    .alert strong{
+      display:block;
+      font-size:13px;
+      margin-bottom:2px;
+    }
+
+    .alert p{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:18px;
+    }
+
+    .grid-4{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:18px;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:18px;
+    }
+
+    .card{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:22px;
+      padding:24px;
+      box-shadow:var(--shadow);
+    }
+
+    .icon-box{
+      width:48px;
+      height:48px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:rgba(47,107,255,.12);
+      border:1px solid rgba(47,107,255,.22);
+      margin-bottom:16px;
+    }
+
+    .card h3,
+    .card h4{
+      margin-bottom:10px;
+    }
+
+    .card p{
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .step-number{
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      margin:0 auto 16px;
+      background:rgba(47,107,255,.12);
+      border:1px solid rgba(47,107,255,.22);
+      color:#d5e2ff;
+      font-weight:800;
+    }
+
+    .center-card{
+      text-align:center;
+    }
+
+    .metric-title{
+      font-size:25px;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .metric-sub{
+      font-size:15px;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .cta-box{
+      padding:38px 26px;
+      border-radius:30px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at top right, rgba(47,107,255,.16), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow:var(--shadow);
+      text-align:center;
+    }
+
+    .cta-box h2{
+      font-size:clamp(30px,4.5vw,50px);
+      margin-bottom:12px;
+    }
+
+    .cta-box p{
+      max-width:760px;
+      margin:0 auto 26px;
+      color:var(--muted);
+      font-size:17px;
+    }
+
+    footer{
+      padding:28px 0 48px;
+      color:#8fa2bf;
+      font-size:14px;
+    }
+
+    .footer-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      border-top:1px solid rgba(255,255,255,.06);
+      padding-top:22px;
+    }
+
+    .footer-links{
+      display:flex;
+      gap:18px;
+      flex-wrap:wrap;
+    }
+
+    .footer-links a:hover{
+      color:#fff;
+    }
+
+    @media (max-width: 1050px){
+      .hero-grid,
+      .dashboard-grid,
+      .grid-4{
+        grid-template-columns:1fr 1fr;
+      }
+      .stat-grid{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width: 860px){
+      .nav{
+        min-height:auto;
+        padding:16px 0;
+        flex-wrap:wrap;
+      }
+
+      .nav-links{
+        width:100%;
+        justify-content:center;
+        padding-top:4px;
+      }
+
+      .hero-grid,
+      .dashboard-grid,
+      .grid-4,
+      .grid-3,
+      .grid-2{
+        grid-template-columns:1fr;
+      }
+
+      .hero{
+        padding-top:56px;
+      }
+
+      .hero-stats{
+        grid-template-columns:1fr;
+      }
+
+      .hero-logo-wrap{
+        align-items:flex-start;
+      }
+    }
+
+    @media (max-width: 560px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+
+      .section{
+        padding:78px 0;
+      }
+
+      .stat-grid{
+        grid-template-columns:1fr;
+      }
+
+      .btn-row{
+        flex-direction:column;
+      }
+
+      .btn{
+        width:100%;
+      }
+
+      .hero-logo{
+        width:72px;
+        height:72px;
+        border-radius:20px;
+      }
+
+      .brand-name{
+        font-size:14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="nav-wrap">
+    <div class="container">
+      <nav class="nav">
+        <a href="#top" class="brand">
+          <div class="brand-logo" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" fill="#2F6BFF"/>
+              <path d="M8 13L10.2 10.5L12.4 12.1L16 8.2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">Trade Guardian</span>
+            <span class="brand-sub">SYSTEM</span>
+          </div>
+        </a>
+
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How it Works</a>
+          <a href="#metrics">Metrics</a>
+          <a href="#about">About</a>
+        </div>
+
+        <a class="btn btn-primary" href="auth.html">Get Started</a>
+      </nav>
+    </div>
+  </div>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-logo-wrap">
+              <div class="hero-logo" aria-hidden="true">
+                <svg width="46" height="46" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L19 5V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V5L12 2Z" fill="#2F6BFF"/>
+                  <path d="M8 13L10.2 10.5L12.4 12.1L16 8.2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+
+              <div>
+                <div class="hero-kicker">Trade Guardian System</div>
+                <h1 class="hero-title">Trade Guardian</h1>
+              </div>
+            </div>
+
+            <div class="hero-tagline">Your personal trading risk copilot.</div>
+
+            <p class="hero-copy">
+              Connect your trading platform, define your trading rules, and let Trade Guardian monitor your discipline and risk in real time.
+            </p>
+
+            <div class="hero-actions">
+              <div class="btn-row">
+                <a class="btn btn-primary" href="auth.html">Get Started</a>
+                <a class="btn btn-secondary" href="#how-it-works">See How It Works</a>
+              </div>
+            </div>
+
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <strong>Real-time risk awareness</strong>
+                <span>Stay informed before mistakes become account damage.</span>
+              </div>
+              <div class="hero-stat">
+                <strong>Rule-based discipline</strong>
+                <span>Every trade is compared against your own plan and limits.</span>
+              </div>
+              <div class="hero-stat">
+                <strong>Account protection</strong>
+                <span>Built for structure, survival and funded-account control.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup">
+            <div class="mockup-top">
+              <div class="mockup-dots"><span></span><span></span><span></span></div>
+              <div class="mockup-title">Trade Guardian Live Monitor</div>
+              <div class="live-pill">Live Session</div>
+            </div>
+
+            <div class="mockup-body">
+              <div class="stat-grid">
+                <div class="mini-card">
+                  <div class="label">Discipline Score</div>
+                  <div class="value">91%</div>
+                  <div class="hint">Stable execution</div>
+                </div>
+                <div class="mini-card">
+                  <div class="label">Risk Exposure</div>
+                  <div class="value">0.8%</div>
+                  <div class="hint">Within plan</div>
+                </div>
+                <div class="mini-card">
+                  <div class="label">Daily Loss Buffer</div>
+                  <div class="value">$640</div>
+                  <div class="hint">Remaining room</div>
+                </div>
+                <div class="mini-card">
+                  <div class="label">Account Status</div>
+                  <div class="value" style="color:#9cf1ba;">Safe</div>
+                  <div class="hint">Rules respected</div>
+                </div>
+              </div>
+
+              <div class="dashboard-grid">
+                <div class="panel">
+                  <h4>Live Plan Alignment</h4>
+                  <div class="bars">
+                    <div class="bar-row">
+                      <div class="bar-head">
+                        <span>Position sizing</span>
+                        <span>94%</span>
+                      </div>
+                      <div class="bar-track"><span class="bar-fill" style="width:94%"></span></div>
+                    </div>
+
+                    <div class="bar-row">
+                      <div class="bar-head">
+                        <span>Session discipline</span>
+                        <span>88%</span>
+                      </div>
+                      <div class="bar-track"><span class="bar-fill" style="width:88%"></span></div>
+                    </div>
+
+                    <div class="bar-row">
+                      <div class="bar-head">
+                        <span>Risk consistency</span>
+                        <span>92%</span>
+                      </div>
+                      <div class="bar-track"><span class="bar-fill" style="width:92%"></span></div>
+                    </div>
+
+                    <div class="bar-row">
+                      <div class="bar-head">
+                        <span>Account survival probability</span>
+                        <span>89%</span>
+                      </div>
+                      <div class="bar-track"><span class="bar-fill" style="width:89%"></span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel">
+                  <h4>Live Alerts</h4>
+                  <div class="alerts">
+                    <div class="alert info">
+                      <div class="alert-icon">i</div>
+                      <div>
+                        <strong>Position size aligned</strong>
+                        <p>Your current risk matches your selected plan parameters.</p>
+                      </div>
+                    </div>
+
+                    <div class="alert warn">
+                      <div class="alert-icon">!</div>
+                      <div>
+                        <strong>Approaching session limit</strong>
+                        <p>You are nearing your maximum number of trades for today.</p>
+                      </div>
+                    </div>
+
+                    <div class="alert info">
+                      <div class="alert-icon">i</div>
+                      <div>
+                        <strong>Execution remains stable</strong>
+                        <p>No major deviation detected from your preferred risk model.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">Features</div>
+          <h2 class="section-title">A cleaner, smarter layer of discipline for serious traders</h2>
+          <p class="section-copy">
+            Trade Guardian is designed to help traders stay aligned with structure, control exposure, and reduce behavior-based mistakes before they damage the account.
+          </p>
+        </div>
+
+        <div class="grid-4">
+          <div class="card">
+            <div class="icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3L19 6V11.2C19 16.1 15.95 19.35 12 21C8.05 19.35 5 16.1 5 11.2V6L12 3Z" stroke="#AFC6FF" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <h4>Account Protection</h4>
+            <p>Monitor distance from drawdown thresholds, loss limits and funded-account rules in real time.</p>
+          </div>
+
+          <div class="card">
+            <div class="icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M4 14L9 9L13 12L20 5" stroke="#AFC6FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20 5V10" stroke="#AFC6FF" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h4>Real-Time Monitoring</h4>
+            <p>Track trade count, risk posture and behavioral drift while the session is still happening.</p>
+          </div>
+
+          <div class="card">
+            <div class="icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="8" stroke="#AFC6FF" stroke-width="1.8"/>
+                <path d="M12 12L16 9" stroke="#AFC6FF" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h4>Discipline Protection</h4>
+            <p>Detect when actions stop matching the plan, the risk rules or the intended session structure.</p>
+          </div>
+
+          <div class="card">
+            <div class="icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M7 17V13" stroke="#AFC6FF" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M12 17V9" stroke="#AFC6FF" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M17 17V6" stroke="#AFC6FF" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h4>Behavior Analysis</h4>
+            <p>Identify patterns like overtrading, emotional scaling and unstable execution before they worsen.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how-it-works">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">How it works</div>
+          <h2 class="section-title">Simple for the trader, powerful behind the scenes</h2>
+          <p class="section-copy">
+            The only manual part is defining the framework. After that, Trade Guardian handles the monitoring, interpretation and live guidance automatically.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card center-card">
+            <div class="step-number">1</div>
+            <h3>Define your plan</h3>
+            <p>Set account size, funded-account rules, maximum loss, risk per trade, position sizing and session limits.</p>
+          </div>
+
+          <div class="card center-card">
+            <div class="step-number">2</div>
+            <h3>Connect your platform</h3>
+            <p>The system reads trading activity automatically so metrics and behavioral analysis do not depend on manual entry.</p>
+          </div>
+
+          <div class="card center-card">
+            <div class="step-number">3</div>
+            <h3>Trade with your copilot</h3>
+            <p>Trade Guardian compares every action against your plan and alerts you when discipline starts to break down.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="metrics">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">Metrics</div>
+          <h2 class="section-title">Metrics focused on behavior, not just profit</h2>
+          <p class="section-copy">
+            Trade Guardian is built to evaluate how the trader behaves under pressure and whether current execution supports long-term account survival.
+          </p>
+        </div>
+
+        <div class="grid-4">
+          <div class="card">
+            <div class="metric-title">Discipline Score</div>
+            <div class="metric-sub">Plan adherence quality</div>
+            <p>Measures how closely the trader follows the structure and rules they committed to.</p>
+          </div>
+
+          <div class="card">
+            <div class="metric-title">Risk Control Score</div>
+            <div class="metric-sub">Exposure consistency</div>
+            <p>Evaluates whether sizing and overall session exposure remain aligned with safe execution.</p>
+          </div>
+
+          <div class="card">
+            <div class="metric-title">Consistency Index</div>
+            <div class="metric-sub">Performance stability</div>
+            <p>Tracks whether execution remains stable from session to session instead of becoming erratic.</p>
+          </div>
+
+          <div class="card">
+            <div class="metric-title">Behavior Stability</div>
+            <div class="metric-sub">Emotional drift detection</div>
+            <p>Highlights changes in behavior that often appear before account damage accelerates.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">About</div>
+          <h2 class="section-title">Built for traders who want structure, clarity and protection</h2>
+          <p class="section-copy">
+            Trade Guardian System is designed for traders who operate under rules, need consistency, and want a smarter way to protect capital while staying aligned with their plan.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>For funded account traders</h4>
+            <p>Monitor compliance with drawdown rules, daily loss thresholds and firm-specific restrictions more clearly.</p>
+          </div>
+
+          <div class="card">
+            <h4>For evaluation traders</h4>
+            <p>Trade with more structure while preparing to pass challenges without emotional mistakes.</p>
+          </div>
+
+          <div class="card">
+            <h4>For rule-based traders</h4>
+            <p>Turn your written trading plan into a live framework that actively supports execution.</p>
+          </div>
+
+          <div class="card">
+            <h4>For discipline-focused traders</h4>
+            <p>Use behavior analytics to improve consistency and reduce the mistakes that destroy accounts.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="cta">
+      <div class="container">
+        <div class="cta-box">
+          <h2>Trade with discipline. Protect your capital.</h2>
+          <p>
+            Trade Guardian System helps traders stay aligned with their plan, manage risk with clarity, and operate with more control in real time.
+          </p>
+
+          <div class="btn-row" style="justify-content:center;">
+            <a class="btn btn-secondary" href="#top">Back to Top</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-row">
+        <div>© 2026 Trade Guardian System. All rights reserved.</div>
+        <div class="footer-links">
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How it Works</a>
+          <a href="#metrics">Metrics</a>
+          <a href="#about">About</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
