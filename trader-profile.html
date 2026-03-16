@@ -333,7 +333,7 @@ button{
 </div>
 
 <script>
-const traderProfile = {};
+const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
 
 const steps = [
   { key:"fullName", title:"What is your full name?", helper:"Enter your first and last name to create your trader profile.", type:"fullname" },
@@ -559,5 +559,6 @@ renderStep();
 <script type="module" src="auth-guard.js"></script>
 <script type="module" src="save-data.js"></script>
 <script type="module" src="save-trader-profile.js"></script>
+<script type="module" src="load-onboarding-data.js"></script>
 </body>
 </html>

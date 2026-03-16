@@ -715,6 +715,8 @@
       display:flex;
       flex-direction:column;
       gap:12px;
+      flex:1;
+      min-height:0;
     }
 
     .accordion-item{
@@ -1205,6 +1207,36 @@
         width:100%;
         justify-content:flex-start;
       }
+
+      .dashboard-grid{
+        padding:16px;
+        gap:16px;
+      }
+
+      .section-card{
+        padding:18px;
+      }
+
+      .topbar{
+        border-radius:14px;
+        padding:0 14px;
+      }
+    }
+
+    .sidebar-footer-actions{
+      margin-top:auto;
+      padding:16px 0 4px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .sidebar-action-btn{
+      display:block;
+      text-align:center;
+      text-decoration:none;
+      box-sizing:border-box;
+      width:100%;
     }
   </style>
 </head>
@@ -1359,6 +1391,12 @@
           </div>
         </div>
       </div>
+
+      <div class="sidebar-footer-actions">
+        <a href="trader-profile.html" class="mini-btn primary sidebar-action-btn">Edit Trading Plan</a>
+        <button id="logoutBtn" class="mini-btn danger sidebar-action-btn">Sign Out</button>
+      </div>
+
     </div>
   </aside>
 
@@ -2519,5 +2557,7 @@
   <script type="module" src="auth-guard.js"></script>
   <script type="module" src="save-data.js"></script>
   <script type="module" src="save-dashboard.js"></script>
+  <script type="module" src="load-dashboard.js"></script>
+  <script type="module" src="logout.js"></script>
 </body>
 </html>

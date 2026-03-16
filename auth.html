@@ -9,7 +9,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -25,6 +25,22 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+function getAuthErrorMessage(code) {
+  const msgs = {
+    "auth/user-not-found":        "No account found for this email.",
+    "auth/wrong-password":        "Incorrect password.",
+    "auth/invalid-credential":    "Email or password is incorrect.",
+    "auth/email-already-in-use":  "Email already registered. Try signing in.",
+    "auth/weak-password":         "Password must be at least 6 characters.",
+    "auth/too-many-requests":     "Too many attempts. Try again later.",
+    "auth/invalid-email":         "Please enter a valid email address.",
+    "auth/user-disabled":         "This account has been disabled.",
+    "auth/network-request-failed":"Network error. Check your connection.",
+    "auth/missing-email":         "Please enter your email address."
+  };
+  return msgs[code] || "Something went wrong. Please try again.";
+}
+
 async function routeUser(uid) {
   try {
     const snap = await getDoc(doc(db, "traders", uid));
@@ -37,133 +53,280 @@ async function routeUser(uid) {
   }
 }
 
-window.signin = async function(){
-  const email = document.getElementById("signin-email").value;
+window.signin = async function () {
+  const email    = document.getElementById("signin-email").value.trim();
   const password = document.getElementById("signin-password").value;
-  const status = document.getElementById("signin-status");
+  const status   = document.getElementById("signin-status");
+  const btn      = document.getElementById("signin-btn");
 
-  try{
-    const credential = await signInWithEmailAndPassword(auth,email,password);
-    await routeUser(credential.user.uid);
-  }catch(e){
-    status.textContent="Unable to sign in.";
+  status.textContent = "";
+  status.className   = "status";
+
+  if (!email || !password) {
+    status.textContent = "Please enter your email and password.";
+    return;
   }
-}
 
-window.signup = async function(){
-  const email = document.getElementById("signup-email").value;
+  btn.disabled    = true;
+  btn.textContent = "Signing in…";
+
+  try {
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    await routeUser(credential.user.uid);
+  } catch (e) {
+    status.textContent  = getAuthErrorMessage(e.code);
+    btn.disabled        = false;
+    btn.textContent     = "Sign In";
+  }
+};
+
+window.signup = async function () {
+  const email    = document.getElementById("signup-email").value.trim();
   const password = document.getElementById("signup-password").value;
-  const status = document.getElementById("signup-status");
+  const status   = document.getElementById("signup-status");
+  const btn      = document.getElementById("signup-btn");
 
-  try{
-    const credential = await createUserWithEmailAndPassword(auth,email,password);
-    await routeUser(credential.user.uid);
-  }catch(e){
-    status.textContent="Unable to create account.";
+  status.textContent = "";
+  status.className   = "status";
+
+  if (!email || !password) {
+    status.textContent = "Please enter your email and password.";
+    return;
   }
-}
 
-window.showTab=function(tab){
-  document.getElementById("signin").style.display = tab==="signin"?"block":"none";
-  document.getElementById("signup").style.display = tab==="signup"?"block":"none";
-}
+  btn.disabled    = true;
+  btn.textContent = "Creating account…";
+
+  try {
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    await routeUser(credential.user.uid);
+  } catch (e) {
+    status.textContent  = getAuthErrorMessage(e.code);
+    btn.disabled        = false;
+    btn.textContent     = "Create Account";
+  }
+};
+
+window.resetPassword = async function () {
+  const email  = document.getElementById("reset-email").value.trim();
+  const status = document.getElementById("reset-status");
+  const btn    = document.getElementById("reset-btn");
+
+  status.textContent = "";
+  status.className   = "status";
+
+  if (!email) {
+    status.textContent = "Please enter your email address.";
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = "Sending…";
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    status.textContent = "Password reset email sent. Check your inbox.";
+    status.className   = "status success";
+    btn.textContent    = "Email Sent";
+  } catch (e) {
+    status.textContent  = getAuthErrorMessage(e.code);
+    btn.disabled        = false;
+    btn.textContent     = "Send Reset Email";
+  }
+};
+
+window.showTab = function (tab) {
+  document.getElementById("signin").style.display = tab === "signin" ? "block" : "none";
+  document.getElementById("signup").style.display = tab === "signup" ? "block" : "none";
+  document.getElementById("reset").style.display  = tab === "reset"  ? "block" : "none";
+
+  const siTab = document.getElementById("tab-signin");
+  const suTab = document.getElementById("tab-signup");
+  if (siTab) siTab.classList.toggle("active", tab === "signin");
+  if (suTab) suTab.classList.toggle("active", tab === "signup");
+
+  document.getElementById("signin-status").textContent = "";
+  document.getElementById("signup-status").textContent = "";
+  document.getElementById("reset-status").textContent  = "";
+  document.getElementById("reset-status").className    = "status";
+};
 </script>
 
 <style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
 body{
-font-family:Inter,system-ui;
-background:#08111f;
-color:white;
-min-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:20px;
+  font-family:Inter,system-ui;
+  background:#08111f;
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
 }
 
 .container{
-width:420px;
-background:#101b2d;
-border-radius:20px;
-padding:40px;
-box-shadow:0 20px 60px rgba(0,0,0,.4);
-border:1px solid rgba(255,255,255,.06);
+  width:100%;
+  max-width:420px;
+  background:#101b2d;
+  border-radius:20px;
+  padding:40px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.06);
 }
 
 .logo{
-font-weight:800;
-font-size:24px;
-margin-bottom:6px;
+  font-weight:800;
+  font-size:24px;
+  margin-bottom:6px;
 }
 
 .sub{
-color:#97a7c0;
-font-size:14px;
-margin-bottom:24px;
+  color:#97a7c0;
+  font-size:14px;
+  margin-bottom:24px;
 }
 
 .tabs{
-display:flex;
-gap:10px;
-margin-bottom:20px;
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
 
 .tab{
-flex:1;
-padding:10px;
-border-radius:8px;
-text-align:center;
-background:#0c1728;
-cursor:pointer;
-border:1px solid rgba(255,255,255,.08);
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  text-align:center;
+  background:#0c1728;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);
+  font-size:14px;
+  font-weight:500;
+  transition:background .18s;
+  user-select:none;
 }
 
 .tab:hover{
-background:#11203a;
+  background:#11203a;
+}
+
+.tab.active{
+  background:#162b4a;
+  border-color:rgba(47,107,255,.45);
+  color:#6fa3ff;
 }
 
 input{
-width:100%;
-padding:14px;
-margin-bottom:12px;
-border-radius:10px;
-border:1px solid rgba(255,255,255,.08);
-background:#0c1728;
-color:white;
+  width:100%;
+  padding:14px;
+  margin-bottom:12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.08);
+  background:#0c1728;
+  color:#fff;
+  font-family:inherit;
+  font-size:14px;
+  outline:none;
+  transition:border-color .18s;
+}
+
+input:focus{
+  border-color:rgba(47,107,255,.5);
+}
+
+input::placeholder{
+  color:#4a6080;
 }
 
 button{
-width:100%;
-padding:14px;
-border:none;
-border-radius:10px;
-background:#2f6bff;
-color:white;
-font-weight:600;
-cursor:pointer;
-margin-top:4px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:#2f6bff;
+  color:#fff;
+  font-family:inherit;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  margin-top:4px;
+  transition:opacity .18s, background .18s;
 }
 
-button:hover{
-opacity:.92;
+button:hover:not(:disabled){
+  opacity:.9;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
 }
 
 .status{
-margin-top:10px;
-font-size:13px;
-color:#ffb6b6;
+  margin-top:10px;
+  font-size:13px;
+  color:#ffb6b6;
+  min-height:18px;
+}
+
+.status.success{
+  color:#6fffb0;
 }
 
 .note{
-margin-top:20px;
-font-size:13px;
-color:#cfdcff;
-background:rgba(255,255,255,.03);
-padding:10px;
-border-radius:8px;
-border:1px solid rgba(255,255,255,.05);
+  margin-top:20px;
+  font-size:13px;
+  color:#cfdcff;
+  background:rgba(255,255,255,.03);
+  padding:10px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.05);
 }
 
+.forgot-link{
+  margin-top:12px;
+  text-align:center;
+}
+
+.forgot-link a{
+  font-size:13px;
+  color:#6fa3ff;
+  text-decoration:none;
+}
+
+.forgot-link a:hover{
+  text-decoration:underline;
+}
+
+.reset-header{
+  margin-bottom:18px;
+}
+
+.back-link{
+  font-size:13px;
+  color:#6fa3ff;
+  text-decoration:none;
+  display:inline-block;
+  margin-bottom:14px;
+}
+
+.back-link:hover{
+  text-decoration:underline;
+}
+
+.reset-title{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.reset-sub{
+  font-size:13px;
+  color:#97a7c0;
+  line-height:1.5;
+}
 </style>
 </head>
 
@@ -171,42 +334,50 @@ border:1px solid rgba(255,255,255,.05);
 
 <div class="container">
 
-<div class="logo">Trade Guardian</div>
-<div class="sub">Secure access to your trading system</div>
+  <div class="logo">Trade Guardian</div>
+  <div class="sub">Secure access to your trading system</div>
 
-<div class="tabs">
-<div class="tab" onclick="showTab('signin')">Sign In</div>
-<div class="tab" onclick="showTab('signup')">Create Account</div>
-</div>
+  <div class="tabs" id="mainTabs">
+    <div class="tab active" id="tab-signin" onclick="showTab('signin')">Sign In</div>
+    <div class="tab"        id="tab-signup" onclick="showTab('signup')">Create Account</div>
+  </div>
 
-<div id="signin">
+  <div id="signin">
+    <input id="signin-email"    type="email"    placeholder="Email address">
+    <input id="signin-password" type="password" placeholder="Password">
+    <button id="signin-btn" onclick="signin()">Sign In</button>
+    <div class="status" id="signin-status"></div>
+    <div class="forgot-link">
+      <a href="#" onclick="showTab('reset');return false;">Forgot password?</a>
+    </div>
+  </div>
 
-<input id="signin-email" type="email" placeholder="Email">
-<input id="signin-password" type="password" placeholder="Password">
+  <div id="signup" style="display:none;">
+    <input id="signup-email"    type="email"    placeholder="Email address">
+    <input id="signup-password" type="password" placeholder="Password">
+    <button id="signup-btn" onclick="signup()">Create Account</button>
+    <div class="status" id="signup-status"></div>
+  </div>
 
-<button onclick="signin()">Sign In</button>
-<div class="status" id="signin-status"></div>
+  <div id="reset" style="display:none;">
+    <div class="reset-header">
+      <a href="#" class="back-link" onclick="showTab('signin');return false;">← Back to Sign In</a>
+      <div class="reset-title">Reset Password</div>
+      <div class="reset-sub">Enter your email and we'll send you a reset link.</div>
+    </div>
+    <input id="reset-email" type="email" placeholder="Email address">
+    <button id="reset-btn" onclick="resetPassword()">Send Reset Email</button>
+    <div class="status" id="reset-status"></div>
+  </div>
 
-</div>
-
-<div id="signup" style="display:none;">
-
-<input id="signup-email" type="email" placeholder="Email">
-<input id="signup-password" type="password" placeholder="Password">
-
-<button onclick="signup()">Create Account</button>
-<div class="status" id="signup-status"></div>
-
-</div>
-
-<div class="note">
-Thank you for being part of Trade Guardian.
-</div>
+  <div class="note">
+    Thank you for being part of Trade Guardian.
+  </div>
 
 </div>
 
 <script>
-showTab('signin')
+showTab('signin');
 </script>
 
 </body>
