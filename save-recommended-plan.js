@@ -9,7 +9,9 @@ function trySave(raw) {
     if (data && typeof data === "object") {
       saveUserData("recommendedPlan", data);
     }
-  } catch (_) {}
+  } catch (err) {
+    console.error("[TradeGuardian] save-recommended-plan.js parse error:", err);
+  }
 }
 
 const existingSelected = localStorage.getItem(SELECTED_KEY);

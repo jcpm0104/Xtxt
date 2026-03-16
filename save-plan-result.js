@@ -9,7 +9,9 @@ function trySavePlanResult(raw) {
     if (data && typeof data === "object") {
       saveUserData("planResult", data);
     }
-  } catch (_) {}
+  } catch (err) {
+    console.error("[TradeGuardian] save-plan-result.js parse error:", err);
+  }
 }
 
 const existingPlan = localStorage.getItem(PLAN_KEY);

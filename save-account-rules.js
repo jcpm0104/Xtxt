@@ -8,7 +8,9 @@ function trySave(raw) {
     if (data && typeof data === "object") {
       saveUserData("accountRules", data);
     }
-  } catch (_) {}
+  } catch (err) {
+    console.error("[TradeGuardian] save-account-rules.js parse error:", err);
+  }
 }
 
 const existing = localStorage.getItem(KEY);

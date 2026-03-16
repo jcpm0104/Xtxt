@@ -8,7 +8,9 @@ function trySave(raw) {
     if (data && typeof data === "object") {
       saveUserData("profile", data);
     }
-  } catch (_) {}
+  } catch (err) {
+    console.error("[TradeGuardian] save-trader-profile.js parse error:", err);
+  }
 }
 
 const existing = localStorage.getItem(KEY);
