@@ -1,8 +1,7 @@
 import { saveUserData } from "./save-data.js";
 
-const _UID         = localStorage.getItem("tg_last_user") || "";
-const SELECTED_KEY = "tradeGuardianSelectedPlan_" + _UID;
-const ACTIVE_KEY   = "tradeGuardianActivePlan_"   + _UID;
+const SELECTED_KEY = "tradeGuardianSelectedPlan";
+const ACTIVE_KEY   = "tradeGuardianActivePlan";
 
 function trySave(raw) {
   try {

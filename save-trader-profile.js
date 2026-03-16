@@ -1,6 +1,6 @@
 import { saveUserData } from "./save-data.js";
 
-const KEY = "tradeGuardianTraderProfile_" + (localStorage.getItem("tg_last_user") || "");
+const KEY = "tradeGuardianTraderProfile";
 
 function trySave(raw) {
   try {

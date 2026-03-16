@@ -393,11 +393,8 @@
 </div>
 
 <script>
-const _tg_uid = localStorage.getItem("tg_last_user") || "";
-const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile_" + _tg_uid)) || {};
-const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules_" + _tg_uid)) || {};
-window._tg_traderProfile = traderProfile;
-window._tg_accountRules = accountRules;
+const traderProfile = JSON.parse(localStorage.getItem("tradeGuardianTraderProfile")) || {};
+const accountRules = JSON.parse(localStorage.getItem("tradeGuardianAccountRules")) || {};
 
 function safeNumber(value) {
   const n = Number(value);
@@ -668,9 +665,9 @@ function activateRecommendedPlan(plan, ctx) {
     pressureScore: plan.pressure.pressureScore
   };
 
-  localStorage.setItem("tradeGuardianSelectedPlan_" + _tg_uid, JSON.stringify(selectedPlan));
-  localStorage.setItem("tradeGuardianActivePlan_" + _tg_uid, JSON.stringify(selectedPlan));
-  localStorage.removeItem("tradeGuardianCustomPlan_" + _tg_uid);
+  localStorage.setItem("tradeGuardianSelectedPlan", JSON.stringify(selectedPlan));
+  localStorage.setItem("tradeGuardianActivePlan", JSON.stringify(selectedPlan));
+  localStorage.removeItem("tradeGuardianCustomPlan");
   window.location.href = "guardian-dashboard.html";
 }
 
@@ -738,7 +735,7 @@ function init() {
   renderPlans(plans, ctx);
 
   document.getElementById("customPlanBtn").addEventListener("click", () => {
-    localStorage.setItem("tradeGuardianSelectedPlan_" + _tg_uid, JSON.stringify({
+    localStorage.setItem("tradeGuardianSelectedPlan", JSON.stringify({
       planType: "custom"
     }));
     window.location.href = "custom-trading-plan.html";

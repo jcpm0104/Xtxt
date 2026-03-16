@@ -1393,6 +1393,7 @@
       </div>
 
       <div class="sidebar-footer-actions">
+        <a href="trader-profile.html" class="mini-btn primary sidebar-action-btn">Edit Trading Plan</a>
         <button id="logoutBtn" class="mini-btn danger sidebar-action-btn">Sign Out</button>
       </div>
 
@@ -1747,15 +1748,14 @@
     const cancelModalBtn = document.getElementById("cancelModalBtn");
     const continueConnectBtn = document.getElementById("continueConnectBtn");
     const platformCards = document.querySelectorAll(".platform-card");
-    const _tg_uid = localStorage.getItem("tg_last_user") || "";
 
     const planStorageKeys = [
-      "tradeGuardianActivePlan_" + _tg_uid,
-      "tradeGuardianSelectedPlan_" + _tg_uid,
-      "tradeGuardianCustomPlan_" + _tg_uid
+      "tradeGuardianActivePlan",
+      "tradeGuardianSelectedPlan",
+      "tradeGuardianCustomPlan"
     ];
 
-    let selectedPlatform = localStorage.getItem("tradeGuardianSelectedPlatform_" + _tg_uid) || "Tradovate";
+    let selectedPlatform = localStorage.getItem("tradeGuardianSelectedPlatform") || "Tradovate";
 
     function getLoadedPlan() {
       for (const key of planStorageKeys) {
@@ -1766,15 +1766,15 @@
     }
 
     function getAccountRules() {
-      return JSON.parse(localStorage.getItem("tradeGuardianAccountRules_" + _tg_uid) || "{}");
+      return JSON.parse(localStorage.getItem("tradeGuardianAccountRules") || "{}");
     }
 
     function getSettingsStore() {
-      return JSON.parse(localStorage.getItem("tg_dashboard_settings_" + _tg_uid) || "{}");
+      return JSON.parse(localStorage.getItem("tg_dashboard_settings") || "{}");
     }
 
     function saveSettingsStore(data) {
-      localStorage.setItem("tg_dashboard_settings_" + _tg_uid, JSON.stringify(data));
+      localStorage.setItem("tg_dashboard_settings", JSON.stringify(data));
     }
 
     function settingsWereApplied(settingsStore) {
@@ -1975,11 +1975,11 @@
     }
 
     function getDraftAccounts() {
-      return JSON.parse(localStorage.getItem("tg_draft_accounts_" + _tg_uid) || "[]");
+      return JSON.parse(localStorage.getItem("tg_draft_accounts") || "[]");
     }
 
     function saveDraftAccounts(accounts) {
-      localStorage.setItem("tg_draft_accounts_" + _tg_uid, JSON.stringify(accounts));
+      localStorage.setItem("tg_draft_accounts", JSON.stringify(accounts));
     }
 
     const plan = getLoadedPlan();
@@ -2140,7 +2140,7 @@
     cancelModalBtn.addEventListener("click", closeModal);
 
     continueConnectBtn.addEventListener("click", () => {
-      localStorage.setItem("tradeGuardianSelectedPlatform_" + _tg_uid, selectedPlatform);
+      localStorage.setItem("tradeGuardianSelectedPlatform", selectedPlatform);
 
       const draftAccounts = getDraftAccounts();
       const newDraft = {

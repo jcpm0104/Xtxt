@@ -179,8 +179,7 @@ Once activated, Trade Guardian will enforce these rules automatically.
 
 <script>
 
-const _tg_uid = localStorage.getItem("tg_last_user") || "";
-const plan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan_" + _tg_uid)) || {};
+const plan = JSON.parse(localStorage.getItem("tradeGuardianCustomPlan")) || {};
 
 const summary = document.getElementById("planSummary");
 
@@ -261,7 +260,7 @@ addItem("Guardian Enforcement",plan.enforcementLevel);
 
 function activatePlan(){
 
-localStorage.setItem("tradeGuardianActivePlan_" + _tg_uid,
+localStorage.setItem("tradeGuardianActivePlan",
 JSON.stringify(plan)
 );
 
