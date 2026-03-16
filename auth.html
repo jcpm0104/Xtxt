@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Guardian Access</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBz0NnKwT50FJdE7E2qp8D6xvnRI9tLrq8",
+  authDomain: "trade-guardian-system.firebaseapp.com",
+  projectId: "trade-guardian-system",
+  storageBucket: "trade-guardian-system.firebasestorage.app",
+  messagingSenderId: "1034103501739",
+  appId: "1:1034103501739:web:55b971e5d4c7a416d658ee"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.signin = async function(){
+  const email = document.getElementById("signin-email").value;
+  const password = document.getElementById("signin-password").value;
+  const status = document.getElementById("signin-status");
+
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    window.location.href="dashboard.html";
+  }catch(e){
+    status.textContent="Unable to sign in.";
+  }
+}
+
+window.signup = async function(){
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
+  const status = document.getElementById("signup-status");
+
+  try{
+    await createUserWithEmailAndPassword(auth,email,password);
+    window.location.href="dashboard.html";
+  }catch(e){
+    status.textContent="Unable to create account.";
+  }
+}
+
+window.showTab=function(tab){
+  document.getElementById("signin").style.display = tab==="signin"?"block":"none";
+  document.getElementById("signup").style.display = tab==="signup"?"block":"none";
+}
+</script>
+
+<style>
+body{
+font-family:Inter,system-ui;
+background:#08111f;
+color:white;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+}
+
+.container{
+width:420px;
+background:#101b2d;
+border-radius:20px;
+padding:40px;
+box-shadow:0 20px 60px rgba(0,0,0,.4);
+border:1px solid rgba(255,255,255,.06);
+}
+
+.logo{
+font-weight:800;
+font-size:24px;
+margin-bottom:6px;
+}
+
+.sub{
+color:#97a7c0;
+font-size:14px;
+margin-bottom:24px;
+}
+
+.tabs{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+.tab{
+flex:1;
+padding:10px;
+border-radius:8px;
+text-align:center;
+background:#0c1728;
+cursor:pointer;
+border:1px solid rgba(255,255,255,.08);
+}
+
+.tab:hover{
+background:#11203a;
+}
+
+input{
+width:100%;
+padding:14px;
+margin-bottom:12px;
+border-radius:10px;
+border:1px solid rgba(255,255,255,.08);
+background:#0c1728;
+color:white;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:10px;
+background:#2f6bff;
+color:white;
+font-weight:600;
+cursor:pointer;
+margin-top:4px;
+}
+
+button:hover{
+opacity:.92;
+}
+
+.status{
+margin-top:10px;
+font-size:13px;
+color:#ffb6b6;
+}
+
+.note{
+margin-top:20px;
+font-size:13px;
+color:#cfdcff;
+background:rgba(255,255,255,.03);
+padding:10px;
+border-radius:8px;
+border:1px solid rgba(255,255,255,.05);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">Trade Guardian</div>
+<div class="sub">Secure access to your trading system</div>
+
+<div class="tabs">
+<div class="tab" onclick="showTab('signin')">Sign In</div>
+<div class="tab" onclick="showTab('signup')">Create Account</div>
+</div>
+
+<div id="signin">
+
+<input id="signin-email" type="email" placeholder="Email">
+<input id="signin-password" type="password" placeholder="Password">
+
+<button onclick="signin()">Sign In</button>
+<div class="status" id="signin-status"></div>
+
+</div>
+
+<div id="signup" style="display:none;">
+
+<input id="signup-email" type="email" placeholder="Email">
+<input id="signup-password" type="password" placeholder="Password">
+
+<button onclick="signup()">Create Account</button>
+<div class="status" id="signup-status"></div>
+
+</div>
+
+<div class="note">
+Thank you for being part of Trade Guardian.
+</div>
+
+</div>
+
+<script>
+showTab('signin')
+</script>
+
+</body>
+</html>
