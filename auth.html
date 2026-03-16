@@ -28,7 +28,7 @@ const db = getFirestore(app);
 async function routeUser(uid) {
   try {
     const snap = await getDoc(doc(db, "traders", uid));
-    window.location.href = (snap.exists() && snap.data().profile)
+    window.location.href = snap.exists()
       ? "guardian-dashboard.html"
       : "welcome.html";
   } catch (err) {
