@@ -2524,11 +2524,14 @@
       setRiskUpdate(payload) {
         defaultState.riskPerTrade = payload.riskPerTrade ?? defaultState.riskPerTrade;
         defaultState.riskPerTradePercent = payload.riskPerTradePercent ?? defaultState.riskPerTradePercent;
+        defaultState.riskPerTradeText = payload.riskPerTradeText ?? defaultState.riskPerTradeText;
         defaultState.dailyLossLimit = payload.dailyLossLimit ?? defaultState.dailyLossLimit;
         defaultState.dailyLossUsed = payload.dailyLossUsed ?? defaultState.dailyLossUsed;
         defaultState.dailyLossPercent = payload.dailyLossPercent ?? defaultState.dailyLossPercent;
         defaultState.totalOpenRisk = payload.totalOpenRisk ?? defaultState.totalOpenRisk;
+        defaultState.openRiskLimit = payload.openRiskLimit ?? defaultState.openRiskLimit;
         defaultState.maxPositions = payload.maxPositions ?? defaultState.maxPositions;
+        defaultState.maxTrades = payload.maxTrades ?? defaultState.maxTrades;
         defaultState.riskStatus = payload.riskStatus ?? defaultState.riskStatus;
         pushActivity("Risk metrics refreshed.");
         renderAll();
