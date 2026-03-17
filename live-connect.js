@@ -234,19 +234,29 @@ async function connectToBackend(dashboard, idToken) {
 
   socket.on("connect", () => {
     console.log(`[TradeGuardian] Socket.IO channel open (id: ${socket.id})`);
-    // Channel is open but we do NOT set connectionStatus: "connected" here —
-    // that would mislead the dashboard into thinking a trading account is live.
-    // The first "account_update" event from the live connector sets the status.
+    // Signal that the backend is reachable — this drives the Live Feed pill.
+    // We do NOT set brokerConnectionStatus: "connected" here because the
+    // socket being open only means the backend is reachable, NOT that a real
+    // Tradovate account has authenticated.  Broker status is set only when
+    // an "account_update" event carrying real account data arrives.
+    dashboard.setBackendConnected(true);
   });
 
   socket.on("disconnect", (reason) => {
     console.warn(`[TradeGuardian] Socket.IO disconnected — ${reason}`);
+    // Backend is no longer reachable — mark both backend and broker as down.
+    // If the socket reconnects, the backend will re-emit account_update and
+    // the broker status will be restored without a page reload.
+    dashboard.setBackendConnected(false);
     dashboard.setAccountUpdate({ connectionStatus: "disconnected" });
   });
 
   socket.on("connect_error", (err) => {
     console.error(`[TradeGuardian] Socket.IO connection error — ${err.message}`);
-    dashboard.setAccountUpdate({ connectionStatus: "error" });
+    // Connection failed — mark backend as unreachable.
+    // Do not touch broker connectionStatus on transient errors; Socket.IO
+    // will retry automatically and the "connect" event will restore it.
+    dashboard.setBackendConnected(false);
   });
 
   // ── Live data events ─────────────────────────────────────────────────────

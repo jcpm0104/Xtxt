@@ -1937,7 +1937,8 @@
 
     const defaultState = {
       brokerName: "Connect Account",
-      connectionStatus: "disconnected",
+      connectionStatus: "disconnected",  // broker/account connection: "connected" | "connecting" | "disconnected"
+      backendConnected: false,           // socket/backend reachability: true when Socket.IO channel is open
       mode: "Not Connected",
       accountSize: 0,
       accountId: "—",
@@ -2103,22 +2104,32 @@
         btn.className = "mini-btn danger";
         btn.textContent = "Disconnect Account";
         btn.addEventListener("click", () => {
-          defaultState.brokerName = "Connect Account";
+          // ── Clear live broker-dependent values only ──────────────────────
+          // These values come from the live Tradovate account and are no
+          // longer meaningful once the account is disconnected.
+          defaultState.brokerName       = "Connect Account";
           defaultState.connectionStatus = "disconnected";
-          defaultState.mode = "Not Connected";
-          defaultState.accountSize = 0;
-          defaultState.accountId = "—";
-          defaultState.balance = 0;
-          defaultState.equity = 0;
-          defaultState.dailyPnl = 0;
-          defaultState.dailyPnlPercent = 0;
+          defaultState.mode             = "Not Connected";
+          defaultState.accountSize      = 0;
+          defaultState.accountId        = "—";
+          defaultState.balance          = 0;
+          defaultState.equity           = 0;
+          defaultState.dailyPnl         = 0;
+          defaultState.dailyPnlPercent  = 0;
           defaultState.openPositionsCount = 0;
-          defaultState.tradesToday = 0;
-          defaultState.totalOpenRisk = 0;
-          defaultState.dailyLossUsed = 0;
+          defaultState.tradesToday      = 0;
+          defaultState.totalOpenRisk    = 0;
+          defaultState.dailyLossUsed    = 0;
           defaultState.dailyLossPercent = 0;
-          defaultState.alerts = [];
-          defaultState.positions = [];
+          defaultState.alerts           = [];
+          defaultState.positions        = [];
+
+          // ── Preserved — these come from saved Firestore plan/accountRules ─
+          // Do NOT clear: riskPerTrade, riskPerTradeText, riskPerTradePercent,
+          // dailyLossLimit, openRiskLimit, maxPositions, maxTrades.
+          // These are plan-static configuration values and remain valid after
+          // a broker account disconnects.
+
           pushActivity("Account disconnected from dashboard view.");
           renderAll();
         });
@@ -2190,8 +2201,11 @@
           ? "Connecting"
           : "Not Connected";
 
+      // Live Feed pill — reflects backend/socket reachability only.
+      // It is Active when the Socket.IO channel to the backend is open,
+      // regardless of whether a real broker account is connected.
       const livePill = document.getElementById("liveFeedPill");
-      if (defaultState.connectionStatus === "connected") {
+      if (defaultState.backendConnected) {
         livePill.innerHTML = `<span class="dot" style="background:var(--success);box-shadow:0 0 14px rgba(45,245,154,.6);"></span><span>Active</span>`;
       } else {
         livePill.innerHTML = `<span class="dot"></span><span>Inactive</span>`;
@@ -2444,6 +2458,13 @@
         defaultState.alerts = Array.isArray(payload) ? payload : [];
         if (defaultState.alerts.length) pushActivity("Guardian alerts updated.");
         renderAll();
+      },
+
+      setBackendConnected(value) {
+        // Called by live-connect.js when the Socket.IO channel opens or closes.
+        // This is entirely separate from whether a real broker account is connected.
+        defaultState.backendConnected = !!value;
+        renderTopBar();
       },
 
       openConnectModal() {
