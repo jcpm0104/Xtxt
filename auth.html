@@ -8,9 +8,6 @@
 <meta name="theme-color" content="#2F6BFF">
 <link rel="icon" type="image/x-icon" href="./favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-apple-180.png">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <link rel="apple-touch-icon-precomposed" href="./apple-touch-icon-precomposed.png">
-  <link rel="icon" type="image/png" sizes="180x180" href="./icons/icon-apple-180.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,7 +17,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -35,6 +32,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// Auto-redirect already-authenticated users directly to the dashboard.
+onAuthStateChanged(auth, (user) => {
+  if (user) routeUser(user.uid);
+});
 
 function getAuthErrorMessage(code) {
   const msgs = {

@@ -8,9 +8,6 @@
   <meta name="theme-color" content="#2F6BFF">
   <link rel="icon" type="image/x-icon" href="./favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-apple-180.png">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <link rel="apple-touch-icon-precomposed" href="./apple-touch-icon-precomposed.png">
-  <link rel="icon" type="image/png" sizes="180x180" href="./icons/icon-apple-180.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1710,8 +1707,6 @@
     </main>
   </div>
 
-  <script src="tradeGuardianDisplayUtils.js"></script>
-
   <script>
     const accountSidebar = document.getElementById("accountSidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
@@ -2457,10 +2452,17 @@
     };
   </script>
 
+  <!-- Socket.IO client (regular script — must load before any module) -->
+  <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+  <!-- Backend URL config — update this file when deploying to GitHub Pages -->
+  <script src="backend-config.js"></script>
+
   <script type="module" src="firebase-init.js"></script>
   <script type="module" src="auth-guard.js"></script>
   <script type="module" src="save-data.js"></script>
   <script type="module" src="load-dashboard.js"></script>
   <script type="module" src="logout.js"></script>
+  <!-- Real-time backend bridge — connects Socket.IO and feeds the dashboard API -->
+  <script type="module" src="live-connect.js"></script>
 </body>
 </html>
