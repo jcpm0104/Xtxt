@@ -1,6 +1,6 @@
 {
-  "name": "Trade Guardian System",
-  "short_name": "TG System",
+  "name": "Trade Guardian",
+  "short_name": "Trade Guardian",
   "description": "Your personal trading risk copilot — protect your capital in real time.",
   "start_url": "./auth.html",
   "display": "standalone",
