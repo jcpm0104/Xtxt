@@ -1114,6 +1114,38 @@
       box-shadow:0 0 0 1px rgba(0,216,255,.08) inset;
     }
 
+    .modal-screen.hidden{display:none;}
+
+    .cred-error{
+      margin:0 22px 12px;
+      padding:10px 14px;
+      border-radius:10px;
+      background:rgba(255,95,109,.12);
+      border:1px solid rgba(255,95,109,.22);
+      color:#ff8a94;
+      font-size:13px;
+      line-height:1.5;
+      display:none;
+    }
+    .cred-error.show{display:block;}
+
+    .pass-wrap{position:relative;}
+    .pass-wrap input{padding-right:40px;}
+    .pass-toggle{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      background:none;
+      border:none;
+      cursor:pointer;
+      padding:4px;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1;
+    }
+    .pass-toggle:hover{color:#fff;}
+
     .platform-name{
       font-size:18px;
       font-weight:700;
@@ -1374,36 +1406,73 @@
 
   <div class="modal-backdrop" id="connectModal">
     <div class="modal">
-      <div class="modal-head">
-        <div>
-          <div class="modal-title">Connect Trading Account</div>
-          <div class="modal-copy">
-            Select the platform you use to execute trades. Trade Guardian currently supports Tradovate and NinjaTrader for real-time account monitoring. The next step will be the credential flow when real API integration is added.
-          </div>
-        </div>
-        <button class="close-modal" id="closeModalBtn">×</button>
-      </div>
 
-      <div class="platform-grid" id="platformGrid">
-        <div class="platform-card selected" data-platform="Tradovate">
-          <div class="platform-name">Tradovate</div>
-          <div class="platform-sub">
-            Cloud futures trading platform with strong API support and fast Trade Guardian compatibility.
+      <!-- Screen 1: Platform selection -->
+      <div id="platformScreen" class="modal-screen">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title">Connect Trading Account</div>
+            <div class="modal-copy">
+              Select the platform you use to execute trades. Trade Guardian currently supports Tradovate for real-time account monitoring.
+            </div>
           </div>
+          <button class="close-modal" id="closeModalBtn">×</button>
         </div>
 
-        <div class="platform-card" data-platform="NinjaTrader">
-          <div class="platform-name">NinjaTrader</div>
-          <div class="platform-sub">
-            Professional futures trading platform with strong support for direct order and position monitoring.
+        <div class="platform-grid" id="platformGrid">
+          <div class="platform-card selected" data-platform="Tradovate">
+            <div class="platform-name">Tradovate</div>
+            <div class="platform-sub">
+              Cloud futures trading platform with strong API support and fast Trade Guardian compatibility.
+            </div>
           </div>
+
+          <div class="platform-card" data-platform="NinjaTrader">
+            <div class="platform-name">NinjaTrader</div>
+            <div class="platform-sub">
+              Professional futures trading platform. Full integration coming soon.
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button class="btn btn-primary" id="continueConnectBtn">Continue</button>
         </div>
       </div>
 
-      <div class="modal-actions">
-        <button class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
-        <button class="btn btn-primary" id="continueConnectBtn">Continue</button>
+      <!-- Screen 2: Tradovate credentials -->
+      <div id="credScreen" class="modal-screen hidden">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title">Tradovate Login</div>
+            <div class="modal-copy">
+              Enter your Tradovate account credentials. They are sent securely to the server and are never stored in the browser.
+            </div>
+          </div>
+          <button class="close-modal" id="closeCredModalBtn">×</button>
+        </div>
+
+        <div style="padding:0 22px 4px;display:flex;flex-direction:column;gap:14px;">
+          <div class="field">
+            <label for="tvUsername">Tradovate Email</label>
+            <input type="email" id="tvUsername" placeholder="trader@example.com" autocomplete="username" />
+          </div>
+          <div class="field pass-wrap">
+            <label for="tvPassword">Password</label>
+            <input type="password" id="tvPassword" placeholder="Your Tradovate password" autocomplete="current-password" />
+            <button class="pass-toggle" id="tvPassToggle" type="button" title="Show/hide password">&#128065;</button>
+          </div>
+        </div>
+
+        <div class="cred-error" id="credError"></div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="backToPlatformBtn">Back</button>
+          <button class="btn btn-primary" id="tradovateConnectBtn">Connect</button>
+        </div>
       </div>
+
     </div>
   </div>
 
@@ -1713,11 +1782,20 @@
     const brandToggle = document.getElementById("brandToggle");
     const closeSidebarBtn = document.getElementById("closeSidebarBtn");
 
-    const connectModal = document.getElementById("connectModal");
-    const closeModalBtn = document.getElementById("closeModalBtn");
-    const cancelModalBtn = document.getElementById("cancelModalBtn");
+    const connectModal       = document.getElementById("connectModal");
+    const platformScreen     = document.getElementById("platformScreen");
+    const credScreen         = document.getElementById("credScreen");
+    const closeModalBtn      = document.getElementById("closeModalBtn");
+    const cancelModalBtn     = document.getElementById("cancelModalBtn");
     const continueConnectBtn = document.getElementById("continueConnectBtn");
-    const platformCards = document.querySelectorAll(".platform-card");
+    const closeCredModalBtn  = document.getElementById("closeCredModalBtn");
+    const backToPlatformBtn  = document.getElementById("backToPlatformBtn");
+    const tradovateConnectBtn = document.getElementById("tradovateConnectBtn");
+    const tvUsernameInput    = document.getElementById("tvUsername");
+    const tvPasswordInput    = document.getElementById("tvPassword");
+    const tvPassToggle       = document.getElementById("tvPassToggle");
+    const credError          = document.getElementById("credError");
+    const platformCards      = document.querySelectorAll(".platform-card");
 
     let selectedPlatform = "Tradovate";
     let settingsStore = {};
@@ -2026,13 +2104,47 @@
       sidebarOverlay.classList.remove("show");
     }
 
+    // ── Modal screen helpers ──────────────────────────────────────────────────
+
+    function showPlatformScreen() {
+      platformScreen.classList.remove("hidden");
+      credScreen.classList.add("hidden");
+    }
+
+    function showCredScreen() {
+      platformScreen.classList.add("hidden");
+      credScreen.classList.remove("hidden");
+      tvUsernameInput.value = "";
+      tvPasswordInput.value = "";
+      tvPasswordInput.type = "password";
+      clearCredError();
+      tvUsernameInput.focus();
+    }
+
+    function showCredError(msg) {
+      credError.textContent = msg;
+      credError.classList.add("show");
+    }
+
+    function clearCredError() {
+      credError.textContent = "";
+      credError.classList.remove("show");
+    }
+
+    function setConnectBtnLoading(loading) {
+      tradovateConnectBtn.disabled = loading;
+      tradovateConnectBtn.textContent = loading ? "Connecting…" : "Connect";
+    }
+
     function openModal() {
       syncPlatformCards();
+      showPlatformScreen();
       connectModal.classList.add("show");
     }
 
     function closeModal() {
       connectModal.classList.remove("show");
+      showPlatformScreen();
     }
 
     brandToggle.addEventListener("click", openSidebar);
@@ -2056,31 +2168,85 @@
       });
     });
 
+    // ── Screen 1 buttons ──────────────────────────────────────────────────────
+
     closeModalBtn.addEventListener("click", closeModal);
     cancelModalBtn.addEventListener("click", closeModal);
 
     continueConnectBtn.addEventListener("click", () => {
-      window.dispatchEvent(new CustomEvent("tg:save", {
-        detail: { section: "dashboard", data: { selectedPlatform } }
-      }));
+      if (selectedPlatform === "Tradovate") {
+        showCredScreen();
+      } else {
+        // Other platforms not yet integrated — keep existing draft behaviour.
+        window.dispatchEvent(new CustomEvent("tg:save", {
+          detail: { section: "dashboard", data: { selectedPlatform } }
+        }));
+        pushActivity(`${selectedPlatform} selected. Full integration coming soon.`);
+        closeModal();
+        closeSidebar();
+        renderActivityLog();
+      }
+    });
 
-      const draftAccounts = getDraftAccounts();
-      const newDraft = {
-        id: `draft-${Date.now()}`,
-        platform: selectedPlatform,
-        mode: document.getElementById("addMode").value,
-        size: Number(document.getElementById("addAccountSize").value || 0),
-        active: draftAccounts.length === 0
-      };
+    // ── Screen 2 buttons ──────────────────────────────────────────────────────
 
-      draftAccounts.push(newDraft);
-      saveDraftAccounts(draftAccounts);
+    closeCredModalBtn.addEventListener("click", closeModal);
+    backToPlatformBtn.addEventListener("click", showPlatformScreen);
 
-      pushActivity(`${selectedPlatform} credential flow opened.`);
-      closeModal();
-      closeSidebar();
-      renderSwitchAccountSection();
-      renderActivityLog();
+    tvPassToggle.addEventListener("click", () => {
+      const isHidden = tvPasswordInput.type === "password";
+      tvPasswordInput.type = isHidden ? "text" : "password";
+      tvPassToggle.innerHTML = isHidden ? "&#128064;" : "&#128065;";
+    });
+
+    tradovateConnectBtn.addEventListener("click", async () => {
+      const username = tvUsernameInput.value.trim();
+      const password = tvPasswordInput.value;
+
+      clearCredError();
+
+      if (!username) {
+        showCredError("Please enter your Tradovate email address.");
+        tvUsernameInput.focus();
+        return;
+      }
+      if (!password) {
+        showCredError("Please enter your Tradovate password.");
+        tvPasswordInput.focus();
+        return;
+      }
+
+      setConnectBtnLoading(true);
+
+      try {
+        const backendUrl = (typeof window.TG_BACKEND_URL === "string" && window.TG_BACKEND_URL.trim())
+          ? window.TG_BACKEND_URL.replace(/\/$/, "")
+          : window.location.origin;
+
+        const res = await fetch(`${backendUrl}/api/broker/tradovate/connect`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          closeModal();
+          closeSidebar();
+          pushActivity("Tradovate authentication succeeded. Waiting for live account data…");
+          renderActivityLog();
+          // The dashboard will update automatically when the Socket.IO
+          // "account_update" event arrives with real Tradovate data.
+        } else {
+          showCredError(data.error ?? "Connection failed. Please try again.");
+        }
+      } catch (err) {
+        showCredError("Unable to reach the Trade Guardian server. Please check your connection.");
+        console.error("[TradeGuardian] Tradovate connect error:", err);
+      } finally {
+        setConnectBtnLoading(false);
+      }
     });
 
     document.getElementById("brokerStatusPill").addEventListener("click", () => {
@@ -2103,8 +2269,18 @@
         btn.id = "disconnectAccountBtn";
         btn.className = "mini-btn danger";
         btn.textContent = "Disconnect Account";
-        btn.addEventListener("click", () => {
-          // ── Clear live broker-dependent values only ──────────────────────
+        btn.addEventListener("click", async () => {
+          // ── Tell the backend to stop the live connector ───────────────────
+          try {
+            const backendUrl = (typeof window.TG_BACKEND_URL === "string" && window.TG_BACKEND_URL.trim())
+              ? window.TG_BACKEND_URL.replace(/\/$/, "")
+              : window.location.origin;
+            await fetch(`${backendUrl}/api/broker/tradovate/disconnect`, { method: "POST" });
+          } catch (err) {
+            console.warn("[TradeGuardian] Disconnect call failed (backend may be unreachable):", err);
+          }
+
+          // ── Clear live broker-dependent values only ───────────────────────
           // These values come from the live Tradovate account and are no
           // longer meaningful once the account is disconnected.
           defaultState.brokerName       = "Connect Account";
@@ -2130,7 +2306,7 @@
           // These are plan-static configuration values and remain valid after
           // a broker account disconnects.
 
-          pushActivity("Account disconnected from dashboard view.");
+          pushActivity("Account disconnected from dashboard.");
           renderAll();
         });
         inner.appendChild(btn);
