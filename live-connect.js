@@ -4,12 +4,18 @@
  * Connection URL:  window.TG_BACKEND_URL  (set in backend-config.js)
  * Socket.IO path:  /api/socket.io         (fixed — matches the backend configuration)
  *
- * On load this module:
- *   1. Waits for Firebase auth state to resolve and obtains an ID token.
- *   2. Fetches the current account, risk, positions, and alerts via REST
- *      so the dashboard shows real values immediately (no 3-second wait).
- *   3. Opens a Socket.IO connection and subscribes to live-update events.
- *   4. Maps every incoming event to the corresponding window.TradeGuardianDashboard method.
+ * Behaviour by backend mode:
+ *
+ *   "waiting"  — No Tradovate credentials are configured yet.
+ *                The Socket.IO channel is opened so the dashboard knows the backend
+ *                is reachable, but NO initial state is loaded from the REST API and
+ *                the dashboard connection status is set to "disconnected".
+ *                When Tradovate is later connected the backend will emit live events
+ *                and the dashboard will update automatically.
+ *
+ *   "live"     — Tradovate credentials are active.
+ *                Initial state is fetched immediately via REST (account, risk,
+ *                positions, alerts) and then kept up to date via Socket.IO events.
  *
  * Dashboard API surface used:
  *   setAccountUpdate(payload)   — balance, equity, dailyPnl, etc.
@@ -71,6 +77,20 @@ async function apiFetch(backendUrl, path, idToken) {
   return res.json();
 }
 
+/**
+ * Check the backend connector mode.
+ * Returns "live", "waiting", or null if the check fails.
+ */
+async function getConnectorMode(backendUrl, idToken) {
+  try {
+    const status = await apiFetch(backendUrl, "/connector/status", idToken);
+    return status.mode ?? null;
+  } catch (err) {
+    console.warn("[TradeGuardian] Could not read connector status:", err.message);
+    return null;
+  }
+}
+
 // ─── Local alert buffer ───────────────────────────────────────────────────────
 
 /**
@@ -128,14 +148,14 @@ function handleAlertEvent(dashboard, alert) {
 function handleAccountLocked(dashboard, lockState) {
   console.warn(`[TradeGuardian] Account LOCKED — ${lockState.reason ?? ""}`);
   const lockAlert = {
-    id:           "account_locked",
-    type:         "account_locked",
-    severity:     "critical",
-    message:      lockState.reason ?? "Account locked by Trade Guardian.",
-    triggeredAt:  new Date(),
-    acknowledged: false,
+    id:             "account_locked",
+    type:           "account_locked",
+    severity:       "critical",
+    message:        lockState.reason ?? "Account locked by Trade Guardian.",
+    triggeredAt:    new Date(),
+    acknowledged:   false,
     acknowledgedAt: null,
-    metadata:     lockState,
+    metadata:       lockState,
   };
   upsertAlert(lockAlert);
   dashboard.setAlertsUpdate([...liveAlerts]);
@@ -145,7 +165,7 @@ function handleAccountLocked(dashboard, lockState) {
 
 /**
  * Fetch the current state from all REST endpoints immediately on connect.
- * This populates the dashboard before the first Socket.IO tick (3 s).
+ * Only called when connector mode is "live" — never in "waiting" mode.
  */
 async function loadInitialState(dashboard, backendUrl, idToken) {
   try {
@@ -181,24 +201,42 @@ async function connectToBackend(dashboard, idToken) {
     return;
   }
 
-  console.log(`[TradeGuardian] Connecting to backend: ${backendUrl}`);
+  // ── Check backend mode before doing anything else ────────────────────────
+  const mode = await getConnectorMode(backendUrl, idToken);
+  console.log(`[TradeGuardian] Backend connector mode: ${mode ?? "unknown"}`);
 
-  // Load initial data via REST while the socket handshake is in progress.
-  loadInitialState(dashboard, backendUrl, idToken);
+  if (mode === "waiting" || mode === null) {
+    // No live trading connection — do NOT load data from the REST API.
+    // Signal the dashboard that the trading connection is not yet established.
+    dashboard.setAccountUpdate({ connectionStatus: "disconnected" });
+    console.log("[TradeGuardian] Backend is waiting for Tradovate credentials. Dashboard will update automatically when live data starts.");
+  } else {
+    // Live mode — fetch current state immediately so the dashboard is
+    // populated before the first Socket.IO tick arrives.
+    loadInitialState(dashboard, backendUrl, idToken);
+  }
+
+  // ── Open Socket.IO channel (always, regardless of mode) ─────────────────
+  // The channel stays open so that as soon as Tradovate connects and the
+  // backend starts emitting events, the dashboard receives them without
+  // requiring a page reload.
+  console.log(`[TradeGuardian] Opening Socket.IO channel to: ${backendUrl}`);
 
   const socket = window.io(backendUrl, {
-    path:               SOCKET_PATH,
-    auth:               { token: idToken ?? null },
-    reconnectionDelay:  3000,
+    path:                 SOCKET_PATH,
+    auth:                 { token: idToken ?? null },
+    reconnectionDelay:    3000,
     reconnectionAttempts: Infinity,
-    transports:         ["websocket", "polling"],
+    transports:           ["websocket", "polling"],
   });
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────────
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   socket.on("connect", () => {
-    console.log(`[TradeGuardian] Socket.IO connected (id: ${socket.id})`);
-    dashboard.setAccountUpdate({ connectionStatus: "connected" });
+    console.log(`[TradeGuardian] Socket.IO channel open (id: ${socket.id})`);
+    // Channel is open but we do NOT set connectionStatus: "connected" here —
+    // that would mislead the dashboard into thinking a trading account is live.
+    // The first "account_update" event from the live connector sets the status.
   });
 
   socket.on("disconnect", (reason) => {
@@ -211,7 +249,7 @@ async function connectToBackend(dashboard, idToken) {
     dashboard.setAccountUpdate({ connectionStatus: "error" });
   });
 
-  // ── Live data events ─────────────────────────────────────────────────────────
+  // ── Live data events ─────────────────────────────────────────────────────
 
   socket.on("account_update",    (data)      => handleAccountUpdate(dashboard, data));
   socket.on("risk_update",       (data)      => handleRiskUpdate(dashboard, data));
