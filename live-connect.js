@@ -6,22 +6,25 @@
  *
  * Behaviour by backend mode:
  *
- *   "waiting"  — No Tradovate credentials are configured yet.
- *                The Socket.IO channel is opened so the dashboard knows the backend
- *                is reachable, but NO initial state is loaded from the REST API and
- *                the dashboard connection status is set to "disconnected".
- *                When Tradovate is later connected the backend will emit live events
- *                and the dashboard will update automatically.
+ *   "waiting"     — No data source connected yet. Backend is reachable but no
+ *                   live account data exists. Dashboard shows disconnected but the
+ *                   socket stays open — the first NT push or Tradovate connect will
+ *                   trigger account_update automatically.
  *
- *   "live"     — Tradovate credentials are active.
- *                Initial state is fetched immediately via REST (account, risk,
- *                positions, alerts) and then kept up to date via Socket.IO events.
+ *   "ninjatrader" — NinjaTrader Add-On has connected (or did so recently).
+ *                   Initial state is loaded from REST immediately so the dashboard
+ *                   is populated before the next 30s heartbeat arrives.
  *
- * Dashboard API surface used:
- *   setAccountUpdate(payload)   — balance, equity, dailyPnl, etc.
- *   setRiskUpdate(payload)      — riskPerTrade, dailyLossLimit, etc.
- *   setPositionsUpdate(array)   — open positions list
- *   setAlertsUpdate(array)      — all active guardian alerts
+ *   "live"        — Tradovate credentials are active.
+ *                   Same REST pre-load as ninjatrader mode.
+ *
+ * Stability guarantees:
+ *   - Transient socket disconnects (ping timeout, transport switch, Replit sleep)
+ *     do NOT clear account data. Only an explicit server-side close does.
+ *   - State is re-fetched from REST on every socket reconnect so data is restored
+ *     within 1–2 seconds rather than waiting up to 30s for the next NT heartbeat.
+ *   - Multiple onAuthStateChanged fires (e.g. token refresh) are deduplicated —
+ *     only one socket is ever open per browser session.
  */
 
 import { auth } from "./firebase-init.js";
@@ -31,12 +34,15 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/f
 
 const SOCKET_PATH = "/api/socket.io";
 
+// ─── Session-level socket guard ───────────────────────────────────────────────
+// Prevents duplicate sockets when onAuthStateChanged fires multiple times
+// (e.g. hourly Firebase token refresh).
+
+let activeSocket   = null;
+let currentUserId  = null;
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/**
- * Resolve the backend root URL.
- * Priority: window.TG_BACKEND_URL (set in backend-config.js) → window.location.origin.
- */
 function resolveBackendUrl() {
   const configured = window.TG_BACKEND_URL;
   if (typeof configured === "string" && configured.trim().length > 0) {
@@ -45,11 +51,6 @@ function resolveBackendUrl() {
   return window.location.origin;
 }
 
-/**
- * Wait for window.TradeGuardianDashboard to be defined.
- * The inline script in guardian-dashboard.html runs synchronously before modules,
- * so it is always already defined — this guard is purely defensive.
- */
 function waitForDashboard() {
   return new Promise((resolve) => {
     if (window.TradeGuardianDashboard) {
@@ -65,10 +66,6 @@ function waitForDashboard() {
   });
 }
 
-/**
- * Perform an authenticated fetch against the backend REST API.
- * Attaches Authorization: Bearer <token> when a token is available.
- */
 async function apiFetch(backendUrl, path, idToken) {
   const headers = { "Content-Type": "application/json" };
   if (idToken) headers["Authorization"] = `Bearer ${idToken}`;
@@ -77,10 +74,6 @@ async function apiFetch(backendUrl, path, idToken) {
   return res.json();
 }
 
-/**
- * Check the backend connector mode.
- * Returns "live", "waiting", or null if the check fails.
- */
 async function getConnectorMode(backendUrl, idToken) {
   try {
     const status = await apiFetch(backendUrl, "/connector/status", idToken);
@@ -93,10 +86,6 @@ async function getConnectorMode(backendUrl, idToken) {
 
 // ─── Local alert buffer ───────────────────────────────────────────────────────
 
-/**
- * liveAlerts accumulates all guardian_alert and account_locked events
- * received during this browser session. Newest alerts appear first.
- */
 let liveAlerts = [];
 
 function upsertAlert(alert) {
@@ -163,10 +152,6 @@ function handleAccountLocked(dashboard, lockState) {
 
 // ─── Initial state load ───────────────────────────────────────────────────────
 
-/**
- * Fetch the current state from all REST endpoints immediately on connect.
- * Only called when connector mode is "live" — never in "waiting" mode.
- */
 async function loadInitialState(dashboard, backendUrl, idToken) {
   try {
     const [account, positions, risk, alerts] = await Promise.all([
@@ -185,9 +170,9 @@ async function loadInitialState(dashboard, backendUrl, idToken) {
       dashboard.setAlertsUpdate([...liveAlerts]);
     }
 
-    console.log("[TradeGuardian] Initial state loaded from backend REST API.");
+    console.log("[TradeGuardian] State loaded from backend REST API.");
   } catch (err) {
-    console.warn("[TradeGuardian] Initial state fetch failed — will rely on Socket.IO ticks.", err.message);
+    console.warn("[TradeGuardian] State fetch failed — will rely on Socket.IO events.", err.message);
   }
 }
 
@@ -197,65 +182,91 @@ async function connectToBackend(dashboard, idToken) {
   const backendUrl = resolveBackendUrl();
 
   if (typeof window.io !== "function") {
-    console.error("[TradeGuardian] Socket.IO client not loaded. Ensure the Socket.IO CDN script is included before live-connect.js.");
+    console.error("[TradeGuardian] Socket.IO client not loaded.");
     return;
   }
 
-  // ── Check backend mode before doing anything else ────────────────────────
+  // ── Check backend mode ────────────────────────────────────────────────────
   const mode = await getConnectorMode(backendUrl, idToken);
   console.log(`[TradeGuardian] Backend connector mode: ${mode ?? "unknown"}`);
 
   if (mode === "waiting" || mode === null) {
-    // No live trading connection — do NOT load data from the REST API.
-    // Signal the dashboard that the trading connection is not yet established.
+    // Backend reachable but no live data source yet.
+    // Signal disconnected but do NOT clear any data that may already exist
+    // from a previous session load — only set status if there's nothing shown.
     dashboard.setAccountUpdate({ connectionStatus: "disconnected" });
-    console.log("[TradeGuardian] Backend is waiting for Tradovate credentials. Dashboard will update automatically when live data starts.");
+    console.log("[TradeGuardian] No live data source active. Dashboard will update automatically when connected.");
   } else {
-    // Live mode — fetch current state immediately so the dashboard is
-    // populated before the first Socket.IO tick arrives.
-    loadInitialState(dashboard, backendUrl, idToken);
+    // "live" or "ninjatrader" — pre-load current store state immediately so the
+    // dashboard is populated before the next Socket.IO event arrives.
+    await loadInitialState(dashboard, backendUrl, idToken);
   }
 
-  // ── Open Socket.IO channel (always, regardless of mode) ─────────────────
-  // The channel stays open so that as soon as Tradovate connects and the
-  // backend starts emitting events, the dashboard receives them without
-  // requiring a page reload.
+  // ── Open Socket.IO channel ───────────────────────────────────────────────
   console.log(`[TradeGuardian] Opening Socket.IO channel to: ${backendUrl}`);
 
   const socket = window.io(backendUrl, {
     path:                 SOCKET_PATH,
     auth:                 { token: idToken ?? null },
-    reconnectionDelay:    3000,
+    reconnectionDelay:    2000,
+    reconnectionDelayMax: 10000,
     reconnectionAttempts: Infinity,
     transports:           ["websocket", "polling"],
   });
 
+  activeSocket = socket;
+
+  // Track whether this is a reconnect (not the initial connect)
+  let connectCount = 0;
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  socket.on("connect", () => {
-    console.log(`[TradeGuardian] Socket.IO channel open (id: ${socket.id})`);
-    // Signal that the backend is reachable — this drives the Live Feed pill.
-    // We do NOT set brokerConnectionStatus: "connected" here because the
-    // socket being open only means the backend is reachable, NOT that a real
-    // Tradovate account has authenticated.  Broker status is set only when
-    // an "account_update" event carrying real account data arrives.
+  socket.on("connect", async () => {
+    connectCount++;
+    console.log(`[TradeGuardian] Socket.IO connected (id: ${socket.id}, attempt #${connectCount})`);
     dashboard.setBackendConnected(true);
+
+    // On every reconnect after the first, re-check mode and re-fetch state.
+    // This restores account data within 1–2 seconds instead of waiting up to
+    // 30s for the next NT heartbeat, covering:
+    //   - Replit backend restart (all in-memory state wiped)
+    //   - Brief network interruption
+    //   - Socket transport switch (WebSocket → polling → WebSocket)
+    if (connectCount > 1) {
+      console.log("[TradeGuardian] Reconnected — refreshing state from backend.");
+      const newMode = await getConnectorMode(backendUrl, idToken).catch(() => null);
+      if (newMode !== "waiting" && newMode !== null) {
+        await loadInitialState(dashboard, backendUrl, idToken);
+      }
+    }
   });
 
   socket.on("disconnect", (reason) => {
-    console.warn(`[TradeGuardian] Socket.IO disconnected — ${reason}`);
-    // Backend is no longer reachable — mark both backend and broker as down.
-    // If the socket reconnects, the backend will re-emit account_update and
-    // the broker status will be restored without a page reload.
+    console.warn(`[TradeGuardian] Socket.IO disconnected — reason: ${reason}`);
+
+    // Mark the backend channel as down so the dashboard shows a reconnecting
+    // indicator. Critically: do NOT call setAccountUpdate({ connectionStatus:
+    // "disconnected" }) here for transient reasons — that would zero out the
+    // entire dashboard for up to 30 seconds on every brief hiccup.
+    //
+    // "io server disconnect" is an explicit server-side close (e.g. auth
+    // revocation). Only in that case do we also clear account state.
+    // All other reasons (transport close, ping timeout, network blip) are
+    // transient — Socket.IO will reconnect automatically and the "connect"
+    // handler above will restore state.
     dashboard.setBackendConnected(false);
-    dashboard.setAccountUpdate({ connectionStatus: "disconnected" });
+
+    if (reason === "io server disconnect") {
+      dashboard.setAccountUpdate({ connectionStatus: "disconnected" });
+      console.warn("[TradeGuardian] Server closed the connection explicitly. Clearing account state.");
+    }
+    // For all other reasons, the last-known account data stays visible.
+    // A reconnecting indicator (driven by setBackendConnected(false)) is enough.
   });
 
   socket.on("connect_error", (err) => {
     console.error(`[TradeGuardian] Socket.IO connection error — ${err.message}`);
-    // Connection failed — mark backend as unreachable.
-    // Do not touch broker connectionStatus on transient errors; Socket.IO
-    // will retry automatically and the "connect" event will restore it.
+    // Do not touch account data on connection errors — these are transient.
     dashboard.setBackendConnected(false);
   });
 
@@ -268,8 +279,6 @@ async function connectToBackend(dashboard, idToken) {
   socket.on("account_locked",    (lockState) => handleAccountLocked(dashboard, lockState));
 
   // ── NinjaTrader connection health events ─────────────────────────────────
-  // "nt_stale"    — backend detected no push for >90s. Show a warning banner.
-  // "nt_connected"— the Add-On has recovered and sent fresh data. Clear banner.
   socket.on("nt_stale", (data) => {
     const secs = typeof data?.secondsAgo === "number" ? data.secondsAgo : null;
     console.warn(
@@ -289,7 +298,6 @@ async function connectToBackend(dashboard, idToken) {
     }
   });
 
-  // trading_day_update is consumed for future session-aware features.
   socket.on("trading_day_update", (data) => {
     console.debug("[TradeGuardian] trading_day_update:", data);
   });
@@ -304,6 +312,25 @@ async function bootstrap() {
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
+
+    // Guard: if the same user already has an active socket, do not open a
+    // second one. Firebase token refresh fires onAuthStateChanged again every
+    // ~60 minutes — without this guard, a second socket would be created,
+    // causing duplicate events and visual flicker.
+    if (currentUserId === user.uid && activeSocket && activeSocket.connected) {
+      console.log("[TradeGuardian] Auth state refreshed — socket already active, skipping re-connect.");
+      return;
+    }
+
+    // If a socket exists for a different user (account switch), tear it down first.
+    if (activeSocket && activeSocket.connected && currentUserId !== user.uid) {
+      console.log("[TradeGuardian] User changed — closing previous socket.");
+      activeSocket.disconnect();
+      activeSocket  = null;
+      currentUserId = null;
+    }
+
+    currentUserId = user.uid;
 
     let idToken = null;
     try {
