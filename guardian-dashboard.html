@@ -1541,17 +1541,17 @@
         </div>
 
         <div class="platform-grid" id="platformGrid">
-          <div class="platform-card selected" data-platform="Tradovate">
+          <div class="platform-card" data-platform="Tradovate">
             <div class="platform-name">Tradovate</div>
             <div class="platform-sub">
-              Cloud futures trading platform with strong API support and fast Trade Guardian compatibility.
+              Direct Tradovate account integration is planned and pending the final official API/partner access path.
             </div>
           </div>
 
-          <div class="platform-card" data-platform="NinjaTrader">
+          <div class="platform-card selected" data-platform="NinjaTrader">
             <div class="platform-name">NinjaTrader</div>
             <div class="platform-sub">
-              Professional futures trading platform. Full integration coming soon.
+              Professional futures trading platform with live Trade Guardian integration for real-time account monitoring.
             </div>
           </div>
         </div>
@@ -1931,7 +1931,7 @@
     const credError          = document.getElementById("credError");
     const platformCards      = document.querySelectorAll(".platform-card");
 
-    let selectedPlatform = "Tradovate";
+    let selectedPlatform = "NinjaTrader";
     let settingsStore = {};
 
     function settingsWereApplied(settingsStore) {
