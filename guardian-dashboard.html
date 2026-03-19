@@ -2311,6 +2311,19 @@
     continueConnectBtn.addEventListener("click", () => {
       if (selectedPlatform === "Tradovate") {
         showCredScreen();
+      } else if (selectedPlatform === "NinjaTrader") {
+        // Close the modal and route into the NinjaTrader Connection sidebar panel.
+        closeModal();
+        openSidebar();
+        const ntItem = document.getElementById("ntAccordionItem");
+        if (ntItem) {
+          // Ensure all accordions are closed so the trigger click will open NT.
+          document.querySelectorAll(".accordion-item").forEach(a => a.classList.remove("open"));
+          // Click the trigger — the accordion wires + nt-tokens.js listener handle
+          // opening the panel and calling renderPanel() in one step.
+          const trigger = ntItem.querySelector(".accordion-trigger");
+          if (trigger) trigger.click();
+        }
       } else {
         // Other platforms not yet integrated — keep existing draft behaviour.
         window.dispatchEvent(new CustomEvent("tg:save", {
