@@ -2746,19 +2746,31 @@
         renderAll();
       },
 
+      // ── Plan configuration limits ─────────────────────────────────────────
+      // Called ONLY by load-dashboard.js reading from the saved Firestore plan.
+      // These values are fixed for the trading day — they never change because
+      // of live connector data.  Live data must use setLiveUsage() instead.
       setRiskUpdate(payload) {
-        defaultState.riskPerTrade = payload.riskPerTrade ?? defaultState.riskPerTrade;
-        defaultState.riskPerTradePercent = payload.riskPerTradePercent ?? defaultState.riskPerTradePercent;
-        defaultState.riskPerTradeText = payload.riskPerTradeText ?? defaultState.riskPerTradeText;
-        defaultState.dailyLossLimit = payload.dailyLossLimit ?? defaultState.dailyLossLimit;
-        defaultState.dailyLossUsed = payload.dailyLossUsed ?? defaultState.dailyLossUsed;
-        defaultState.dailyLossPercent = payload.dailyLossPercent ?? defaultState.dailyLossPercent;
-        defaultState.totalOpenRisk = payload.totalOpenRisk ?? defaultState.totalOpenRisk;
-        defaultState.openRiskLimit = payload.openRiskLimit ?? defaultState.openRiskLimit;
-        defaultState.maxPositions = payload.maxPositions ?? defaultState.maxPositions;
-        defaultState.maxTrades = payload.maxTrades ?? defaultState.maxTrades;
-        defaultState.riskStatus = payload.riskStatus ?? defaultState.riskStatus;
-        pushActivity("Risk metrics refreshed.");
+        if (payload.riskPerTrade       !== undefined) defaultState.riskPerTrade       = payload.riskPerTrade;
+        if (payload.riskPerTradePercent !== undefined) defaultState.riskPerTradePercent = payload.riskPerTradePercent;
+        if (payload.riskPerTradeText    !== undefined) defaultState.riskPerTradeText    = payload.riskPerTradeText;
+        if (payload.dailyLossLimit      !== undefined) defaultState.dailyLossLimit      = payload.dailyLossLimit;
+        if (payload.openRiskLimit       !== undefined) defaultState.openRiskLimit       = payload.openRiskLimit;
+        if (payload.maxPositions        !== undefined) defaultState.maxPositions        = payload.maxPositions;
+        if (payload.maxTrades           !== undefined) defaultState.maxTrades           = payload.maxTrades;
+        renderAll();
+      },
+
+      // ── Live usage values ─────────────────────────────────────────────────
+      // Called ONLY by live-connect.js from Socket.IO events and REST pre-load.
+      // Updates ONLY how much of the plan limits have been consumed.
+      // Plan limit fields (dailyLossLimit, riskPerTrade, maxPositions, etc.)
+      // are NOT accepted here — they can never be set from connector data.
+      setLiveUsage(payload) {
+        if (payload.dailyLossUsed    !== undefined) defaultState.dailyLossUsed    = payload.dailyLossUsed;
+        if (payload.dailyLossPercent !== undefined) defaultState.dailyLossPercent = payload.dailyLossPercent;
+        if (payload.totalOpenRisk    !== undefined) defaultState.totalOpenRisk    = payload.totalOpenRisk;
+        if (payload.riskStatus       !== undefined) defaultState.riskStatus       = payload.riskStatus;
         renderAll();
       },
 

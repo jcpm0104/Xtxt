@@ -110,12 +110,12 @@ function handleAccountUpdate(dashboard, data) {
 }
 
 function handleRiskUpdate(dashboard, data) {
-  // ONLY update live usage values from the connector payload.
-  // Plan configuration limits — dailyLossLimit, riskPerTrade, riskPerTradePercent,
-  // riskPerTradeText, openRiskLimit, maxPositions, maxTrades — are authoritative
-  // from the user's saved Firestore trading plan (set by load-dashboard.js) and
-  // must NEVER be overwritten by live connector data.
-  dashboard.setRiskUpdate({
+  // Route live connector data to setLiveUsage — the firewall method that only
+  // accepts live usage values and structurally cannot overwrite plan limits.
+  // Plan limits (dailyLossLimit, riskPerTrade, maxPositions, etc.) are loaded
+  // once from Firestore by load-dashboard.js via setRiskUpdate and are never
+  // touched by connector data, initial REST load, or reconnect refreshes.
+  dashboard.setLiveUsage({
     dailyLossUsed:    data.dailyLossUsed,
     dailyLossPercent: data.dailyLossPercent,
     totalOpenRisk:    data.totalOpenRisk,
