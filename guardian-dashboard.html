@@ -1278,6 +1278,104 @@
       box-sizing:border-box;
       width:100%;
     }
+    /* ── NinjaTrader Token Panel ─────────────────────────────────── */
+    #ntAccordionItem.open .accordion-content{max-height:1100px;}
+
+    .nt-status-row{display:flex;align-items:center;gap:8px;padding:6px 0;}
+    .nt-status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+    .nt-status-dot.connected{background:var(--success);box-shadow:0 0 6px var(--success);}
+    .nt-status-label{font-size:13px;color:var(--muted);}
+    .nt-status-dot.connected + .nt-status-label{color:var(--success);}
+
+    .nt-token-list{display:flex;flex-direction:column;gap:8px;}
+
+    .nt-token-card{
+      border:1px solid rgba(255,255,255,.08);border-radius:12px;
+      padding:12px;background:rgba(255,255,255,.03);
+      display:flex;flex-direction:column;gap:4px;
+    }
+    .nt-token-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+    .nt-token-label{font-size:13px;font-weight:600;color:#fff;}
+    .nt-token-meta{font-size:11px;color:var(--muted);}
+
+    .nt-revoke-btn{
+      background:rgba(255,95,109,.1);border:1px solid rgba(255,95,109,.2);
+      color:var(--danger);border-radius:8px;padding:4px 10px;
+      font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;transition:.15s;
+    }
+    .nt-revoke-btn:hover{background:rgba(255,95,109,.2);}
+    .nt-revoke-btn:disabled{opacity:.45;cursor:default;}
+
+    .nt-reveal{
+      border:1px solid rgba(0,216,255,.25);border-radius:12px;
+      padding:14px;background:rgba(0,216,255,.04);
+      display:flex;flex-direction:column;gap:10px;
+    }
+    .nt-reveal-warning{font-size:12px;font-weight:600;color:var(--warning);}
+    .nt-reveal-value{
+      font-family:'Courier New',monospace;font-size:10.5px;
+      color:var(--primary);word-break:break-all;
+      background:rgba(0,0,0,.35);border-radius:8px;padding:10px;user-select:all;
+    }
+    .nt-copy-btn{
+      width:100%;border:1px solid rgba(0,216,255,.25);border-radius:10px;
+      padding:9px;background:rgba(0,216,255,.08);color:var(--primary);
+      font-size:12px;font-weight:700;cursor:pointer;transition:.15s;
+    }
+    .nt-copy-btn:hover{background:rgba(0,216,255,.14);}
+
+    .nt-instructions{
+      border-top:1px solid rgba(255,255,255,.06);
+      padding-top:12px;display:flex;flex-direction:column;gap:9px;
+    }
+    .nt-instructions-title{
+      font-size:11px;font-weight:700;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.05em;
+    }
+    .nt-step{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--muted);line-height:1.5;}
+    .nt-step-num{
+      display:grid;place-items:center;width:18px;height:18px;border-radius:50%;
+      background:rgba(0,216,255,.12);border:1px solid rgba(0,216,255,.2);
+      color:var(--primary);font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px;
+    }
+    .nt-code{
+      display:inline-block;background:rgba(0,0,0,.4);border-radius:6px;
+      padding:3px 6px;font-family:monospace;font-size:10px;
+      color:var(--primary);word-break:break-all;margin-top:4px;
+    }
+    .nt-loading{font-size:13px;color:var(--muted);text-align:center;padding:6px 0;}
+    .nt-err{font-size:13px;color:var(--danger);line-height:1.5;}
+    /* ── NinjaTrader stale connection banner ── */
+    .nt-stale-banner {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 189, 89, 0.08);
+      border: 1px solid rgba(255, 189, 89, 0.35);
+      border-radius: 14px;
+      padding: 10px 20px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: #ffd47e;
+      animation: stale-fadein 0.3s ease;
+    }
+    .nt-stale-banner.visible {
+      display: flex;
+    }
+    .nt-stale-banner svg {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      color: #ffbd59;
+    }
+    .nt-stale-banner strong {
+      color: #ffbd59;
+      font-weight: 600;
+    }
+    @keyframes stale-fadein {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
   </style>
 </head>
 <body>
@@ -1396,6 +1494,29 @@
         </div>
       </div>
 
+      <!-- NinjaTrader Connection accordion -->
+      <div class="accordion-item" id="ntAccordionItem">
+        <button class="accordion-trigger">
+          <div class="accordion-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M6 9l2.5 2.5L6 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="12" y1="14" x2="17" y2="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="accordion-title">NinjaTrader Connection</div>
+          </div>
+          <div class="accordion-arrow">⌄</div>
+        </button>
+        <div class="accordion-content">
+          <div class="accordion-inner" id="ntPanelInner">
+            <div class="nt-loading">Open to manage your NinjaTrader connection.</div>
+          </div>
+        </div>
+      </div>
+
       <div class="sidebar-footer-actions">
         <a href="trader-profile.html" class="mini-btn primary sidebar-action-btn">Edit Trading Plan</a>
         <button id="logoutBtn" class="mini-btn danger sidebar-action-btn">Sign Out</button>
@@ -1504,6 +1625,19 @@
         </div>
       </div>
     </header>
+
+    <!-- NinjaTrader stale connection banner — shown by live-connect.js via setNtStale(true) -->
+    <div class="nt-stale-banner" id="ntStaleBanner" role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span>
+        <strong>NinjaTrader connection lost</strong> — last data received
+        <span id="ntStaleAge">over a minute</span> ago.
+        Check that NinjaTrader is running and the Trade Guardian Add-On is connected.
+      </span>
+    </div>
 
     <main class="dashboard-grid">
       <section class="metrics-grid">
@@ -2017,6 +2151,7 @@
       brokerName: "Connect Account",
       connectionStatus: "disconnected",  // broker/account connection: "connected" | "connecting" | "disconnected"
       backendConnected: false,           // socket/backend reachability: true when Socket.IO channel is open
+      ntStale: false,                    // true when backend has detected a stale NT connection
       mode: "Not Connected",
       accountSize: 0,
       accountId: "—",
@@ -2643,6 +2778,25 @@
         renderTopBar();
       },
 
+      setNtStale(isStale, secondsAgo) {
+        // Called by live-connect.js when "nt_stale" or "nt_connected" arrives.
+        // Shows or hides the stale connection banner below the top bar.
+        defaultState.ntStale = !!isStale;
+        const banner = document.getElementById("ntStaleBanner");
+        if (!banner) return;
+        if (isStale) {
+          banner.classList.add("visible");
+          const ageEl = document.getElementById("ntStaleAge");
+          if (ageEl && typeof secondsAgo === "number") {
+            if (secondsAgo < 120)       ageEl.textContent = secondsAgo + " seconds";
+            else if (secondsAgo < 3600) ageEl.textContent = Math.round(secondsAgo / 60) + " minutes";
+            else                        ageEl.textContent = Math.round(secondsAgo / 3600) + " hours";
+          }
+        } else {
+          banner.classList.remove("visible");
+        }
+      },
+
       openConnectModal() {
         openModal();
       }
@@ -2661,5 +2815,7 @@
   <script type="module" src="logout.js"></script>
   <!-- Real-time backend bridge — connects Socket.IO and feeds the dashboard API -->
   <script type="module" src="live-connect.js"></script>
+  <!-- NinjaTrader token management panel -->
+  <script type="module" src="nt-tokens.js"></script>
 </body>
 </html>

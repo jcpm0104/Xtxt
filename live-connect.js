@@ -267,6 +267,28 @@ async function connectToBackend(dashboard, idToken) {
   socket.on("guardian_alert",    (alert)     => handleAlertEvent(dashboard, alert));
   socket.on("account_locked",    (lockState) => handleAccountLocked(dashboard, lockState));
 
+  // ── NinjaTrader connection health events ─────────────────────────────────
+  // "nt_stale"    — backend detected no push for >90s. Show a warning banner.
+  // "nt_connected"— the Add-On has recovered and sent fresh data. Clear banner.
+  socket.on("nt_stale", (data) => {
+    const secs = typeof data?.secondsAgo === "number" ? data.secondsAgo : null;
+    console.warn(
+      `[TradeGuardian] NinjaTrader connection stale — last push ${secs !== null ? secs + "s ago" : "(unknown)"}`
+    );
+    if (typeof dashboard.setNtStale === "function") {
+      dashboard.setNtStale(true, secs);
+    }
+  });
+
+  socket.on("nt_connected", (data) => {
+    console.log(
+      `[TradeGuardian] NinjaTrader connection recovered — reconnectedAt: ${data?.reconnectedAt ?? "unknown"}`
+    );
+    if (typeof dashboard.setNtStale === "function") {
+      dashboard.setNtStale(false);
+    }
+  });
+
   // trading_day_update is consumed for future session-aware features.
   socket.on("trading_day_update", (data) => {
     console.debug("[TradeGuardian] trading_day_update:", data);
